@@ -1,4 +1,6 @@
-use fitness_api::{LoginRequest, LoginService, ReqwestHttpClient};
+use fitness_api::{
+    http_client::ReqwestHttpClient, login_service::LoginService, request::LoginRequest,
+};
 
 #[tokio::main]
 async fn main() {
@@ -9,7 +11,7 @@ async fn main() {
         token: None,
         http_client,
     };
-    let login_request = LoginRequest::new("foo", "bar");
+    let login_request = LoginRequest::new("username", "passwort", "client_id");
     login_service.do_login(login_request).await;
     println!("{:?}", login_service.token);
 }
