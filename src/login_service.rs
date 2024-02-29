@@ -37,7 +37,7 @@ mod test {
     #[tokio::test]
     async fn setup_service() {
         let mut login_service: LoginService<HttpClientMock> = Default::default();
-        let req = LoginRequest::new("user", "password");
+        let req = LoginRequest::new("user", "password", "client-id");
         login_service.do_login(req).await;
 
         assert!(login_service.token.is_some());
