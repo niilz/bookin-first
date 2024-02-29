@@ -32,6 +32,7 @@ async fn main() {
         http_client,
     };
     let login_request = LoginRequest::new(&args.username, &args.password, &args.clientid);
-    login_service.do_login(login_request).await;
+    let response = login_service.do_login(login_request).await;
+
     println!("{:?}", login_service.token);
 }

@@ -7,7 +7,7 @@ where
     Client: HttpClient,
 {
     pub async fn do_login(&mut self, request: LoginRequest) -> Result<(), Box<dyn Error>> {
-        match self.http_client.do_login(request).await {
+        match self.http_client.egym_login(request).await {
             Ok(res) => {
                 println!("Login succeeded");
                 self.token = Some(res.session_token);
@@ -33,7 +33,7 @@ mod test {
     #[derive(Default, Debug)]
     struct HttpClientMock;
     impl HttpClient for HttpClientMock {
-        async fn do_login(&self, _req: LoginRequest) -> Result<LoginResponse, Box<dyn Error>> {
+        async fn egym_login(&self, _req: LoginRequest) -> Result<LoginResponse, Box<dyn Error>> {
             Ok(LoginResponse {
                 session_token: "session:12345".to_string(),
             })
@@ -43,7 +43,7 @@ mod test {
     #[derive(Default, Debug)]
     struct FailingHttpClientMock;
     impl HttpClient for FailingHttpClientMock {
-        async fn do_login(&self, _req: LoginRequest) -> Result<LoginResponse, Box<dyn Error>> {
+        async fn egym_login(&self, _req: LoginRequest) -> Result<LoginResponse, Box<dyn Error>> {
             Err(Box::from("Failed as planned for test"))
         }
     }
