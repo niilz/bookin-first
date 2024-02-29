@@ -1,5 +1,5 @@
 use fitness_api::{
-    http_client::ReqwestHttpClient, login_service::LoginService, request::LoginRequest,
+    http_client::ReqwestHttpClient, login_service::LoginService, request::EgymLoginRequest,
 };
 
 use clap::Parser;
@@ -31,7 +31,7 @@ async fn main() {
         token: None,
         http_client,
     };
-    let login_request = LoginRequest::new(&args.username, &args.password, &args.clientid);
+    let login_request = EgymLoginRequest::new(&args.username, &args.password, &args.clientid);
     let response = login_service.do_login(login_request).await;
 
     println!("{:?}", login_service.token);

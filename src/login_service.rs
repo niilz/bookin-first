@@ -1,16 +1,16 @@
 use std::error::Error;
 
-use crate::{http_client::HttpClient, request::LoginRequest};
+use crate::{http_client::HttpClient, request::EgymLoginRequest};
 
 impl<Client> LoginService<Client>
 where
     Client: HttpClient,
 {
-    pub async fn do_login(&mut self, request: LoginRequest) -> Result<(), Box<dyn Error>> {
+    pub async fn do_login(&mut self, request: EgymLoginRequest) -> Result<(), Box<dyn Error>> {
         match self.http_client.egym_login(request).await {
             Ok(res) => {
                 println!("Login succeeded");
-                self.token = Some(res.session_token);
+                self.token = Some(res.egym_jwt);
                 Ok(())
             }
             Err(e) => Err(Box::from(format!("login failed: {e}"))),
@@ -26,16 +26,19 @@ pub struct LoginService<Client> {
 
 #[cfg(test)]
 mod test {
-    use crate::response::LoginResponse;
+    use crate::response::EgymLoginResponse;
 
     use super::*;
 
     #[derive(Default, Debug)]
     struct HttpClientMock;
     impl HttpClient for HttpClientMock {
-        async fn egym_login(&self, _req: LoginRequest) -> Result<LoginResponse, Box<dyn Error>> {
-            Ok(LoginResponse {
-                session_token: "session:12345".to_string(),
+        async fn egym_login(
+            &self,
+            _req: EgymLoginRequest,
+        ) -> Result<EgymLoginResponse, Box<dyn Error>> {
+            Ok(EgymLoginResponse {
+                egym_jwt: "session:12345".to_string(),
             })
         }
     }
@@ -43,7 +46,10 @@ mod test {
     #[derive(Default, Debug)]
     struct FailingHttpClientMock;
     impl HttpClient for FailingHttpClientMock {
-        async fn egym_login(&self, _req: LoginRequest) -> Result<LoginResponse, Box<dyn Error>> {
+        async fn egym_login(
+            &self,
+            _req: EgymLoginRequest,
+        ) -> Result<EgymLoginResponse, Box<dyn Error>> {
             Err(Box::from("Failed as planned for test"))
         }
     }
@@ -51,7 +57,7 @@ mod test {
     #[tokio::test]
     async fn setup_service() {
         let mut login_service: LoginService<HttpClientMock> = Default::default();
-        let req = LoginRequest::new("user", "password", "client-id");
+        let req = EgymLoginRequest::new("user", "password", "client-id");
         let success = login_service.do_login(req).await;
 
         assert!(success.is_ok());
@@ -62,7 +68,7 @@ mod test {
     #[tokio::test]
     async fn setup_fails() {
         let mut login_service: LoginService<FailingHttpClientMock> = Default::default();
-        let req = LoginRequest::new("user", "password", "client-id");
+        let req = EgymLoginRequest::new("user", "password", "client-id");
         let success = login_service.do_login(req).await;
 
         assert!(success.is_err());

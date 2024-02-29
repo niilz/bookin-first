@@ -40,7 +40,7 @@ impl HttpClient for ReqwestHttpClient {
                 );
                 Ok({
                     EgymLoginResponse {
-                        session_token: "Dummy".to_string(),
+                        egym_jwt: "Dummy".to_string(),
                     }
                 })
             }
