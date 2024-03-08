@@ -34,7 +34,7 @@ macro_rules! mock_client {
     };
 }
 
-pub(crate) type MockCall = Option<fn() -> Result<FitnessFirstLoginResponse, Box<dyn Error>>>;
+pub(crate) type MockCall<Request> = Option<fn() -> Result<Request, Box<dyn Error>>>;
 
 pub(crate) fn egym_login_response_dummy(
     egym_jwt: &str,
