@@ -16,10 +16,12 @@ where
                 Ok(Response::Text(res)) => {
                     if let Some((_, token)) = res.rsplit_once("?token=") {
                         self.token = Some(token.to_string());
+                        println!("Egym-RES: {res}");
                         println!("Egym login succeeded");
+                    } else {
+                        eprintln!("Egym login failed");
+                        return Err(Box::from(format!("Could not extract token from: {res}")));
                     }
-                    eprintln!("Egym login failed");
-                    return Err(Box::from(format!("Could not extract token from: {res}")));
                 }
                 Err(e) => return Err(Box::from(format!("login egym failed: {e}"))),
             };
@@ -30,9 +32,10 @@ where
     async fn login_to_fitnes_first(&mut self) -> Result<(), Box<dyn Error>> {
         let ff_login_req = FitnessFirstLoginRequest::new(&self.token.as_ref().unwrap());
         match self.http_client.ff_login(ff_login_req).await {
-            Ok(_res) => {
+            Ok(res) => {
                 //self.session = Some(res.session_token);
                 println!("FF login succeeded");
+                println!("FF-RES: {res:?}");
                 Ok(())
             }
             Err(e) => Err(Box::from(format!("login fitness-first failed: {e}"))),

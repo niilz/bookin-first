@@ -5,8 +5,10 @@ use crate::{
     response::Response,
 };
 
-const MEIN_FITNESS_FIRST_URL: &str = "https://www.fitnessfirst.de/mein-fitnessfirst";
+const FITNESS_FIRST_CALLBACK_URL: &str = "https://www.fitnessfirst.de/mein-fitnessfirst";
 const EGYM_LOGIN_URL: &str = "https://id.egym.com/login";
+const FITNESS_FIRST_BASE_URL: &str = "https://mein.fitnessfirst.de";
+const EGYM_TOKEN_PATH: &str = "/egymid-login?token=";
 //const EGYM_LOGIN_URL: &str = "https://httpbin.org/post";
 
 pub trait HttpClient {
@@ -25,7 +27,7 @@ impl HttpClient for ReqwestHttpClient {
         params.insert("username", request.user_name.as_str());
         params.insert("password", request.password.as_str());
         params.insert("clientId", request.client_id.as_str());
-        params.insert("callbackUrl", MEIN_FITNESS_FIRST_URL);
+        params.insert("callbackUrl", FITNESS_FIRST_CALLBACK_URL);
         let res = self.client.post(EGYM_LOGIN_URL).form(&params).send().await;
         match res {
             Ok(res) => {
@@ -38,8 +40,21 @@ impl HttpClient for ReqwestHttpClient {
 
     async fn ff_login(
         &self,
-        _request: FitnessFirstLoginRequest,
+        request: FitnessFirstLoginRequest,
     ) -> Result<Response, Box<dyn Error>> {
-        todo!()
+        //https://mein.fitnessfirst.de/egymid-login?token=
+        let url = format!(
+            "{FITNESS_FIRST_BASE_URL}{EGYM_TOKEN_PATH}{}",
+            request.egym_token
+        );
+        println!("{url}");
+        let res = self.client.get(url).send().await;
+        match res {
+            Ok(res) => {
+                let res = res.text().await.expect("could not read response text");
+                Ok(Response::Text(res))
+            }
+            Err(e) => Err(Box::from(format!("Failed to login: {e}"))),
+        }
     }
 }
