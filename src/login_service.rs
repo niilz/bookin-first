@@ -3,6 +3,7 @@ use std::error::Error;
 use crate::{
     http_client::HttpClient,
     request::{EgymLoginRequest, FitnessFirstLoginRequest},
+    response::Response,
 };
 
 impl<Client> LoginService<Client>
@@ -12,9 +13,13 @@ where
     pub async fn do_login(&mut self, request: EgymLoginRequest) -> Result<(), Box<dyn Error>> {
         if self.token.is_none() {
             match self.http_client.egym_login(request).await {
-                Ok(res) => {
-                    println!("Login succeeded");
-                    self.token = Some(res.egym_jwt);
+                Ok(Response::Text(res)) => {
+                    if let Some((_, token)) = res.rsplit_once("?token=") {
+                        self.token = Some(token.to_string());
+                        println!("Egym login succeeded");
+                    }
+                    eprintln!("Egym login failed");
+                    return Err(Box::from(format!("Could not extract token from: {res}")));
                 }
                 Err(e) => return Err(Box::from(format!("login egym failed: {e}"))),
             };
@@ -25,8 +30,9 @@ where
     async fn login_to_fitnes_first(&mut self) -> Result<(), Box<dyn Error>> {
         let ff_login_req = FitnessFirstLoginRequest::new(&self.token.as_ref().unwrap());
         match self.http_client.ff_login(ff_login_req).await {
-            Ok(res) => {
-                self.session = Some(res.session_token);
+            Ok(_res) => {
+                //self.session = Some(res.session_token);
+                println!("FF login succeeded");
                 Ok(())
             }
             Err(e) => Err(Box::from(format!("login fitness-first failed: {e}"))),
@@ -59,11 +65,11 @@ mod test {
         login_service::LoginService,
         mock_client,
         request::{EgymLoginRequest, FitnessFirstLoginRequest},
-        response::{EgymLoginResponse, FitnessFirstLoginResponse},
+        response::Response,
         testutil::{egym_login_response_dummy, ff_login_response_dummy, MockCall},
     };
 
-    const EGYM_JWT_DUMMY: &str = "session:12345";
+    const EGYM_JWT_DUMMY: &str = "https://www.foo.de/my-area?token=base64jwt";
     const SESS_ID_DUMMY: &str = "PHPSESSID-12345";
     const EGYM_LOGIN_ERR_DUMMY: &str = "Egym login test-failure";
     const FF_LOGIN_ERR_DUMMY: &str = "FF login test-failure";
@@ -81,7 +87,7 @@ mod test {
 
         assert!(success.is_err());
         assert!(login_service.token.is_some());
-        assert_eq!(EGYM_JWT_DUMMY, login_service.token.unwrap());
+        assert_eq!("base64jwt", login_service.token.unwrap());
     }
 
     #[tokio::test]
