@@ -1,6 +1,9 @@
 use std::{collections::HashMap, error::Error};
 
-use crate::{request::EgymLoginRequest, response::EgymLoginResponse};
+use crate::{
+    request::{EgymLoginRequest, FitnessFirstLoginRequest},
+    response::{EgymLoginResponse, FitnessFirstLoginResponse},
+};
 
 const MEIN_FITNESS_FIRST_URL: &str = "https://www.fitnessfirst.de/mein-fitnessfirst";
 const EGYM_LOGIN_URL: &str = "https://id.egym.com/login";
@@ -46,5 +49,12 @@ impl HttpClient for ReqwestHttpClient {
             }
             Err(e) => Err(Box::from(format!("Failed to login: {e}"))),
         }
+    }
+
+    async fn ff_login(
+        &self,
+        request: FitnessFirstLoginRequest,
+    ) -> Result<FitnessFirstLoginResponse, Box<dyn Error>> {
+        todo!()
     }
 }

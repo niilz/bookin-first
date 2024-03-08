@@ -26,7 +26,10 @@ pub struct LoginService<Client> {
 
 #[cfg(test)]
 mod test {
-    use crate::response::EgymLoginResponse;
+    use crate::{
+        request::FitnessFirstLoginRequest,
+        response::{EgymLoginResponse, FitnessFirstLoginResponse},
+    };
 
     use super::*;
 
@@ -41,6 +44,16 @@ mod test {
                 egym_jwt: "session:12345".to_string(),
             })
         }
+
+        async fn ff_login(
+            &self,
+            request: FitnessFirstLoginRequest,
+        ) -> Result<FitnessFirstLoginResponse, Box<dyn Error>> {
+            let fitness_first_login_response = FitnessFirstLoginResponse {
+                session_token: "PHPSESS-12345".to_string(),
+            };
+            Ok(fitness_first_login_response)
+        }
     }
 
     #[derive(Default, Debug)]
@@ -51,6 +64,13 @@ mod test {
             _req: EgymLoginRequest,
         ) -> Result<EgymLoginResponse, Box<dyn Error>> {
             Err(Box::from("Failed as planned for test"))
+        }
+
+        async fn ff_login(
+            &self,
+            request: FitnessFirstLoginRequest,
+        ) -> Result<FitnessFirstLoginResponse, Box<dyn Error>> {
+            todo!()
         }
     }
 
