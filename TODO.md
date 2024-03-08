@@ -1,9 +1,8 @@
 # TODO
 
-- Use Clap to take command-line args for user, password, client-id (for now)
-- extract token from response
-- Login to page to get session-token
-- Store token
+- Login to page to get session-token (kinda done)
+- Retrieve session cookie from response
+- Store token and session (cache)
 - Retrieve list of classes
 - Extract class-ids
 - Load slots
