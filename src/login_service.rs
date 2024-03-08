@@ -106,7 +106,6 @@ mod test {
         );
         let mut login_service: LoginService<HttpClientMock> = Default::default();
         let req = EgymLoginRequest::new("user", "password", "client-id");
-        login_service.token = Some("Dummy-Token".to_string());
         let success = login_service.do_login(req).await;
 
         assert!(success.is_ok());
@@ -118,7 +117,7 @@ mod test {
     #[tokio::test]
     async fn ff_login_fails() {
         mock_client!(
-            Some(|| egym_login_response_dummy("session:12345")),
+            Some(|| egym_login_response_dummy(EGYM_JWT_DUMMY)),
             Some(|| Err(Box::from(FF_LOGIN_ERR_DUMMY)))
         );
         let mut login_service: LoginService<HttpClientMock> = Default::default();
