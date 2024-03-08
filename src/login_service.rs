@@ -1,97 +1,133 @@
 use std::error::Error;
 
-use crate::{http_client::HttpClient, request::EgymLoginRequest};
+use crate::{
+    http_client::HttpClient,
+    request::{EgymLoginRequest, FitnessFirstLoginRequest},
+};
 
 impl<Client> LoginService<Client>
 where
     Client: HttpClient,
 {
     pub async fn do_login(&mut self, request: EgymLoginRequest) -> Result<(), Box<dyn Error>> {
-        match self.http_client.egym_login(request).await {
+        if self.token.is_none() {
+            match self.http_client.egym_login(request).await {
+                Ok(res) => {
+                    println!("Login succeeded");
+                    self.token = Some(res.egym_jwt);
+                }
+                Err(e) => return Err(Box::from(format!("login egym failed: {e}"))),
+            };
+        }
+        self.login_to_fitnes_first().await
+    }
+
+    async fn login_to_fitnes_first(&mut self) -> Result<(), Box<dyn Error>> {
+        let ff_login_req = FitnessFirstLoginRequest::new(&self.token.as_ref().unwrap());
+        match self.http_client.ff_login(ff_login_req).await {
             Ok(res) => {
-                println!("Login succeeded");
-                self.token = Some(res.egym_jwt);
+                self.session = Some(res.session_token);
                 Ok(())
             }
-            Err(e) => Err(Box::from(format!("login failed: {e}"))),
+            Err(e) => Err(Box::from(format!("login fitness-first failed: {e}"))),
         }
     }
 }
 
 #[derive(Default, Debug)]
 pub struct LoginService<Client> {
-    pub token: Option<String>,
     pub http_client: Client,
+    token: Option<String>,
+    session: Option<String>,
+}
+impl<Client> LoginService<Client> {
+    pub fn new(http_client: Client) -> Self {
+        Self {
+            http_client,
+            token: None,
+            session: None,
+        }
+    }
 }
 
 #[cfg(test)]
 mod test {
+    use std::error::Error;
+
     use crate::{
-        request::FitnessFirstLoginRequest,
+        http_client::HttpClient,
+        login_service::LoginService,
+        mock_client,
+        request::{EgymLoginRequest, FitnessFirstLoginRequest},
         response::{EgymLoginResponse, FitnessFirstLoginResponse},
+        testutil::{egym_login_response_dummy, ff_login_response_dummy, MockCall},
     };
 
-    use super::*;
-
-    #[derive(Default, Debug)]
-    struct HttpClientMock;
-    impl HttpClient for HttpClientMock {
-        async fn egym_login(
-            &self,
-            _req: EgymLoginRequest,
-        ) -> Result<EgymLoginResponse, Box<dyn Error>> {
-            Ok(EgymLoginResponse {
-                egym_jwt: "session:12345".to_string(),
-            })
-        }
-
-        async fn ff_login(
-            &self,
-            request: FitnessFirstLoginRequest,
-        ) -> Result<FitnessFirstLoginResponse, Box<dyn Error>> {
-            let fitness_first_login_response = FitnessFirstLoginResponse {
-                session_token: "PHPSESS-12345".to_string(),
-            };
-            Ok(fitness_first_login_response)
-        }
-    }
-
-    #[derive(Default, Debug)]
-    struct FailingHttpClientMock;
-    impl HttpClient for FailingHttpClientMock {
-        async fn egym_login(
-            &self,
-            _req: EgymLoginRequest,
-        ) -> Result<EgymLoginResponse, Box<dyn Error>> {
-            Err(Box::from("Failed as planned for test"))
-        }
-
-        async fn ff_login(
-            &self,
-            request: FitnessFirstLoginRequest,
-        ) -> Result<FitnessFirstLoginResponse, Box<dyn Error>> {
-            todo!()
-        }
-    }
+    const EGYM_JWT_DUMMY: &str = "session:12345";
+    const SESS_ID_DUMMY: &str = "PHPSESSID-12345";
+    const EGYM_LOGIN_ERR_DUMMY: &str = "Egym login test-failure";
+    const FF_LOGIN_ERR_DUMMY: &str = "FF login test-failure";
 
     #[tokio::test]
-    async fn setup_service() {
+    async fn egym_login_success() {
+        mock_client!(
+            Some(|| egym_login_response_dummy(EGYM_JWT_DUMMY)),
+            Some(|| Err(Box::from("FF-login not tested here")))
+        );
+
         let mut login_service: LoginService<HttpClientMock> = Default::default();
         let req = EgymLoginRequest::new("user", "password", "client-id");
         let success = login_service.do_login(req).await;
 
-        assert!(success.is_ok());
+        assert!(success.is_err());
         assert!(login_service.token.is_some());
-        assert_eq!("session:12345", login_service.token.unwrap());
+        assert_eq!(EGYM_JWT_DUMMY, login_service.token.unwrap());
     }
 
     #[tokio::test]
-    async fn setup_fails() {
-        let mut login_service: LoginService<FailingHttpClientMock> = Default::default();
+    async fn egym_login_fails() {
+        mock_client!(
+            Some(|| Err(Box::from(EGYM_LOGIN_ERR_DUMMY))),
+            MockCall::None
+        );
+        let mut login_service: LoginService<HttpClientMock> = Default::default();
         let req = EgymLoginRequest::new("user", "password", "client-id");
         let success = login_service.do_login(req).await;
 
         assert!(success.is_err());
         assert!(login_service.token.is_none());
+    }
+
+    #[tokio::test]
+    async fn ff_login_success() {
+        mock_client!(
+            Some(|| egym_login_response_dummy(EGYM_JWT_DUMMY)),
+            Some(|| ff_login_response_dummy(SESS_ID_DUMMY))
+        );
+        let mut login_service: LoginService<HttpClientMock> = Default::default();
+        let req = EgymLoginRequest::new("user", "password", "client-id");
+        login_service.token = Some("Dummy-Token".to_string());
+        let success = login_service.do_login(req).await;
+
+        assert!(success.is_ok());
+        assert!(login_service.token.is_some());
+        assert!(login_service.session.is_some());
+        assert_eq!(SESS_ID_DUMMY, login_service.session.unwrap());
+    }
+
+    #[tokio::test]
+    async fn ff_login_fails() {
+        mock_client!(
+            Some(|| egym_login_response_dummy("session:12345")),
+            Some(|| Err(Box::from(FF_LOGIN_ERR_DUMMY)))
+        );
+        let mut login_service: LoginService<HttpClientMock> = Default::default();
+        let req = EgymLoginRequest::new("user", "password", "client-id");
+        let success = login_service.do_login(req).await;
+
+        assert!(success.is_err());
+        assert!(login_service.token.is_some());
+        assert_eq!(EGYM_JWT_DUMMY, login_service.token.unwrap());
+        assert!(login_service.session.is_none());
     }
 }

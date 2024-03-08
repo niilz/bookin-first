@@ -27,12 +27,10 @@ async fn main() {
     let http_client = ReqwestHttpClient {
         client: reqwest::Client::new(),
     };
-    let mut login_service = LoginService {
-        token: None,
-        http_client,
-    };
+    let mut login_service = LoginService::new(http_client);
+
     let login_request = EgymLoginRequest::new(&args.username, &args.password, &args.clientid);
     let response = login_service.do_login(login_request).await;
 
-    println!("{:?}", login_service.token);
+    //println!("{:?}", login_service.token);
 }
