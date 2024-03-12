@@ -30,6 +30,9 @@ macro_rules! mock_client {
                     todo!("test failed, unexpected path")
                 }
             }
+            async fn read_courses(&self, _session_id: &str) -> Result<Response, Box<dyn Error>> {
+                Ok(Response::Text("Dummy-Course-List".to_string()))
+            }
         }
     };
 }
