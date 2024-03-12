@@ -9,12 +9,14 @@ pub const FITNESS_FIRST_BASE_URL: &str = "https://mein.fitnessfirst.de";
 const FITNESS_FIRST_CALLBACK_URL: &str = "https://www.fitnessfirst.de/mein-fitnessfirst";
 const EGYM_LOGIN_URL: &str = "https://id.egym.com/login";
 const EGYM_TOKEN_PATH: &str = "/egymid-login?token=";
+const COURSES_URL_PATH: &str = "/api/magicline/openapi/classes/hamburg3";
 //const EGYM_LOGIN_URL: &str = "https://httpbin.org/post";
 
 pub trait HttpClient {
     async fn egym_login(&self, request: EgymLoginRequest) -> Result<Response, Box<dyn Error>>;
     async fn ff_login(&self, request: FitnessFirstLoginRequest)
         -> Result<Response, Box<dyn Error>>;
+    async fn read_courses(&self, session_id: &str) -> Result<Response, Box<dyn Error>>;
 }
 
 pub struct ReqwestHttpClient {
@@ -52,6 +54,24 @@ impl HttpClient for ReqwestHttpClient {
         match res {
             Ok(_res) => Ok(Response::SessionSet),
             Err(e) => Err(Box::from(format!("Failed to login: {e}"))),
+        }
+    }
+
+    async fn read_courses(&self, session_id: &str) -> Result<Response, Box<dyn Error>> {
+        let url = format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}");
+        println!("Getting courses from: {url}");
+        let res = self
+            .client
+            .get(url)
+            .header("Cookie", session_id)
+            .send()
+            .await;
+        match res {
+            Ok(res) => {
+                let res = res.text().await.expect("could not read res as test");
+                Ok(Response::Text(res))
+            }
+            Err(e) => Err(Box::from(format!("Failed to read courses: {e}"))),
         }
     }
 }
