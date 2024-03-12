@@ -1,6 +1,6 @@
-use std::error::Error;
+use std::{collections::HashMap, error::Error};
 
-use crate::response::Response;
+use crate::{cookies::Cookie, response::Response};
 
 #[macro_export]
 macro_rules! mock_client {
@@ -42,4 +42,14 @@ pub(crate) fn egym_login_response_dummy(egym_jwt: &str) -> Result<Response, Box<
 
 pub(crate) fn ff_login_response_dummy(session: &str) -> Result<Response, Box<dyn Error>> {
     Ok(Response::Text(session.to_string()))
+}
+
+#[derive(Default, Debug)]
+pub(crate) struct CookieMock {
+    pub(crate) cookie_dummy: HashMap<String, String>,
+}
+impl Cookie for CookieMock {
+    fn read_cookie(&self, domain: &str) -> Result<String, Box<dyn Error>> {
+        Ok("PHPSESSID123DUMMY".to_string())
+    }
 }
