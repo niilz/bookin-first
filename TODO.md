@@ -1,9 +1,8 @@
 # TODO
 
-- Login to page to get session-token (kinda done)
-- Retrieve session cookie from response
+- conver list of classes to objects (serde)
+- Write tests for the fitness-service (read-classes)
 - Store token and session (cache)
-- Retrieve list of classes
 - Extract class-ids
 - Load slots
 - confirm slot by using user-id, class-id, slot-id (I think ;)
