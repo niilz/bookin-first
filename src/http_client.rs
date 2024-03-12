@@ -5,9 +5,9 @@ use crate::{
     response::Response,
 };
 
+pub const FITNESS_FIRST_BASE_URL: &str = "https://mein.fitnessfirst.de";
 const FITNESS_FIRST_CALLBACK_URL: &str = "https://www.fitnessfirst.de/mein-fitnessfirst";
 const EGYM_LOGIN_URL: &str = "https://id.egym.com/login";
-const FITNESS_FIRST_BASE_URL: &str = "https://mein.fitnessfirst.de";
 const EGYM_TOKEN_PATH: &str = "/egymid-login?token=";
 //const EGYM_LOGIN_URL: &str = "https://httpbin.org/post";
 
@@ -47,13 +47,10 @@ impl HttpClient for ReqwestHttpClient {
             "{FITNESS_FIRST_BASE_URL}{EGYM_TOKEN_PATH}{}",
             request.egym_token
         );
-        println!("{url}");
+        println!("Logging in to: {url}");
         let res = self.client.get(url).send().await;
         match res {
-            Ok(res) => {
-                let res = res.text().await.expect("could not read response text");
-                Ok(Response::Text(res))
-            }
+            Ok(_res) => Ok(Response::SessionSet),
             Err(e) => Err(Box::from(format!("Failed to login: {e}"))),
         }
     }
