@@ -1,10 +1,15 @@
 use std::{error::Error, sync::Arc};
 
 use crate::{
+    cookies::Cookie,
     http_client::{HttpClient, FITNESS_FIRST_BASE_URL},
     request::{EgymLoginRequest, FitnessFirstLoginRequest},
     response::Response,
 };
+
+pub trait LoginCreds {
+    fn get_session_id(&self) -> Option<String>;
+}
 
 impl<Client, Cookie> LoginService<Client, Cookie>
 where
@@ -44,6 +49,16 @@ where
             }
             Err(e) => Err(Box::from(format!("login fitness-first failed: {e}"))),
         }
+    }
+}
+
+impl<Client, Cookie> LoginCreds for LoginService<Client, Cookie>
+where
+    Client: HttpClient,
+    Cookie: crate::cookies::Cookie,
+{
+    fn get_session_id(&self) -> Option<String> {
+        self.session.clone()
     }
 }
 
