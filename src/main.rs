@@ -1,7 +1,8 @@
 use std::sync::Arc;
 
 use fitness_api::{
-    http_client::ReqwestHttpClient, login_service::LoginService, request::EgymLoginRequest,
+    fitness_service::FitnessService, http_client::ReqwestHttpClient, login_service::LoginService,
+    request::EgymLoginRequest,
 };
 
 use clap::Parser;
@@ -44,5 +45,16 @@ async fn main() {
     let session = cookie_jar.cookies(&Url::parse("https://mein.fitnessfirst.de").unwrap());
     println!("Session: {session:?}");
 
-    //println!("{:?}", login_service.token);
+    let http_client_2 = ReqwestHttpClient {
+        client: reqwest::Client::new(),
+    };
+
+    let fitness_service = FitnessService {
+        credendials: login_service,
+        http_client: http_client_2,
+    };
+
+    let courses = fitness_service.read_courses().await;
+
+    println!("Courses: {:?}", courses);
 }
