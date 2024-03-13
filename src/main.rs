@@ -56,5 +56,5 @@ async fn main() {
 
     let courses = fitness_service.read_courses().await;
 
-    println!("Courses: {:?}", courses);
+    println!("Courses: {:#?}", courses);
 }
