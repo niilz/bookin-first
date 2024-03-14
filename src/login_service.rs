@@ -1,7 +1,6 @@
 use std::{error::Error, sync::Arc};
 
 use crate::{
-    cookies::Cookie,
     http_client::{HttpClient, FITNESS_FIRST_BASE_URL},
     request::{EgymLoginRequest, FitnessFirstLoginRequest},
     response::Response,

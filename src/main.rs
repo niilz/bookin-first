@@ -32,27 +32,21 @@ async fn main() {
     let args = Args::parse();
 
     let cookie_jar = Arc::new(Jar::default());
+
     let client = reqwest::Client::builder()
         .cookie_provider(Arc::clone(&cookie_jar))
         .build()
         .expect("Could not create client");
-    let http_client = ReqwestHttpClient { client };
-    let mut login_service = LoginService::new(http_client, Arc::clone(&cookie_jar));
+    let http_client = Arc::new(ReqwestHttpClient { client });
+    let mut login_service = LoginService::new(Arc::clone(&http_client), Arc::clone(&cookie_jar));
 
     let login_request = EgymLoginRequest::new(&args.username, &args.password, &args.clientid);
-    let response = login_service.do_login(login_request).await;
+    let _response = login_service.do_login(login_request).await;
 
     let session = cookie_jar.cookies(&Url::parse("https://mein.fitnessfirst.de").unwrap());
     println!("Session: {session:?}");
 
-    let http_client_2 = ReqwestHttpClient {
-        client: reqwest::Client::new(),
-    };
-
-    let fitness_service = FitnessService {
-        credendials: login_service,
-        http_client: http_client_2,
-    };
+    let fitness_service = FitnessService::new(login_service, Arc::clone(&http_client));
 
     let courses = fitness_service.read_courses().await;
 

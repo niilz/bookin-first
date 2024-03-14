@@ -1,4 +1,4 @@
-use std::{collections::HashMap, error::Error};
+use std::{collections::HashMap, error::Error, sync::Arc};
 
 use crate::{
     request::{EgymLoginRequest, FitnessFirstLoginRequest},
@@ -21,6 +21,26 @@ pub trait HttpClient {
 
 pub struct ReqwestHttpClient {
     pub client: reqwest::Client,
+}
+
+impl<Client> HttpClient for Arc<Client>
+where
+    Client: HttpClient,
+{
+    async fn egym_login(&self, request: EgymLoginRequest) -> Result<Response, Box<dyn Error>> {
+        self.as_ref().egym_login(request).await
+    }
+
+    async fn ff_login(
+        &self,
+        request: FitnessFirstLoginRequest,
+    ) -> Result<Response, Box<dyn Error>> {
+        self.as_ref().ff_login(request).await
+    }
+
+    async fn read_courses(&self, session_id: &str) -> Result<Response, Box<dyn Error>> {
+        self.as_ref().read_courses(session_id).await
+    }
 }
 
 impl HttpClient for ReqwestHttpClient {
