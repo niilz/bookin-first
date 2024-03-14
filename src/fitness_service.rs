@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use crate::{http_client::HttpClient, login_service::LoginCreds, response::Response};
+use crate::{dto::response::Response, http_client::HttpClient, login_service::LoginCreds};
 
 pub struct FitnessService<Creds, Client> {
     credendials: Creds,
@@ -22,5 +22,17 @@ where
         self.http_client
             .read_courses(&self.credendials.get_session_id().unwrap())
             .await
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::{mock_client, testutil::MockCall};
+
+    #[tokio::test]
+    async fn read_all_courses() {
+        mock_client!(MockCall::None, MockCall::None, MockCall::None);
+        //let creds_mock = CredentialsMock;
+        //FitnessService::new(client_mock);
     }
 }

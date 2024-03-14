@@ -1,37 +1,49 @@
 use std::{collections::HashMap, error::Error};
 
-use crate::{cookies::Cookie, response::Response};
+use crate::{cookies::Cookie, dto::response::Response, login_service::LoginCreds};
 
 #[macro_export]
 macro_rules! mock_client {
-    ($egym_dummy:expr, $ff_dummy:expr) => {
+    ($egym_dummy:expr, $ff_dummy:expr, $courses_dummy:expr) => {
+        use crate::{
+            dto::{
+                request::{EgymLoginRequest, FitnessFirstLoginRequest},
+                response::Response,
+            },
+            http_client::HttpClient,
+        };
+        use std::error::Error;
+
         #[derive(Default, Debug)]
         struct HttpClientMock;
+
+        fn resolve_call(
+            call: Option<fn() -> Result<Response, Box<dyn Error>>>,
+        ) -> Result<Response, Box<dyn Error>> {
+            if let Some(call) = call {
+                call()
+            } else {
+                todo!("test failed, unexpected path")
+            }
+        }
 
         impl HttpClient for HttpClientMock {
             async fn egym_login(
                 &self,
                 _request: EgymLoginRequest,
             ) -> Result<Response, Box<dyn Error>> {
-                if let Some(call) = $egym_dummy {
-                    call()
-                } else {
-                    todo!("test failed, unexpected path")
-                }
+                resolve_call($egym_dummy)
             }
 
             async fn ff_login(
                 &self,
                 _request: FitnessFirstLoginRequest,
             ) -> Result<Response, Box<dyn Error>> {
-                if let Some(call) = $ff_dummy {
-                    call()
-                } else {
-                    todo!("test failed, unexpected path")
-                }
+                resolve_call($ff_dummy)
             }
+
             async fn read_courses(&self, _session_id: &str) -> Result<Response, Box<dyn Error>> {
-                Ok(Response::Text("Dummy-Course-List".to_string()))
+                resolve_call($courses_dummy)
             }
         }
     };
@@ -54,5 +66,13 @@ pub(crate) struct CookieMock {
 impl Cookie for CookieMock {
     fn read_cookie(&self, domain: &str) -> Result<String, Box<dyn Error>> {
         Ok("PHPSESSID123DUMMY".to_string())
+    }
+}
+
+#[derive(Default, Debug)]
+pub(crate) struct CredentialsMock;
+impl LoginCreds for CredentialsMock {
+    fn get_session_id(&self) -> Option<String> {
+        todo!()
     }
 }

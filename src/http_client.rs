@@ -1,8 +1,8 @@
 use std::{collections::HashMap, error::Error, sync::Arc};
 
 use crate::{
-    request::{EgymLoginRequest, FitnessFirstLoginRequest},
-    response::Response,
+    dto::request::{EgymLoginRequest, FitnessFirstLoginRequest},
+    dto::response::Response,
 };
 
 pub const FITNESS_FIRST_BASE_URL: &str = "https://mein.fitnessfirst.de";

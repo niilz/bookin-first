@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use fitness_api::{
-    fitness_service::FitnessService, http_client::ReqwestHttpClient, login_service::LoginService,
-    request::EgymLoginRequest,
+    dto::request::EgymLoginRequest, fitness_service::FitnessService,
+    http_client::ReqwestHttpClient, login_service::LoginService,
 };
 
 use clap::Parser;
