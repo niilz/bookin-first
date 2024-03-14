@@ -1,5 +1,6 @@
 # TODO
 
+- Write test (in FitnessService) that deserializes the courses
 - conver list of classes to objects (serde)
 - Write tests for the fitness-service (read-classes)
 - Store token and session (cache)

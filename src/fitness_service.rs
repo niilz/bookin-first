@@ -32,7 +32,7 @@ mod test {
     #[tokio::test]
     async fn read_all_courses() {
         mock_client!(MockCall::None, MockCall::None, MockCall::None);
-        //let creds_mock = CredentialsMock;
+        let creds_mock = CredentialsMock;
         //FitnessService::new(client_mock);
     }
 }
