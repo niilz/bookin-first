@@ -12,6 +12,8 @@ const EGYM_TOKEN_PATH: &str = "/egymid-login?token=";
 const COURSES_URL_PATH: &str = "/api/magicline/openapi/classes/hamburg3";
 //const EGYM_LOGIN_URL: &str = "https://httpbin.org/post";
 
+// TODO: Remove when async fn in traits is fully stable (see: https://blog.rust-lang.org/2023/12/21/async-fn-rpit-in-traits.html#async-fn-in-public-traits)
+#[trait_variant::make(HttpClientSend: Send)]
 pub trait HttpClient {
     async fn egym_login(&self, request: EgymLoginRequest) -> Result<Response, Box<dyn Error>>;
     async fn ff_login(&self, request: FitnessFirstLoginRequest)
