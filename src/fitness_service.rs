@@ -38,6 +38,19 @@ where
             Err(Box::from("Unexpected Response-Type"))
         }
     }
+    pub async fn read_slots(&self, course_id: usize) -> Result<Vec<Course>, Box<dyn Error>> {
+        let slots_res = self
+            .http_client
+            .read_slots(&self.credendials.get_session_id().unwrap())
+            .await?;
+        if let Response::Json(slots_json) = slots_res {
+            let result = serde_json::from_str::<SlotsResult>(&slots_json)
+                .expect("Could not deserialize into courses");
+            Ok(result.courses)
+        } else {
+            Err(Box::from("Unexpected Response-Type"))
+        }
+    }
 }
 
 #[cfg(test)]

@@ -1,0 +1,124 @@
+{
+  "classes": {
+    "result": [
+      {
+        "id": 1486084584,
+        "startDateTime": "2024-03-19T18:00:00+01:00",
+        "endDateTime": "2024-03-19T18:30:00+01:00",
+        "instructors": [
+          {
+            "id": 1390790684,
+            "firstName": "Fitness Coach",
+            "lastName": "Fitness First HH3"
+          }
+        ],
+        "location": {
+          "id": 1390788673,
+          "name": "freestyle Fl\u00e4che",
+          "description": null
+        },
+        "earliestBookingDateTime": "2024-03-18T18:00:00+01:00",
+        "latestBookingDateTime": null,
+        "maxParticipants": 20,
+        "maxWaitingListParticipants": 0,
+        "bookedParticipants": 0,
+        "waitingListParticipants": 0
+      },
+      {
+        "id": 1486085974,
+        "startDateTime": "2024-03-21T18:00:00+01:00",
+        "endDateTime": "2024-03-21T18:30:00+01:00",
+        "instructors": [
+          {
+            "id": 1390790684,
+            "firstName": "Fitness Coach",
+            "lastName": "Fitness First HH3"
+          }
+        ],
+        "location": {
+          "id": 1390788673,
+          "name": "freestyle Fl\u00e4che",
+          "description": null
+        },
+        "earliestBookingDateTime": "2024-03-20T18:00:00+01:00",
+        "latestBookingDateTime": null,
+        "maxParticipants": 20,
+        "maxWaitingListParticipants": 0,
+        "bookedParticipants": 0,
+        "waitingListParticipants": 0
+      },
+      {
+        "id": 1486089943,
+        "startDateTime": "2024-03-22T18:00:00+01:00",
+        "endDateTime": "2024-03-22T18:30:00+01:00",
+        "instructors": [
+          {
+            "id": 1390790684,
+            "firstName": "Fitness Coach",
+            "lastName": "Fitness First HH3"
+          }
+        ],
+        "location": {
+          "id": 1390788673,
+          "name": "freestyle Fl\u00e4che",
+          "description": null
+        },
+        "earliestBookingDateTime": "2024-03-21T18:00:00+01:00",
+        "latestBookingDateTime": null,
+        "maxParticipants": 20,
+        "maxWaitingListParticipants": 0,
+        "bookedParticipants": 0,
+        "waitingListParticipants": 0
+      },
+      {
+        "id": 1486084587,
+        "startDateTime": "2024-03-26T18:00:00+01:00",
+        "endDateTime": "2024-03-26T18:30:00+01:00",
+        "instructors": [
+          {
+            "id": 1390790684,
+            "firstName": "Fitness Coach",
+            "lastName": "Fitness First HH3"
+          }
+        ],
+        "location": {
+          "id": 1390788673,
+          "name": "freestyle Fl\u00e4che",
+          "description": null
+        },
+        "earliestBookingDateTime": "2024-03-25T18:00:00+01:00",
+        "latestBookingDateTime": null,
+        "maxParticipants": 20,
+        "maxWaitingListParticipants": 0,
+        "bookedParticipants": 0,
+        "waitingListParticipants": 0
+      },
+      {
+        "id": 1486085887,
+        "startDateTime": "2024-03-28T18:00:00+01:00",
+        "endDateTime": "2024-03-28T18:30:00+01:00",
+        "instructors": [
+          {
+            "id": 1390790684,
+            "firstName": "Fitness Coach",
+            "lastName": "Fitness First HH3"
+          }
+        ],
+        "location": {
+          "id": 1390788673,
+          "name": "freestyle Fl\u00e4che",
+          "description": null
+        },
+        "earliestBookingDateTime": "2024-03-27T18:00:00+01:00",
+        "latestBookingDateTime": null,
+        "maxParticipants": 20,
+        "maxWaitingListParticipants": 0,
+        "bookedParticipants": 0,
+        "waitingListParticipants": 0
+      }
+    ],
+    "hasNext": false,
+    "offset": "50"
+  },
+  "bookings": []
+}
