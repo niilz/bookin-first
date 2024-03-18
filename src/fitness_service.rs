@@ -47,7 +47,7 @@ mod test {
 
     #[tokio::test]
     async fn read_all_courses() {
-        let expected_courses = generate_course_list(5);
+        let expected_courses = generate_dummy_courses(5);
         let http_client_mock = mock_client!(
             MockRes::None,
             MockRes::None,
@@ -64,7 +64,7 @@ mod test {
         assert_eq!(expected_courses, courses);
     }
 
-    fn generate_course_list(count: u32) -> Vec<Course> {
+    fn generate_dummy_courses(count: u32) -> Vec<Course> {
         (0..count)
             .map(|id| Course {
                 id: id as usize,
