@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{io::stdin, sync::Arc};
 
 use fitness_api::{
     dto::request::EgymLoginRequest, fitness_service::FitnessService,
@@ -48,7 +48,23 @@ async fn main() {
 
     let fitness_service = FitnessService::new(login_service, Arc::clone(&http_client));
 
-    let courses = fitness_service.read_courses().await;
+    let courses = fitness_service.read_courses().await.expect("read courses");
 
     println!("Courses: {:#?}", courses);
+
+    // - allow user input for course name
+
+    let mut user_input = String::new();
+    let _ = stdin().read_line(&mut user_input).expect("read user input");
+    let user_course = user_input.trim();
+
+    let course = courses
+        .iter()
+        .find(|c| c.title.contains(user_course))
+        .expect("find course");
+
+    println!("Course: {course:#?}");
+
+    // - find slots by course id
+    // - implement course-booking with slot- and course id
 }

@@ -28,8 +28,9 @@ where
             .read_courses(&self.credendials.get_session_id().unwrap())
             .await?;
         if let Response::Json(courses_json) = courses_res {
-            Ok(serde_json::from_str::<Vec<Course>>(&courses_json)
-                .expect("Could not deserialize into courses"))
+            let result = serde_json::from_str::<crate::dto::course::Result>(&courses_json)
+                .expect("Could not deserialize into courses");
+            Ok(result.result)
         } else {
             Err(Box::from("Unexpected Response-Type"))
         }

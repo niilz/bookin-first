@@ -1,6 +1,12 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+pub struct CoursesResult {
+    #[serde(rename = "result")]
+    pub courses: Vec<Course>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub struct Course {
     /// Internal-Id of the course
     pub id: usize,
