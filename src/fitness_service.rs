@@ -1,6 +1,10 @@
 use std::error::Error;
 
-use crate::{dto::response::Response, http_client::HttpClient, login_service::LoginCreds};
+use crate::{
+    dto::{course::Course, response::Response},
+    http_client::HttpClient,
+    login_service::LoginCreds,
+};
 
 pub struct FitnessService<Creds, Client> {
     credendials: Creds,
@@ -18,10 +22,17 @@ where
             http_client,
         }
     }
-    pub async fn read_courses(&self) -> Result<Response, Box<dyn Error>> {
-        self.http_client
+    pub async fn read_courses(&self) -> Result<Vec<Course>, Box<dyn Error>> {
+        let courses_res = self
+            .http_client
             .read_courses(&self.credendials.get_session_id().unwrap())
-            .await
+            .await?;
+        if let Response::Json(courses_json) = courses_res {
+            Ok(serde_json::from_str::<Vec<Course>>(&courses_json)
+                .expect("Could not deserialize into courses"))
+        } else {
+            Err(Box::from("Unexpected Response-Type"))
+        }
     }
 }
 
@@ -36,19 +47,18 @@ mod test {
 
     #[tokio::test]
     async fn read_all_courses() {
-        mock_client!(MockCall::None, MockCall::None, MockCall::None);
+        mock_client!(
+            MockCall::None,
+            MockCall::None,
+            Some(|| Ok(Response::Json("".to_string())))
+        );
         let creds_mock = CredentialsMock;
         let mock_client = HttpClientMock;
         let fitness_service = FitnessService::new(creds_mock, mock_client);
-        let res = fitness_service
-            .read_courses()
-            .await
-            .expect("Should have a response");
+        let courses = fitness_service.read_courses().await.expect("test failed");
 
-        if let Response::Courses(courses) = res {
-            let expected_courses = generate_course_list(5);
-            assert_eq!(expected_courses, courses);
-        }
+        let expected_courses = generate_course_list(5);
+        assert_eq!(expected_courses, courses);
     }
 
     fn generate_course_list(count: u32) -> Vec<Course> {

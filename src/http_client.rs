@@ -89,10 +89,7 @@ impl HttpClient for ReqwestHttpClient {
             .send()
             .await;
         match res {
-            Ok(res) => {
-                let res = res.text().await.expect("could not read res as test");
-                Ok(Response::Text(res))
-            }
+            Ok(res) => Ok(Response::Json(res.text().await?)),
             Err(e) => Err(Box::from(format!("Failed to read courses: {e}"))),
         }
     }
