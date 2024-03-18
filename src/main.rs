@@ -50,9 +50,13 @@ async fn main() {
 
     let courses = fitness_service.read_courses().await.expect("read courses");
 
-    println!("Courses: {:#?}", courses);
+    println!("The courses are:");
 
-    // - allow user input for course name
+    for (idx, course) in courses.iter().enumerate() {
+        println!("{}: {}", idx + 1, course.title);
+    }
+    println!();
+    println!("Insert Course Name");
 
     let mut user_input = String::new();
     let _ = stdin().read_line(&mut user_input).expect("read user input");
@@ -63,6 +67,9 @@ async fn main() {
         .find(|c| c.title.contains(user_course))
         .expect("find course");
 
+    println!();
+    println!("You're chosen course is:");
+    println!();
     println!("Course: {course:#?}");
 
     // - find slots by course id
