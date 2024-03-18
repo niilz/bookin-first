@@ -1,7 +1,10 @@
 use std::error::Error;
 
 use crate::{
-    dto::{course::Course, response::Response},
+    dto::{
+        course::{Course, CoursesResult},
+        response::Response,
+    },
     http_client::HttpClient,
     login_service::LoginCreds,
 };
@@ -28,9 +31,9 @@ where
             .read_courses(&self.credendials.get_session_id().unwrap())
             .await?;
         if let Response::Json(courses_json) = courses_res {
-            let result = serde_json::from_str::<crate::dto::course::Result>(&courses_json)
+            let result = serde_json::from_str::<CoursesResult>(&courses_json)
                 .expect("Could not deserialize into courses");
-            Ok(result.result)
+            Ok(result.courses)
         } else {
             Err(Box::from("Unexpected Response-Type"))
         }
