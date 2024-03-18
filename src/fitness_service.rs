@@ -27,7 +27,10 @@ where
 
 #[cfg(test)]
 mod test {
-    use crate::{mock_client, testutil::MockCall};
+    use crate::{
+        mock_client,
+        testutil::{CredentialsMock, MockCall},
+    };
 
     #[tokio::test]
     async fn read_all_courses() {
