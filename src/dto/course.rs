@@ -1,22 +1,22 @@
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug, Eq, PartialEq)]
 pub struct Course {
     /// Internal-Id of the course
-    id: usize,
+    pub id: usize,
     /// Name of the course
-    title: String,
+    pub title: String,
     /// like "Studio"
     #[serde(rename = "type")]
-    typ: String,
+    pub typ: String,
     /// Course-Duration in minutes
-    duration: u32,
+    pub duration: u32,
     /// like "freestyle Kleingruppentraining"
-    category: String,
-    description: String,
+    pub category: String,
+    pub description: String,
     /// Image-URL starts with "https://"
     #[serde(rename = "imgUrl")]
-    image_url: String,
+    pub image_url: String,
     /// Whether the course is bookable or not
-    bookable: bool,
+    pub bookable: bool,
 }

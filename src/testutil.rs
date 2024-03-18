@@ -73,6 +73,6 @@ impl Cookie for CookieMock {
 pub(crate) struct CredentialsMock;
 impl LoginCreds for CredentialsMock {
     fn get_session_id(&self) -> Option<String> {
-        todo!()
+        Some("dummy-session-id".to_string())
     }
 }

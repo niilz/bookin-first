@@ -28,6 +28,8 @@ where
 #[cfg(test)]
 mod test {
     use crate::{
+        dto::course::Course,
+        fitness_service::FitnessService,
         mock_client,
         testutil::{CredentialsMock, MockCall},
     };
@@ -36,6 +38,31 @@ mod test {
     async fn read_all_courses() {
         mock_client!(MockCall::None, MockCall::None, MockCall::None);
         let creds_mock = CredentialsMock;
-        //FitnessService::new(client_mock);
+        let mock_client = HttpClientMock;
+        let fitness_service = FitnessService::new(creds_mock, mock_client);
+        let res = fitness_service
+            .read_courses()
+            .await
+            .expect("Should have a response");
+
+        if let Response::Courses(courses) = res {
+            let expected_courses = generate_course_list(5);
+            assert_eq!(expected_courses, courses);
+        }
+    }
+
+    fn generate_course_list(count: u32) -> Vec<Course> {
+        (0..count)
+            .map(|id| Course {
+                id: id as usize,
+                title: fakeit::words::sentence(5),
+                typ: fakeit::words::word(),
+                duration: fakeit::datetime::minute().parse::<u32>().unwrap(),
+                category: fakeit::words::word(),
+                description: fakeit::hipster::sentence(10),
+                image_url: fakeit::image::url(42, 42),
+                bookable: fakeit::bool_rand::bool(),
+            })
+            .collect()
     }
 }
