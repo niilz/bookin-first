@@ -82,15 +82,14 @@ impl<Client, Cookie> LoginService<Client, Cookie> {
 #[cfg(test)]
 
 mod test {
-    use std::error::Error;
+
+    use std::sync::Arc;
 
     use crate::{
-        dto::request::{EgymLoginRequest, FitnessFirstLoginRequest},
-        dto::response::Response,
-        http_client::HttpClient,
+        dto::request::EgymLoginRequest,
         login_service::LoginService,
         mock_client,
-        testutil::{egym_login_response_dummy, ff_login_response_dummy, CookieMock, MockCall},
+        testutil::{egym_login_response_dummy, ff_login_response_dummy, CookieMock},
     };
 
     const EGYM_JWT_DUMMY: &str = "https://www.foo.de/my-area?token=base64jwt";
@@ -100,13 +99,13 @@ mod test {
 
     #[tokio::test]
     async fn egym_login_success() {
-        mock_client!(
-            Some(|| egym_login_response_dummy(EGYM_JWT_DUMMY)),
-            Some(|| Err(Box::from("FF-login not tested here"))),
-            MockCall::None
+        let http_client_mock = mock_client!(
+            Some(egym_login_response_dummy(EGYM_JWT_DUMMY)),
+            Some(Err(Box::from("FF-login not tested here"))),
+            MockRes::None
         );
 
-        let mut login_service: LoginService<HttpClientMock, CookieMock> = Default::default();
+        let mut login_service = LoginService::new(http_client_mock, Arc::new(CookieMock));
         let req = EgymLoginRequest::new("user", "password", "client-id");
         let success = login_service.do_login(req).await;
 
@@ -117,12 +116,12 @@ mod test {
 
     #[tokio::test]
     async fn egym_login_fails() {
-        mock_client!(
-            Some(|| Err(Box::from(EGYM_LOGIN_ERR_DUMMY))),
-            MockCall::None,
-            MockCall::None
+        let http_client_mock = mock_client!(
+            Some(Err(Box::from(EGYM_LOGIN_ERR_DUMMY))),
+            MockRes::None,
+            MockRes::None
         );
-        let mut login_service: LoginService<HttpClientMock, CookieMock> = Default::default();
+        let mut login_service = LoginService::new(http_client_mock, Arc::new(CookieMock));
         let req = EgymLoginRequest::new("user", "password", "client-id");
         let success = login_service.do_login(req).await;
 
@@ -132,12 +131,12 @@ mod test {
 
     #[tokio::test]
     async fn ff_login_success() {
-        mock_client!(
-            Some(|| egym_login_response_dummy(EGYM_JWT_DUMMY)),
-            Some(|| ff_login_response_dummy(SESS_ID_DUMMY)),
-            MockCall::None
+        let http_client_mock = mock_client!(
+            Some(egym_login_response_dummy(EGYM_JWT_DUMMY)),
+            Some(ff_login_response_dummy(SESS_ID_DUMMY)),
+            MockRes::None
         );
-        let mut login_service: LoginService<HttpClientMock, CookieMock> = Default::default();
+        let mut login_service = LoginService::new(http_client_mock, Arc::new(CookieMock));
         let req = EgymLoginRequest::new("user", "password", "client-id");
         let success = login_service.do_login(req).await;
 
@@ -149,12 +148,12 @@ mod test {
 
     #[tokio::test]
     async fn ff_login_fails() {
-        mock_client!(
-            Some(|| egym_login_response_dummy(EGYM_JWT_DUMMY)),
-            Some(|| Err(Box::from(FF_LOGIN_ERR_DUMMY))),
-            MockCall::None
+        let http_client_mock = mock_client!(
+            Some(egym_login_response_dummy(EGYM_JWT_DUMMY)),
+            Some(Err(Box::from(FF_LOGIN_ERR_DUMMY))),
+            MockRes::None
         );
-        let mut login_service: LoginService<HttpClientMock, CookieMock> = Default::default();
+        let mut login_service = LoginService::new(http_client_mock, Arc::new(CookieMock));
         let req = EgymLoginRequest::new("user", "password", "client-id");
         let success = login_service.do_login(req).await;
 

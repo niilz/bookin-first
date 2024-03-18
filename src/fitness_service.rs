@@ -42,22 +42,25 @@ mod test {
         dto::course::Course,
         fitness_service::FitnessService,
         mock_client,
-        testutil::{CredentialsMock, MockCall},
+        testutil::{courses_response_dummy, CredentialsMock},
     };
 
     #[tokio::test]
     async fn read_all_courses() {
-        mock_client!(
-            MockCall::None,
-            MockCall::None,
-            Some(|| Ok(Response::Json("".to_string())))
-        );
-        let creds_mock = CredentialsMock;
-        let mock_client = HttpClientMock;
-        let fitness_service = FitnessService::new(creds_mock, mock_client);
-        let courses = fitness_service.read_courses().await.expect("test failed");
-
         let expected_courses = generate_course_list(5);
+        let http_client_mock = mock_client!(
+            MockRes::None,
+            MockRes::None,
+            Some(courses_response_dummy(&expected_courses))
+        );
+
+        let creds_mock = CredentialsMock;
+        let fitness_service = FitnessService::new(creds_mock, http_client_mock);
+        let courses = fitness_service
+            .read_courses()
+            .await
+            .expect("test: read_courses");
+
         assert_eq!(expected_courses, courses);
     }
 
