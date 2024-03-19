@@ -29,7 +29,7 @@ where
     pub async fn fetch_courses(&self) -> Result<Vec<Course>, Box<dyn Error>> {
         let courses_res = self
             .http_client
-            .read_courses(&self.credendials.get_session_id().unwrap())
+            .fetch_courses(&self.credendials.get_session_id().unwrap())
             .await?;
         if let Response::Json(courses_json) = courses_res {
             let result = serde_json::from_str::<CoursesResult>(&courses_json)
@@ -39,10 +39,11 @@ where
             Err(Box::from("Unexpected Response-Type"))
         }
     }
+
     pub async fn fetch_slots(&self, course_id: usize) -> Result<Vec<Slot>, Box<dyn Error>> {
         let slots_res = self
             .http_client
-            .read_slots(course_id, &self.credendials.get_session_id().unwrap())
+            .fetch_slots(course_id, &self.credendials.get_session_id().unwrap())
             .await?;
         if let Response::Json(slots_json) = slots_res {
             let result = serde_json::from_str::<SlotsResult>(&slots_json)
@@ -51,6 +52,16 @@ where
         } else {
             Err(Box::from("Unexpected Response-Type"))
         }
+    }
+
+    pub async fn book_course(
+        &self,
+        course_id: usize,
+        slot_id: usize,
+    ) -> Result<(), Box<dyn Error>> {
+        self.http_client
+            .book_course(course_id, &self.credendials.get_session_id().unwrap())
+            .await?
     }
 }
 

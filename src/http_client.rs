@@ -17,10 +17,16 @@ pub trait HttpClient {
     async fn egym_login(&self, request: EgymLoginRequest) -> Result<Response, Box<dyn Error>>;
     async fn ff_login(&self, request: FitnessFirstLoginRequest)
         -> Result<Response, Box<dyn Error>>;
-    async fn read_courses(&self, session_id: &str) -> Result<Response, Box<dyn Error>>;
-    async fn read_slots(
+    async fn fetch_courses(&self, session_id: &str) -> Result<Response, Box<dyn Error>>;
+    async fn fetch_slots(
         &self,
         course_id: usize,
+        session_id: &str,
+    ) -> Result<Response, Box<dyn Error>>;
+    async fn book_course(
+        &self,
+        course_id: usize,
+        slot_id: usize,
         session_id: &str,
     ) -> Result<Response, Box<dyn Error>>;
 }
@@ -63,7 +69,7 @@ impl HttpClient for ReqwestHttpClient {
         }
     }
 
-    async fn read_courses(&self, session_id: &str) -> Result<Response, Box<dyn Error>> {
+    async fn fetch_courses(&self, session_id: &str) -> Result<Response, Box<dyn Error>> {
         let url = format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}");
         println!("Getting courses from: {url}");
         let res = self
@@ -78,7 +84,7 @@ impl HttpClient for ReqwestHttpClient {
         }
     }
 
-    async fn read_slots(
+    async fn fetch_slots(
         &self,
         course_id: usize,
         session_id: &str,
@@ -97,6 +103,11 @@ impl HttpClient for ReqwestHttpClient {
             Err(e) => Err(Box::from(format!("Failed to read slots: {e}"))),
         }
     }
+
+    async fn book_course(&self, course_id: usize, slot_id: usize, session_id: &str) {
+        let booking_url = format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}")
+
+    }
 }
 
 impl<Client> HttpClient for Arc<Client>
@@ -114,15 +125,26 @@ where
         self.as_ref().ff_login(request).await
     }
 
-    async fn read_courses(&self, session_id: &str) -> Result<Response, Box<dyn Error>> {
-        self.as_ref().read_courses(session_id).await
+    async fn fetch_courses(&self, session_id: &str) -> Result<Response, Box<dyn Error>> {
+        self.as_ref().fetch_courses(session_id).await
     }
 
-    async fn read_slots(
+    async fn fetch_slots(
         &self,
         course_id: usize,
         session_id: &str,
     ) -> Result<Response, Box<dyn Error>> {
-        self.as_ref().read_slots(course_id, session_id).await
+        self.as_ref().fetch_slots(course_id, session_id).await
+    }
+
+    async fn book_course(
+        &self,
+        course_id: usize,
+        slot_id: usize,
+        session_id: &str,
+    ) -> Result<Response, Box<dyn Error>> {
+        self.as_ref()
+            .book_course(course_id, slot_id, session_id)
+            .await
     }
 }

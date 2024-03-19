@@ -27,3 +27,7 @@ impl FitnessFirstLoginRequest {
         }
     }
 }
+
+pub struct Booking {
+//{`"customerId`":`"1380798137`",`"classSlotId`":1486092405,`"classId`":1355292810,`"clubId`":`"hamburg3`",`"clubName`":`"Hamburg - Eppendorf`",`"className`":`"Hyrox (M/F)`"}
+}
