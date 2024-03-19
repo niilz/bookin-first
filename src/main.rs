@@ -50,7 +50,7 @@ async fn main() {
 
     let fitness_service = FitnessService::new(login_service, Arc::clone(&http_client));
 
-    let courses = fitness_service.read_courses().await.expect("read courses");
+    let courses = fitness_service.fetch_courses().await.expect("read courses");
 
     let course_choice = match args.course_name {
         Some(course) => course,
@@ -68,7 +68,7 @@ async fn main() {
     println!("Course: {course:#?}");
 
     let slots = fitness_service
-        .read_slots(course.id)
+        .fetch_slots(course.id)
         .await
         .expect("read slots");
 

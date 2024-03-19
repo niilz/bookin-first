@@ -26,7 +26,7 @@ where
             http_client,
         }
     }
-    pub async fn read_courses(&self) -> Result<Vec<Course>, Box<dyn Error>> {
+    pub async fn fetch_courses(&self) -> Result<Vec<Course>, Box<dyn Error>> {
         let courses_res = self
             .http_client
             .read_courses(&self.credendials.get_session_id().unwrap())
@@ -39,7 +39,7 @@ where
             Err(Box::from("Unexpected Response-Type"))
         }
     }
-    pub async fn read_slots(&self, course_id: usize) -> Result<Vec<Slot>, Box<dyn Error>> {
+    pub async fn fetch_slots(&self, course_id: usize) -> Result<Vec<Slot>, Box<dyn Error>> {
         let slots_res = self
             .http_client
             .read_slots(course_id, &self.credendials.get_session_id().unwrap())
@@ -81,7 +81,7 @@ mod test {
         let creds_mock = CredentialsMock;
         let fitness_service = FitnessService::new(creds_mock, http_client_mock);
         let courses = fitness_service
-            .read_courses()
+            .fetch_courses()
             .await
             .expect("test: read_courses");
 
@@ -101,7 +101,7 @@ mod test {
         let creds_mock = CredentialsMock;
         let fitness_service = FitnessService::new(creds_mock, http_client_mock);
         let slots = fitness_service
-            .read_slots(1234)
+            .fetch_slots(1234)
             .await
             .expect("test: read_courses");
 
