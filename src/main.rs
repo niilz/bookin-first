@@ -1,8 +1,10 @@
 use std::{io::stdin, sync::Arc};
 
 use fitness_api::{
-    dto::request::EgymLoginRequest, fitness_service::FitnessService,
-    http_client::ReqwestHttpClient, login_service::LoginService,
+    dto::{course::Course, request::EgymLoginRequest},
+    fitness_service::FitnessService,
+    http_client::ReqwestHttpClient,
+    login_service::LoginService,
 };
 
 use clap::Parser;
@@ -25,6 +27,10 @@ pub struct Args {
     /// Client-ID, should be replaced by retrieving it programatically
     #[arg(short, long)]
     pub clientid: String,
+
+    /// Optional Flag to signal that we want the following course without prompting the user
+    #[arg(short = 'n', long)]
+    pub course_name: Option<String>,
 }
 
 #[tokio::main]
@@ -50,6 +56,42 @@ async fn main() {
 
     let courses = fitness_service.read_courses().await.expect("read courses");
 
+    let course_choice = match args.course_name {
+        Some(course) => course,
+        None => handle_user_input(&courses),
+    };
+
+    let course = courses
+        .iter()
+        .find(|c| c.title.contains(&course_choice))
+        .expect("find course");
+
+    println!();
+    println!("You're chosen course is:");
+    println!();
+    println!("Course: {course:#?}");
+
+    let slots = fitness_service
+        .read_slots(course.id)
+        .await
+        .expect("read slots");
+
+    println!();
+    println!("Available Slots:");
+    for (idx, slot) in slots.iter().enumerate() {
+        println!(
+            "{} - {} - {}",
+            idx + 1,
+            slot.start_date_time,
+            slot.earliest_booking_date_time
+        );
+    }
+    println!();
+
+    // - implement course-booking with slot- and course id
+}
+
+fn handle_user_input(courses: &Vec<Course>) -> String {
     println!("The courses are:");
 
     for (idx, course) in courses.iter().enumerate() {
@@ -60,18 +102,5 @@ async fn main() {
 
     let mut user_input = String::new();
     let _ = stdin().read_line(&mut user_input).expect("read user input");
-    let user_course = user_input.trim();
-
-    let course = courses
-        .iter()
-        .find(|c| c.title.contains(user_course))
-        .expect("find course");
-
-    println!();
-    println!("You're chosen course is:");
-    println!();
-    println!("Course: {course:#?}");
-
-    // - find slots by course id
-    // - implement course-booking with slot- and course id
+    user_input.trim().to_string()
 }

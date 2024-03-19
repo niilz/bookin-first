@@ -46,8 +46,8 @@ where
             .await?;
         if let Response::Json(slots_json) = slots_res {
             let result = serde_json::from_str::<SlotsResult>(&slots_json)
-                .expect("Could not deserialize into courses");
-            Ok(result.slots)
+                .expect("Could not deserialize into slots");
+            Ok(result.slots())
         } else {
             Err(Box::from("Unexpected Response-Type"))
         }
@@ -105,7 +105,7 @@ mod test {
             .await
             .expect("test: read_courses");
 
-        assert_eq!(expected_slots.slots, slots);
+        assert_eq!(expected_slots.slots(), slots);
     }
 
     fn generate_dummy_courses(count: u32) -> CoursesResult {
@@ -136,7 +136,7 @@ mod test {
                 start_date_time: convert(fakeit::datetime::date()),
                 end_date_time: convert(fakeit::datetime::date()),
                 earliest_booking_date_time: convert(fakeit::datetime::date()),
-                latest_booking_date_time: convert(fakeit::datetime::date()),
+                latest_booking_date_time: None,
                 max_participants: count as u8,
                 max_waiting_list_participants: 0,
                 booked_participants: 0,
