@@ -1,8 +1,10 @@
 use std::error::Error;
 
+use serde::Serialize;
+
 use crate::{
     cookies::Cookie,
-    dto::{course::CoursesResult, response::Response},
+    dto::{course::CoursesResult, response::Response, slots::SlotsResult},
     login_service::LoginCreds,
 };
 
@@ -90,10 +92,12 @@ pub(crate) fn ff_login_response_dummy(session: &str) -> Result<Response, Box<dyn
     Ok(Response::Text(session.to_string()))
 }
 
-pub(crate) fn courses_response_dummy(courses: &CoursesResult) -> Result<Response, Box<dyn Error>> {
-    let courses_str: String =
-        serde_json::to_string(courses).expect("test: serialize expected courses");
-    Ok(Response::Json(courses_str))
+pub(crate) fn serialize_response_dummy(
+    response_data: impl Serialize,
+) -> Result<Response, Box<dyn Error>> {
+    let response: String =
+        serde_json::to_string(&response_data).expect("test: serialize expected response-data");
+    Ok(Response::Json(response))
 }
 
 #[derive(Default, Debug)]

@@ -65,16 +65,16 @@ mod test {
         },
         fitness_service::FitnessService,
         mock_client,
-        testutil::{courses_response_dummy, CredentialsMock},
+        testutil::{serialize_response_dummy, CredentialsMock},
     };
 
     #[tokio::test]
-    async fn read_all_courses() {
+    async fn read_all_courses_works() {
         let expected_courses = generate_dummy_courses(5);
         let http_client_mock = mock_client!(
             MockRes::None,
             MockRes::None,
-            Some(courses_response_dummy(&expected_courses)),
+            Some(serialize_response_dummy(&expected_courses)),
             MockRes::None
         );
 
@@ -86,6 +86,26 @@ mod test {
             .expect("test: read_courses");
 
         assert_eq!(expected_courses.courses, courses);
+    }
+
+    #[tokio::test]
+    async fn read_all_slots_works() {
+        let expected_slots = generate_dummy_slots(5);
+        let http_client_mock = mock_client!(
+            MockRes::None,
+            MockRes::None,
+            MockRes::None,
+            Some(serialize_response_dummy(&expected_slots))
+        );
+
+        let creds_mock = CredentialsMock;
+        let fitness_service = FitnessService::new(creds_mock, http_client_mock);
+        let slots = fitness_service
+            .read_slots(1234)
+            .await
+            .expect("test: read_courses");
+
+        assert_eq!(expected_slots.slots, slots);
     }
 
     fn generate_dummy_courses(count: u32) -> CoursesResult {
