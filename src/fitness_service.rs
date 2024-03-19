@@ -56,8 +56,13 @@ where
 
 #[cfg(test)]
 mod test {
+    use chrono::{DateTime, Local};
+
     use crate::{
-        dto::course::{Course, CoursesResult},
+        dto::{
+            course::{Course, CoursesResult},
+            slots::{Slot, SlotsResult},
+        },
         fitness_service::FitnessService,
         mock_client,
         testutil::{courses_response_dummy, CredentialsMock},
@@ -94,6 +99,28 @@ mod test {
                 description: fakeit::hipster::sentence(10),
                 image_url: fakeit::image::url(42, 42),
                 bookable: fakeit::bool_rand::bool(),
+            })
+            .collect()
+    }
+
+    fn convert(fake_date: fakeit::datetime::DateTime) -> DateTime<Local> {
+        DateTime::from_timestamp(fake_date.secs, fake_date.nsecs)
+            .expect("test fails: convert fake-date to chrono-date")
+            .with_timezone(&Local)
+    }
+
+    fn generate_dummy_slots(count: u32) -> SlotsResult {
+        (0..count)
+            .map(|id| Slot {
+                id: id as usize,
+                start_date_time: convert(fakeit::datetime::date()),
+                end_date_time: convert(fakeit::datetime::date()),
+                earliest_booking_date_time: convert(fakeit::datetime::date()),
+                latest_booking_date_time: convert(fakeit::datetime::date()),
+                max_participants: count as u8,
+                max_waiting_list_participants: 0,
+                booked_participants: 0,
+                waiting_list_participants: 0,
             })
             .collect()
     }

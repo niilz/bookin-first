@@ -9,7 +9,7 @@ pub struct CoursesResult {
 impl FromIterator<Course> for CoursesResult {
     fn from_iter<T: IntoIterator<Item = Course>>(iter: T) -> Self {
         Self {
-            courses: iter.into_iter().collect::<Vec<_>>(),
+            courses: iter.into_iter().collect(),
         }
     }
 }

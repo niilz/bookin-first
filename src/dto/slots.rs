@@ -7,6 +7,14 @@ pub struct SlotsResult {
     pub slots: Vec<Slot>,
 }
 
+impl FromIterator<Slot> for SlotsResult {
+    fn from_iter<T: IntoIterator<Item = Slot>>(iter: T) -> Self {
+        Self {
+            slots: iter.into_iter().collect(),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub struct Slot {
     /// Slot - ID
