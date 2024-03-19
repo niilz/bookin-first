@@ -19,6 +19,11 @@ pub trait HttpClient {
     async fn ff_login(&self, request: FitnessFirstLoginRequest)
         -> Result<Response, Box<dyn Error>>;
     async fn read_courses(&self, session_id: &str) -> Result<Response, Box<dyn Error>>;
+    async fn read_slots(
+        &self,
+        course_id: usize,
+        session_id: &str,
+    ) -> Result<Response, Box<dyn Error>>;
 }
 
 pub struct ReqwestHttpClient {
@@ -42,6 +47,14 @@ where
 
     async fn read_courses(&self, session_id: &str) -> Result<Response, Box<dyn Error>> {
         self.as_ref().read_courses(session_id).await
+    }
+
+    async fn read_slots(
+        &self,
+        course_id: usize,
+        session_id: &str,
+    ) -> Result<Response, Box<dyn Error>> {
+        self.as_ref().read_slots(course_id, session_id).await
     }
 }
 
@@ -91,6 +104,26 @@ impl HttpClient for ReqwestHttpClient {
         match res {
             Ok(res) => Ok(Response::Json(res.text().await?)),
             Err(e) => Err(Box::from(format!("Failed to read courses: {e}"))),
+        }
+    }
+
+    async fn read_slots(
+        &self,
+        course_id: usize,
+        session_id: &str,
+    ) -> Result<Response, Box<dyn Error>> {
+        let courses_url = format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}");
+        let slots_url = format!("{courses_url}/{course_id}/slots");
+        println!("Getting slots from: {slots_url}");
+        let res = self
+            .client
+            .get(slots_url)
+            .header("Cookie", session_id)
+            .send()
+            .await;
+        match res {
+            Ok(res) => Ok(Response::Json(res.text().await?)),
+            Err(e) => Err(Box::from(format!("Failed to read slots: {e}"))),
         }
     }
 }

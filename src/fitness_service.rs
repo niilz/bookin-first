@@ -4,6 +4,7 @@ use crate::{
     dto::{
         course::{Course, CoursesResult},
         response::Response,
+        slots::{Slot, SlotsResult},
     },
     http_client::HttpClient,
     login_service::LoginCreds,
@@ -38,15 +39,15 @@ where
             Err(Box::from("Unexpected Response-Type"))
         }
     }
-    pub async fn read_slots(&self, course_id: usize) -> Result<Vec<Course>, Box<dyn Error>> {
+    pub async fn read_slots(&self, course_id: usize) -> Result<Vec<Slot>, Box<dyn Error>> {
         let slots_res = self
             .http_client
-            .read_slots(&self.credendials.get_session_id().unwrap())
+            .read_slots(course_id, &self.credendials.get_session_id().unwrap())
             .await?;
         if let Response::Json(slots_json) = slots_res {
             let result = serde_json::from_str::<SlotsResult>(&slots_json)
                 .expect("Could not deserialize into courses");
-            Ok(result.courses)
+            Ok(result.slots)
         } else {
             Err(Box::from("Unexpected Response-Type"))
         }
@@ -56,7 +57,7 @@ where
 #[cfg(test)]
 mod test {
     use crate::{
-        dto::course::Course,
+        dto::course::{Course, CoursesResult},
         fitness_service::FitnessService,
         mock_client,
         testutil::{courses_response_dummy, CredentialsMock},
@@ -68,7 +69,8 @@ mod test {
         let http_client_mock = mock_client!(
             MockRes::None,
             MockRes::None,
-            Some(courses_response_dummy(&expected_courses))
+            Some(courses_response_dummy(&expected_courses)),
+            MockRes::None
         );
 
         let creds_mock = CredentialsMock;
@@ -78,10 +80,10 @@ mod test {
             .await
             .expect("test: read_courses");
 
-        assert_eq!(expected_courses, courses);
+        assert_eq!(expected_courses.courses, courses);
     }
 
-    fn generate_dummy_courses(count: u32) -> Vec<Course> {
+    fn generate_dummy_courses(count: u32) -> CoursesResult {
         (0..count)
             .map(|id| Course {
                 id: id as usize,

@@ -6,6 +6,14 @@ pub struct CoursesResult {
     pub courses: Vec<Course>,
 }
 
+impl FromIterator<Course> for CoursesResult {
+    fn from_iter<T: IntoIterator<Item = Course>>(iter: T) -> Self {
+        Self {
+            courses: iter.into_iter().collect::<Vec<_>>(),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub struct Course {
     /// Internal-Id of the course

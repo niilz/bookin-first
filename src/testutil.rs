@@ -2,13 +2,13 @@ use std::error::Error;
 
 use crate::{
     cookies::Cookie,
-    dto::{course::Course, response::Response},
+    dto::{course::CoursesResult, response::Response},
     login_service::LoginCreds,
 };
 
 #[macro_export]
 macro_rules! mock_client {
-    ($egym_dummy:expr, $ff_dummy:expr, $courses_dummy:expr) => {{
+    ($egym_dummy:expr, $ff_dummy:expr, $courses_dummy:expr, $slots_dummy:expr) => {{
         use crate::{
             dto::{
                 request::{EgymLoginRequest, FitnessFirstLoginRequest},
@@ -24,6 +24,7 @@ macro_rules! mock_client {
             egym_dummy: MockRes,
             ff_dummy: MockRes,
             courses_dummy: MockRes,
+            slots_dummy: MockRes,
         }
 
         impl HttpClient for HttpClientMock {
@@ -56,11 +57,24 @@ macro_rules! mock_client {
                     None => todo!("test failed, unexpected path"),
                 }
             }
+
+            async fn read_slots(
+                &self,
+                _course_id: usize,
+                _session_id: &str,
+            ) -> Result<Response, Box<dyn Error>> {
+                match self.slots_dummy.as_ref() {
+                    Some(Ok(res)) => Ok(res.clone()),
+                    Some(Err(e)) => Err(Box::from(e.to_string())),
+                    None => todo!("test failed, unexpected path"),
+                }
+            }
         }
         let mock = HttpClientMock {
             egym_dummy: $egym_dummy,
             ff_dummy: $ff_dummy,
             courses_dummy: $courses_dummy,
+            slots_dummy: $slots_dummy,
         };
         mock
     }};
@@ -76,7 +90,7 @@ pub(crate) fn ff_login_response_dummy(session: &str) -> Result<Response, Box<dyn
     Ok(Response::Text(session.to_string()))
 }
 
-pub(crate) fn courses_response_dummy(courses: &Vec<Course>) -> Result<Response, Box<dyn Error>> {
+pub(crate) fn courses_response_dummy(courses: &CoursesResult) -> Result<Response, Box<dyn Error>> {
     let courses_str: String =
         serde_json::to_string(courses).expect("test: serialize expected courses");
     Ok(Response::Json(courses_str))
