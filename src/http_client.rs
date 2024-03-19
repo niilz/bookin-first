@@ -10,7 +10,6 @@ const FITNESS_FIRST_CALLBACK_URL: &str = "https://www.fitnessfirst.de/mein-fitne
 const EGYM_LOGIN_URL: &str = "https://id.egym.com/login";
 const EGYM_TOKEN_PATH: &str = "/egymid-login?token=";
 const COURSES_URL_PATH: &str = "/api/magicline/openapi/classes/hamburg3";
-//const EGYM_LOGIN_URL: &str = "https://httpbin.org/post";
 
 // TODO: Remove when async fn in traits is fully stable (see: https://blog.rust-lang.org/2023/12/21/async-fn-rpit-in-traits.html#async-fn-in-public-traits)
 #[trait_variant::make(HttpClientSend: Send)]
@@ -30,40 +29,12 @@ pub struct ReqwestHttpClient {
     pub client: reqwest::Client,
 }
 
-impl<Client> HttpClient for Arc<Client>
-where
-    Client: HttpClient,
-{
-    async fn egym_login(&self, request: EgymLoginRequest) -> Result<Response, Box<dyn Error>> {
-        self.as_ref().egym_login(request).await
-    }
-
-    async fn ff_login(
-        &self,
-        request: FitnessFirstLoginRequest,
-    ) -> Result<Response, Box<dyn Error>> {
-        self.as_ref().ff_login(request).await
-    }
-
-    async fn read_courses(&self, session_id: &str) -> Result<Response, Box<dyn Error>> {
-        self.as_ref().read_courses(session_id).await
-    }
-
-    async fn read_slots(
-        &self,
-        course_id: usize,
-        session_id: &str,
-    ) -> Result<Response, Box<dyn Error>> {
-        self.as_ref().read_slots(course_id, session_id).await
-    }
-}
-
 impl HttpClient for ReqwestHttpClient {
     async fn egym_login(&self, request: EgymLoginRequest) -> Result<Response, Box<dyn Error>> {
         let mut params = HashMap::new();
         params.insert("username", request.user_name.as_str());
         params.insert("password", request.password.as_str());
-        params.insert("clientId", request.client_id.as_str());
+        params.insert("clientId", request.client_id);
         params.insert("callbackUrl", FITNESS_FIRST_CALLBACK_URL);
         let res = self.client.post(EGYM_LOGIN_URL).form(&params).send().await;
         match res {
@@ -125,5 +96,33 @@ impl HttpClient for ReqwestHttpClient {
             Ok(res) => Ok(Response::Json(res.text().await?)),
             Err(e) => Err(Box::from(format!("Failed to read slots: {e}"))),
         }
+    }
+}
+
+impl<Client> HttpClient for Arc<Client>
+where
+    Client: HttpClient,
+{
+    async fn egym_login(&self, request: EgymLoginRequest) -> Result<Response, Box<dyn Error>> {
+        self.as_ref().egym_login(request).await
+    }
+
+    async fn ff_login(
+        &self,
+        request: FitnessFirstLoginRequest,
+    ) -> Result<Response, Box<dyn Error>> {
+        self.as_ref().ff_login(request).await
+    }
+
+    async fn read_courses(&self, session_id: &str) -> Result<Response, Box<dyn Error>> {
+        self.as_ref().read_courses(session_id).await
+    }
+
+    async fn read_slots(
+        &self,
+        course_id: usize,
+        session_id: &str,
+    ) -> Result<Response, Box<dyn Error>> {
+        self.as_ref().read_slots(course_id, session_id).await
     }
 }

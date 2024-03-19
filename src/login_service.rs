@@ -107,7 +107,7 @@ mod test {
         );
 
         let mut login_service = LoginService::new(http_client_mock, Arc::new(CookieMock));
-        let req = EgymLoginRequest::new("user", "password", "client-id");
+        let req = EgymLoginRequest::new("user", "password");
         let success = login_service.do_login(req).await;
 
         assert!(success.is_err());
@@ -124,7 +124,7 @@ mod test {
             MockRes::None
         );
         let mut login_service = LoginService::new(http_client_mock, Arc::new(CookieMock));
-        let req = EgymLoginRequest::new("user", "password", "client-id");
+        let req = EgymLoginRequest::new("user", "password");
         let success = login_service.do_login(req).await;
 
         assert!(success.is_err());
@@ -140,7 +140,7 @@ mod test {
             MockRes::None
         );
         let mut login_service = LoginService::new(http_client_mock, Arc::new(CookieMock));
-        let req = EgymLoginRequest::new("user", "password", "client-id");
+        let req = EgymLoginRequest::new("user", "password");
         let success = login_service.do_login(req).await;
 
         assert!(success.is_ok());
@@ -158,7 +158,7 @@ mod test {
             MockRes::None
         );
         let mut login_service = LoginService::new(http_client_mock, Arc::new(CookieMock));
-        let req = EgymLoginRequest::new("user", "password", "client-id");
+        let req = EgymLoginRequest::new("user", "password");
         let success = login_service.do_login(req).await;
 
         assert!(success.is_err());

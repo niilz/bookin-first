@@ -24,12 +24,8 @@ pub struct Args {
     #[arg(short, long)]
     pub password: String,
 
-    /// Client-ID, should be replaced by retrieving it programatically
-    #[arg(short, long)]
-    pub clientid: String,
-
     /// Optional Flag to signal that we want the following course without prompting the user
-    #[arg(short = 'n', long)]
+    #[arg(short, long)]
     pub course_name: Option<String>,
 }
 
@@ -46,7 +42,7 @@ async fn main() {
     let http_client = Arc::new(ReqwestHttpClient { client });
     let mut login_service = LoginService::new(Arc::clone(&http_client), Arc::clone(&cookie_jar));
 
-    let login_request = EgymLoginRequest::new(&args.username, &args.password, &args.clientid);
+    let login_request = EgymLoginRequest::new(&args.username, &args.password);
     let _response = login_service.do_login(login_request).await;
 
     let session = cookie_jar.cookies(&Url::parse("https://mein.fitnessfirst.de").unwrap());

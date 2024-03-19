@@ -1,14 +1,18 @@
 pub struct EgymLoginRequest {
     pub user_name: String,
     pub password: String,
-    pub client_id: String,
+    pub client_id: &'static str,
 }
+
+// Aparently the client-id is not per user but per company registered with eGym
+const FF_CLIENT_ID: &str = "a175bce7-3e5b-4863-92a1-efc1991ae6fd";
+
 impl EgymLoginRequest {
-    pub fn new(user_name: &str, password: &str, client_id: &str) -> Self {
+    pub fn new(user_name: &str, password: &str) -> Self {
         Self {
             user_name: user_name.to_string(),
             password: password.to_string(),
-            client_id: client_id.to_string(),
+            client_id: FF_CLIENT_ID,
         }
     }
 }
