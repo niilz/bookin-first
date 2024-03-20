@@ -1,6 +1,6 @@
 # TODO
 
-- where does the user-id come from?
+- extract user-id (mmsMembershipIds) from jwt after egym-login
 - confirm slot by using user-id, class-id, slot-id (I think ;)
 - book class
 - Store token and session (cache)
