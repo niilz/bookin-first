@@ -10,7 +10,11 @@ use crate::{
 
 #[macro_export]
 macro_rules! mock_client {
-    ($egym_dummy:expr, $ff_dummy:expr, $courses_dummy:expr, $slots_dummy:expr) => {{
+    ($egym_dummy:expr,
+     $ff_dummy:expr,
+     $courses_dummy:expr,
+     $slots_dummy:expr,
+     $book_dummy:expr) => {{
         use crate::{
             dto::{
                 request::{EgymLoginRequest, FitnessFirstLoginRequest},
@@ -27,6 +31,7 @@ macro_rules! mock_client {
             ff_dummy: MockRes,
             courses_dummy: MockRes,
             slots_dummy: MockRes,
+            book_dummy: MockRes,
         }
 
         impl HttpClient for HttpClientMock {
@@ -52,7 +57,7 @@ macro_rules! mock_client {
                 }
             }
 
-            async fn read_courses(&self, _session_id: &str) -> Result<Response, Box<dyn Error>> {
+            async fn fetch_courses(&self, _session_id: &str) -> Result<Response, Box<dyn Error>> {
                 match self.courses_dummy.as_ref() {
                     Some(Ok(res)) => Ok(res.clone()),
                     Some(Err(e)) => Err(Box::from(e.to_string())),
@@ -60,7 +65,7 @@ macro_rules! mock_client {
                 }
             }
 
-            async fn read_slots(
+            async fn fetch_slots(
                 &self,
                 _course_id: usize,
                 _session_id: &str,
@@ -71,12 +76,27 @@ macro_rules! mock_client {
                     None => todo!("test failed, unexpected path"),
                 }
             }
+
+            async fn book_course(
+                &self,
+                _course_id: usize,
+                _slot_id: usize,
+                _session_id: &str,
+            ) -> Result<Response, Box<dyn Error>> {
+                match self.book_dummy.as_ref() {
+                    Some(Ok(res)) => Ok(res.clone()),
+                    Some(Err(e)) => Err(Box::from(e.to_string())),
+                    None => todo!("test failed, unexpected path"),
+                }
+            }
         }
+
         let mock = HttpClientMock {
             egym_dummy: $egym_dummy,
             ff_dummy: $ff_dummy,
             courses_dummy: $courses_dummy,
             slots_dummy: $slots_dummy,
+            book_dummy: $book_dummy,
         };
         mock
     }};

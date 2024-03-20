@@ -58,10 +58,14 @@ where
         &self,
         course_id: usize,
         slot_id: usize,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<Response, Box<dyn Error>> {
         self.http_client
-            .book_course(course_id, &self.credendials.get_session_id().unwrap())
-            .await?
+            .book_course(
+                course_id,
+                slot_id,
+                &self.credendials.get_session_id().unwrap(),
+            )
+            .await
     }
 }
 
@@ -86,6 +90,7 @@ mod test {
             MockRes::None,
             MockRes::None,
             Some(serialize_response_dummy(&expected_courses)),
+            MockRes::None,
             MockRes::None
         );
 
@@ -106,7 +111,8 @@ mod test {
             MockRes::None,
             MockRes::None,
             MockRes::None,
-            Some(serialize_response_dummy(&expected_slots))
+            Some(serialize_response_dummy(&expected_slots)),
+            MockRes::None
         );
 
         let creds_mock = CredentialsMock;

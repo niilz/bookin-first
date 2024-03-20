@@ -104,9 +104,14 @@ impl HttpClient for ReqwestHttpClient {
         }
     }
 
-    async fn book_course(&self, course_id: usize, slot_id: usize, session_id: &str) {
-        let booking_url = format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}")
-
+    async fn book_course(
+        &self,
+        course_id: usize,
+        slot_id: usize,
+        session_id: &str,
+    ) -> Result<Response, Box<dyn Error>> {
+        let booking_url = format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}");
+        todo!()
     }
 }
 

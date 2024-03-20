@@ -103,6 +103,7 @@ mod test {
             Some(egym_login_response_dummy(EGYM_JWT_DUMMY)),
             Some(Err(Box::from("FF-login not tested here"))),
             MockRes::None,
+            MockRes::None,
             MockRes::None
         );
 
@@ -121,6 +122,7 @@ mod test {
             Some(Err(Box::from(EGYM_LOGIN_ERR_DUMMY))),
             MockRes::None,
             MockRes::None,
+            MockRes::None,
             MockRes::None
         );
         let mut login_service = LoginService::new(http_client_mock, Arc::new(CookieMock));
@@ -136,6 +138,7 @@ mod test {
         let http_client_mock = mock_client!(
             Some(egym_login_response_dummy(EGYM_JWT_DUMMY)),
             Some(ff_login_response_dummy(SESS_ID_DUMMY)),
+            MockRes::None,
             MockRes::None,
             MockRes::None
         );
@@ -154,6 +157,7 @@ mod test {
         let http_client_mock = mock_client!(
             Some(egym_login_response_dummy(EGYM_JWT_DUMMY)),
             Some(Err(Box::from(FF_LOGIN_ERR_DUMMY))),
+            MockRes::None,
             MockRes::None,
             MockRes::None
         );
