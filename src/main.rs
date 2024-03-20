@@ -1,7 +1,10 @@
 use std::{io::stdin, sync::Arc};
 
 use fitness_api::{
-    dto::{course::Course, request::EgymLoginRequest},
+    dto::{
+        course::Course,
+        request::{BookingRequest, EgymLoginRequest},
+    },
     fitness_service::FitnessService,
     http_client::ReqwestHttpClient,
     login_service::LoginService,
@@ -84,7 +87,17 @@ async fn main() {
     }
     println!();
 
-    // - implement course-booking with slot- and course id
+    println!("Start booking now");
+    /*
+    let booking = BookingRequest {
+        customer_id: ,
+        slot_id: todo!(),
+        course_id: todo!(),
+        club_id: todo!(),
+        club_name: todo!(),
+        course_name: todo!(),
+    };
+    */
 }
 
 fn handle_user_input(courses: &Vec<Course>) -> String {
