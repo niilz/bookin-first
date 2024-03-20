@@ -2,11 +2,7 @@ use std::error::Error;
 
 use serde::Serialize;
 
-use crate::{
-    cookies::Cookie,
-    dto::{course::CoursesResult, response::Response, slots::SlotsResult},
-    login_service::LoginCreds,
-};
+use crate::{cookies::Cookie, dto::response::Response, login_service::LoginCreds};
 
 #[macro_export]
 macro_rules! mock_client {
