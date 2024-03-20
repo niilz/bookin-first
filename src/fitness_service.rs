@@ -3,7 +3,7 @@ use std::error::Error;
 use crate::{
     dto::{
         course::{Course, CoursesResult},
-        response::Response,
+        response::{BookingResponse, Response},
         slots::{Slot, SlotsResult},
     },
     http_client::HttpClient,
@@ -58,24 +58,33 @@ where
         &self,
         course_id: usize,
         slot_id: usize,
-    ) -> Result<Response, Box<dyn Error>> {
-        self.http_client
+    ) -> Result<BookingResponse, Box<dyn Error>> {
+        let booking_res = self
+            .http_client
             .book_course(
                 course_id,
                 slot_id,
                 &self.credendials.get_session_id().unwrap(),
             )
-            .await
+            .await?;
+        if let Response::Json(booking_json) = booking_res {
+            serde_json::from_str::<BookingResponse>(&booking_json)
+                .map_err(serde_json::error::Error::into)
+        } else {
+            Err(Box::from("Unexpected Response-Type"))
+        }
     }
 }
 
 #[cfg(test)]
 mod test {
     use chrono::{DateTime, Local};
+    use serde_json::json;
 
     use crate::{
         dto::{
             course::{Course, CoursesResult},
+            response::{BookingResponse, BookingState},
             slots::{Slot, SlotsResult},
         },
         fitness_service::FitnessService,
@@ -123,6 +132,38 @@ mod test {
             .expect("test: read_courses");
 
         assert_eq!(expected_slots.slots(), slots);
+    }
+
+    #[tokio::test]
+    async fn can_book_course() {
+        let booking_dummy = json!({
+        "bookingId": 1234567,
+        "bookingStatus": "BOOKED",
+        "classSlotId": 89012345,
+        "classId": 11223344,
+        "customerId": 55667788
+              })
+        .to_string();
+        let http_client_mock = mock_client!(
+            MockRes::None,
+            MockRes::None,
+            MockRes::None,
+            MockRes::None,
+            Some(Ok(Response::Json(booking_dummy)))
+        );
+
+        let creds_mock = CredentialsMock;
+        let fitness_service = FitnessService::new(creds_mock, http_client_mock);
+        let booking = fitness_service
+            .book_course(42, 43)
+            .await
+            .expect("test: book course");
+
+        assert_eq!(1234567, booking.booking_id);
+        assert_eq!(BookingState::BOOKED, booking.booking_status);
+        assert_eq!(89012345, booking.slot_id);
+        assert_eq!(11223344, booking.course_id);
+        assert_eq!(55667788, booking.customer_id);
     }
 
     fn generate_dummy_courses(count: u32) -> CoursesResult {

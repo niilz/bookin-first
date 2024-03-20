@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 pub struct EgymLoginRequest {
     pub user_name: String,
     pub password: String,
@@ -28,6 +30,18 @@ impl FitnessFirstLoginRequest {
     }
 }
 
-pub struct Booking {
-//{`"customerId`":`"1380798137`",`"classSlotId`":1486092405,`"classId`":1355292810,`"clubId`":`"hamburg3`",`"clubName`":`"Hamburg - Eppendorf`",`"className`":`"Hyrox (M/F)`"}
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
+pub struct BookingRequest {
+    #[serde(rename = "customerId")]
+    customer_id: usize,
+    #[serde(rename = "classSlotId")]
+    slot_id: usize,
+    #[serde(rename = "classId")]
+    course_id: usize,
+    #[serde(rename = "clubId")]
+    club_id: String,
+    #[serde(rename = "clubName")]
+    club_name: String,
+    #[serde(rename = "className")]
+    course_name: String,
 }
