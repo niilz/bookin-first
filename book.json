@@ -1,0 +1,17 @@
+{
+  "classId": 12345,
+  "className": "BodyFit H.I.I.T.  (M)",
+  "classSlotId": 12345,
+  "clubId": "hamburg3",
+  "clubName": "Hamburg - Eppendorf",
+  "customerId": "12345"
+}
+
+{
+  "bookingId": 12345,
+  "bookingStatus": "BOOKED",
+  "classSlotId": 132345,
+  "classId": 13456,
+  "customerId": 12345
+}
+DELETE: "https://mein.fitnessfirst.de/api/magicline/openapi/classes/hamburg3/booking/12345" -> null

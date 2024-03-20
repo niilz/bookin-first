@@ -1,8 +1,8 @@
 use std::{collections::HashMap, error::Error, sync::Arc};
 
-use crate::{
-    dto::request::{EgymLoginRequest, FitnessFirstLoginRequest},
-    dto::response::Response,
+use crate::dto::{
+    request::{BookingRequest, EgymLoginRequest, FitnessFirstLoginRequest},
+    response::Response,
 };
 
 pub const FITNESS_FIRST_BASE_URL: &str = "https://mein.fitnessfirst.de";
@@ -25,8 +25,7 @@ pub trait HttpClient {
     ) -> Result<Response, Box<dyn Error>>;
     async fn book_course(
         &self,
-        course_id: usize,
-        slot_id: usize,
+        booking: BookingRequest,
         session_id: &str,
     ) -> Result<Response, Box<dyn Error>>;
 }
@@ -106,12 +105,23 @@ impl HttpClient for ReqwestHttpClient {
 
     async fn book_course(
         &self,
-        course_id: usize,
-        slot_id: usize,
+        booking: BookingRequest,
         session_id: &str,
     ) -> Result<Response, Box<dyn Error>> {
-        let booking_url = format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}");
-        todo!()
+        //https://mein.fitnessfirst.de/api/magicline/openapi/classes/hamburg3/booking/book
+        let booking_url = format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}/booking/book");
+        let booking = serde_json::to_string(&booking)?;
+        let res = self
+            .client
+            .post(booking_url)
+            .body(booking)
+            .header("Cookie", session_id)
+            .send()
+            .await;
+        match res {
+            Ok(res) => Ok(Response::Json(res.text().await?)),
+            Err(e) => Err(Box::from(format!("Failed to read slots: {e}"))),
+        }
     }
 }
 
@@ -144,12 +154,9 @@ where
 
     async fn book_course(
         &self,
-        course_id: usize,
-        slot_id: usize,
+        booking: BookingRequest,
         session_id: &str,
     ) -> Result<Response, Box<dyn Error>> {
-        self.as_ref()
-            .book_course(course_id, slot_id, session_id)
-            .await
+        self.as_ref().book_course(booking, session_id).await
     }
 }

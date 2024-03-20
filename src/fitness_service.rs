@@ -3,6 +3,7 @@ use std::error::Error;
 use crate::{
     dto::{
         course::{Course, CoursesResult},
+        request::BookingRequest,
         response::{BookingResponse, Response},
         slots::{Slot, SlotsResult},
     },
@@ -56,16 +57,11 @@ where
 
     pub async fn book_course(
         &self,
-        course_id: usize,
-        slot_id: usize,
+        booking: BookingRequest,
     ) -> Result<BookingResponse, Box<dyn Error>> {
         let booking_res = self
             .http_client
-            .book_course(
-                course_id,
-                slot_id,
-                &self.credendials.get_session_id().unwrap(),
-            )
+            .book_course(booking, &self.credendials.get_session_id().unwrap())
             .await?;
         if let Response::Json(booking_json) = booking_res {
             serde_json::from_str::<BookingResponse>(&booking_json)
@@ -84,7 +80,8 @@ mod test {
     use crate::{
         dto::{
             course::{Course, CoursesResult},
-            response::{BookingResponse, BookingState},
+            request::BookingRequest,
+            response::BookingState,
             slots::{Slot, SlotsResult},
         },
         fitness_service::FitnessService,
@@ -154,8 +151,16 @@ mod test {
 
         let creds_mock = CredentialsMock;
         let fitness_service = FitnessService::new(creds_mock, http_client_mock);
+        let request_dummy = BookingRequest {
+            customer_id: 42,
+            slot_id: 43,
+            course_id: 43,
+            club_id: "Best Studio".to_string(),
+            club_name: "Best-Club".to_string(),
+            course_name: "Some Course".to_string(),
+        };
         let booking = fitness_service
-            .book_course(42, 43)
+            .book_course(request_dummy)
             .await
             .expect("test: book course");
 

@@ -13,7 +13,7 @@ macro_rules! mock_client {
      $book_dummy:expr) => {{
         use crate::{
             dto::{
-                request::{EgymLoginRequest, FitnessFirstLoginRequest},
+                request::{BookingRequest, EgymLoginRequest, FitnessFirstLoginRequest},
                 response::Response,
             },
             http_client::HttpClient,
@@ -75,8 +75,7 @@ macro_rules! mock_client {
 
             async fn book_course(
                 &self,
-                _course_id: usize,
-                _slot_id: usize,
+                _booking: BookingRequest,
                 _session_id: &str,
             ) -> Result<Response, Box<dyn Error>> {
                 match self.book_dummy.as_ref() {
