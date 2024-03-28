@@ -8,6 +8,25 @@ use crate::{
 
 pub trait LoginCreds {
     fn get_session_id(&self) -> Option<String>;
+    fn get_user_id(&self) -> Result<String, Box<dyn Error>>;
+}
+
+#[derive(Default, Debug)]
+pub struct LoginService<Client, Cookie> {
+    pub http_client: Client,
+    token: Option<String>,
+    session: Option<String>,
+    cookie_jar: Arc<Cookie>,
+}
+impl<Client, Cookie> LoginService<Client, Cookie> {
+    pub fn new(http_client: Client, cookie_jar: Arc<Cookie>) -> Self {
+        Self {
+            http_client,
+            token: None,
+            session: None,
+            cookie_jar,
+        }
+    }
 }
 
 impl<Client, Cookie> LoginService<Client, Cookie>
@@ -59,23 +78,9 @@ where
     fn get_session_id(&self) -> Option<String> {
         self.session.clone()
     }
-}
 
-#[derive(Default, Debug)]
-pub struct LoginService<Client, Cookie> {
-    pub http_client: Client,
-    token: Option<String>,
-    session: Option<String>,
-    cookie_jar: Arc<Cookie>,
-}
-impl<Client, Cookie> LoginService<Client, Cookie> {
-    pub fn new(http_client: Client, cookie_jar: Arc<Cookie>) -> Self {
-        Self {
-            http_client,
-            token: None,
-            session: None,
-            cookie_jar,
-        }
+    fn get_user_id(&self) -> Result<String, Box<dyn Error>> {
+        todo!()
     }
 }
 
@@ -150,6 +155,25 @@ mod test {
         assert!(login_service.token.is_some());
         assert!(login_service.session.is_some());
         assert_eq!(SESS_ID_DUMMY, login_service.session.unwrap());
+    }
+
+    #[tokio::test]
+    async fn ff_login_fails() {
+        let http_client_mock = mock_client!(
+            Some(egym_login_response_dummy(EGYM_JWT_DUMMY)),
+            Some(Err(Box::from(FF_LOGIN_ERR_DUMMY))),
+            MockRes::None,
+            MockRes::None,
+            MockRes::None
+        );
+        let mut login_service = LoginService::new(http_client_mock, Arc::new(CookieMock));
+        let req = EgymLoginRequest::new("user", "password");
+        let success = login_service.do_login(req).await;
+
+        assert!(success.is_err());
+        assert!(login_service.token.is_some());
+        assert_eq!("base64jwt", login_service.token.unwrap());
+        assert!(login_service.session.is_none());
     }
 
     #[tokio::test]
