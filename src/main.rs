@@ -3,7 +3,7 @@ use std::{io::stdin, sync::Arc};
 use fitness_api::{
     dto::{
         course::Course,
-        request::{BookingRequest, EgymLoginRequest},
+        request::{EgymLoginRequest},
     },
     fitness_service::FitnessService,
     http_client::ReqwestHttpClient,
