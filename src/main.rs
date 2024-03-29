@@ -1,13 +1,10 @@
 use std::{io::stdin, sync::Arc};
 
 use fitness_api::{
-    dto::{
-        course::Course,
-        request::{EgymLoginRequest},
-    },
+    dto::{course::Course, request::EgymLoginRequest},
     fitness_service::FitnessService,
     http_client::ReqwestHttpClient,
-    login_service::LoginService,
+    login_service::{LoginCreds, LoginService},
 };
 
 use clap::Parser;
@@ -47,6 +44,11 @@ async fn main() {
 
     let login_request = EgymLoginRequest::new(&args.username, &args.password);
     let _response = login_service.do_login(login_request).await;
+
+    println!(
+        "TODO: Build the booking reuquest. Meanwhile here is the user-ID: {:?}",
+        login_service.get_user_id()
+    );
 
     let session = cookie_jar.cookies(&Url::parse("https://mein.fitnessfirst.de").unwrap());
     println!("Session: {session:?}");
@@ -88,6 +90,7 @@ async fn main() {
     println!();
 
     println!("Start booking now");
+
     /*
     let booking = BookingRequest {
         customer_id: ,
