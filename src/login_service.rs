@@ -92,20 +92,22 @@ mod test {
 
     use crate::{
         dto::request::EgymLoginRequest,
-        login_service::LoginService,
+        login_service::{LoginCreds, LoginService},
         mock_client,
         testutil::{egym_login_response_dummy, ff_login_response_dummy, CookieMock},
     };
 
-    const EGYM_JWT_DUMMY: &str = "https://www.foo.de/my-area?token=base64jwt";
+    const EGYM_TOKEN_URL_DUMMY: &str = "https://www.foo.de/my-area?token=";
+    const EGYM_JWT_DUMMY: &str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkdW1teS1pc3N1ZXIiLCJhdWQiOiJkdW1teS1hdWRpZW5jZSIsImV4cCI6MTcxMTc0ODkyNCwiaWF0IjoxNzExNzQ1MzI0LCJzdWIiOiJkdW1teS1zdWIiLCJ1aWQiOiJhMTc1YmNlNy0zZTViLTQ4NjMtOTJhMS1lZmMxOTkxYWU2ZmQ6ZWZnaTVlaDVwd2lqIiwiY2xhaW1zIjp7ImJyYW5kSWQiOiJkdW1teS1icmFuZC1pZCIsImVneW1BY2NvdW50SWQiOiJkdW1teS1lZ3ltLWFjY291bnQtaWQiLCJtZW1iZXJzaGlwSWQiOiJkdW1teS1tZW1iZXJzaGlwLWlkIiwibW1zTWVtYmVyc2hpcElkcyI6WyIxMjM0NTY3ODkwIl19fQ.C_NkEF_U8PNPfSSX_P-aYZdssOygvhz3Q8QEGfbEnkI";
     const SESS_ID_DUMMY: &str = "PHPSESSID123DUMMY";
     const EGYM_LOGIN_ERR_DUMMY: &str = "Egym login test-failure";
     const FF_LOGIN_ERR_DUMMY: &str = "FF login test-failure";
 
     #[tokio::test]
     async fn egym_login_success() {
+        let token_res_dummy = format!("{EGYM_TOKEN_URL_DUMMY}{EGYM_JWT_DUMMY}");
         let http_client_mock = mock_client!(
-            Some(egym_login_response_dummy(EGYM_JWT_DUMMY)),
+            Some(egym_login_response_dummy(&token_res_dummy)),
             Some(Err(Box::from("FF-login not tested here"))),
             MockRes::None,
             MockRes::None,
@@ -118,7 +120,7 @@ mod test {
 
         assert!(success.is_err());
         assert!(login_service.token.is_some());
-        assert_eq!("base64jwt", login_service.token.unwrap());
+        assert_eq!(EGYM_JWT_DUMMY, login_service.token.unwrap());
     }
 
     #[tokio::test]
@@ -140,8 +142,9 @@ mod test {
 
     #[tokio::test]
     async fn ff_login_success() {
+        let token_res_dummy = format!("{EGYM_TOKEN_URL_DUMMY}{EGYM_JWT_DUMMY}");
         let http_client_mock = mock_client!(
-            Some(egym_login_response_dummy(EGYM_JWT_DUMMY)),
+            Some(egym_login_response_dummy(&token_res_dummy)),
             Some(ff_login_response_dummy(SESS_ID_DUMMY)),
             MockRes::None,
             MockRes::None,
@@ -159,8 +162,9 @@ mod test {
 
     #[tokio::test]
     async fn ff_login_fails() {
+        let token_res_dummy = format!("{EGYM_TOKEN_URL_DUMMY}{EGYM_JWT_DUMMY}");
         let http_client_mock = mock_client!(
-            Some(egym_login_response_dummy(EGYM_JWT_DUMMY)),
+            Some(egym_login_response_dummy(&token_res_dummy)),
             Some(Err(Box::from(FF_LOGIN_ERR_DUMMY))),
             MockRes::None,
             MockRes::None,
@@ -172,26 +176,27 @@ mod test {
 
         assert!(success.is_err());
         assert!(login_service.token.is_some());
-        assert_eq!("base64jwt", login_service.token.unwrap());
+        assert_eq!(EGYM_JWT_DUMMY, login_service.token.unwrap());
         assert!(login_service.session.is_none());
     }
 
     #[tokio::test]
-    async fn ff_login_fails() {
+    async fn can_decode_user_id_from_token() {
+        let token_res_dummy = format!("{EGYM_TOKEN_URL_DUMMY}{EGYM_JWT_DUMMY}");
         let http_client_mock = mock_client!(
-            Some(egym_login_response_dummy(EGYM_JWT_DUMMY)),
-            Some(Err(Box::from(FF_LOGIN_ERR_DUMMY))),
+            Some(egym_login_response_dummy(&token_res_dummy)),
+            Some(ff_login_response_dummy(SESS_ID_DUMMY)),
             MockRes::None,
             MockRes::None,
             MockRes::None
         );
         let mut login_service = LoginService::new(http_client_mock, Arc::new(CookieMock));
         let req = EgymLoginRequest::new("user", "password");
-        let success = login_service.do_login(req).await;
+        let _success = login_service.do_login(req).await;
 
-        assert!(success.is_err());
         assert!(login_service.token.is_some());
-        assert_eq!("base64jwt", login_service.token.unwrap());
-        assert!(login_service.session.is_none());
+        assert_eq!(EGYM_JWT_DUMMY, login_service.token.as_ref().unwrap());
+        let user_id = login_service.get_user_id();
+        assert_eq!(user_id.unwrap(), "user_id_dummy");
     }
 }
