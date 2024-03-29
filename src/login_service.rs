@@ -1,5 +1,7 @@
 use std::{error::Error, sync::Arc};
 
+use base64::{engine::general_purpose::STANDARD_NO_PAD, Engine};
+
 use crate::{
     dto::request::{EgymLoginRequest, FitnessFirstLoginRequest},
     dto::response::Response,
@@ -80,7 +82,12 @@ where
     }
 
     fn get_user_id(&self) -> Result<String, Box<dyn Error>> {
-        todo!()
+        let payload = match &self.token {
+            Some(token) => token.split('.').nth(1).ok_or("Payload missing")?,
+            None => return Err("Token missing".into()),
+        };
+        let decoded = STANDARD_NO_PAD.decode(payload)?;
+        Ok(String::from_utf8(decoded).unwrap())
     }
 }
 
