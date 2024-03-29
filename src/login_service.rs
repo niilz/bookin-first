@@ -3,8 +3,11 @@ use std::{error::Error, sync::Arc};
 use base64::{engine::general_purpose::STANDARD_NO_PAD, Engine};
 
 use crate::{
-    dto::request::{EgymLoginRequest, FitnessFirstLoginRequest},
-    dto::response::Response,
+    dto::{
+        request::{EgymLoginRequest, FitnessFirstLoginRequest},
+        response::Response,
+        token::{Claims, Jwt},
+    },
     http_client::{HttpClient, FITNESS_FIRST_BASE_URL},
 };
 
@@ -87,7 +90,10 @@ where
             None => return Err("Token missing".into()),
         };
         let decoded = STANDARD_NO_PAD.decode(payload)?;
-        Ok(String::from_utf8(decoded).unwrap())
+        let Jwt {
+            claims: Claims { user_ids },
+        } = serde_json::from_slice(&decoded)?;
+        Ok(user_ids[0].to_string())
     }
 }
 
@@ -204,6 +210,6 @@ mod test {
         assert!(login_service.token.is_some());
         assert_eq!(EGYM_JWT_DUMMY, login_service.token.as_ref().unwrap());
         let user_id = login_service.get_user_id();
-        assert_eq!(user_id.unwrap(), "user_id_dummy");
+        assert_eq!(user_id.unwrap(), "1234567890");
     }
 }
