@@ -129,7 +129,7 @@ fn slot_input(slots: &Vec<Slot>) -> &'_ Slot {
     let _ = stdin().read_line(&mut slot_nr).expect("read user input");
     let slot_nr = slot_nr.trim().to_string().parse::<usize>();
     let nr = match slot_nr {
-        Ok(nr) => nr - 1,
+        Ok(nr) => nr.saturating_sub(1),
         Err(_) => return slot_input(slots),
     };
 
