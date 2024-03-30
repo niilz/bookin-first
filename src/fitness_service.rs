@@ -151,14 +151,7 @@ mod test {
 
         let creds_mock = CredentialsMock;
         let fitness_service = FitnessService::new(creds_mock, http_client_mock);
-        let request_dummy = BookingRequest {
-            user_id: 42,
-            slot_id: 43,
-            course_id: 43,
-            club_id: "Best Studio".to_string(),
-            club_name: "Best-Club".to_string(),
-            course_name: "Some Course".to_string(),
-        };
+        let request_dummy = BookingRequest::new(42, 43, 43, "Some Course".to_string());
         let booking = fitness_service
             .book_course(request_dummy)
             .await
