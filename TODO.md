@@ -1,8 +1,7 @@
 # TODO
 
-- confirm slot by using user-id, class-id, slot-id (I think ;)
-- book class
 - Store token and session (cache)
-- Retrieve client-id by first calling fitness-first and then calling egym (instead of taking it as arg)
+- Add appointment to calendar
 - implement delete
-- implement unsupervised run
+- implement unsupervised run (for course and slot)
+- maybe it can happen that course is not bookable: handle that
