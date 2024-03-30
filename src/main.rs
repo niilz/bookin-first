@@ -65,7 +65,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let course = courses
         .iter()
-        .find(|c| c.title.contains(&course_choice))
+        .find(|c| {
+            c.title
+                .to_lowercase()
+                .contains(&course_choice.to_lowercase())
+        })
         .expect("find course");
 
     println!();
