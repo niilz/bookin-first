@@ -93,6 +93,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let booking = BookingRequest::new(user_id, slot_choice.id, course.id, course.title);
 
+    let booking_res = fitness_service.book_course(booking).await?;
+
+    println!("Booking: {booking_res:?}");
+
     Ok(())
 }
 
