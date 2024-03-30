@@ -130,7 +130,7 @@ impl LoginCreds for CredentialsMock {
         Some("dummy-session-id".to_string())
     }
 
-    fn get_user_id(&self) -> Result<String, Box<dyn Error>> {
-        Ok("dummy-user-id".to_string())
+    fn get_user_id(&self) -> Result<usize, Box<dyn Error>> {
+        Ok(123454321)
     }
 }

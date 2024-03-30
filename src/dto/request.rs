@@ -33,7 +33,7 @@ impl FitnessFirstLoginRequest {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct BookingRequest {
     #[serde(rename = "customerId")]
-    pub customer_id: usize,
+    pub user_id: usize,
     #[serde(rename = "classSlotId")]
     pub slot_id: usize,
     #[serde(rename = "classId")]

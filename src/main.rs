@@ -1,7 +1,11 @@
-use std::{io::stdin, sync::Arc};
+use std::{error::Error, io::stdin, sync::Arc};
 
 use fitness_api::{
-    dto::{course::Course, request::EgymLoginRequest},
+    dto::{
+        course::Course,
+        request::{BookingRequest, EgymLoginRequest},
+        slots::Slot,
+    },
     fitness_service::FitnessService,
     http_client::ReqwestHttpClient,
     login_service::{LoginCreds, LoginService},
@@ -30,7 +34,7 @@ pub struct Args {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
 
     let cookie_jar = Arc::new(Jar::default());
@@ -45,10 +49,7 @@ async fn main() {
     let login_request = EgymLoginRequest::new(&args.username, &args.password);
     let _response = login_service.do_login(login_request).await;
 
-    println!(
-        "TODO: Build the booking reuquest. Meanwhile here is the user-ID: {:?}",
-        login_service.get_user_id()
-    );
+    let user_id = login_service.get_user_id()?;
 
     let session = cookie_jar.cookies(&Url::parse("https://mein.fitnessfirst.de").unwrap());
     println!("Session: {session:?}");
@@ -57,9 +58,9 @@ async fn main() {
 
     let courses = fitness_service.fetch_courses().await.expect("read courses");
 
-    let course_choice = match args.course_name {
-        Some(course) => course,
-        None => handle_user_input(&courses),
+    let course_choice = match &args.course_name {
+        Some(course) => course.to_string(),
+        None => course_input(&courses),
     };
 
     let course = courses
@@ -78,32 +79,27 @@ async fn main() {
         .expect("read slots");
 
     println!();
-    println!("Available Slots:");
-    for (idx, slot) in slots.iter().enumerate() {
-        println!(
-            "{} - {} - {}",
-            idx + 1,
-            slot.start_date_time,
-            slot.earliest_booking_date_time
-        );
-    }
-    println!();
 
     println!("Start booking now");
 
-    /*
+    let slot_choice = match &args.course_name {
+        Some(_) => todo!("select next possible slot automatically, or add date-input"),
+        None => slot_input(&slots),
+    };
+
     let booking = BookingRequest {
-        customer_id: ,
-        slot_id: todo!(),
-        course_id: todo!(),
+        user_id,
+        slot_id: slot_choice.id,
+        course_id: course.id,
         club_id: todo!(),
         club_name: todo!(),
         course_name: todo!(),
     };
-    */
+
+    Ok(())
 }
 
-fn handle_user_input(courses: &Vec<Course>) -> String {
+fn course_input(courses: &Vec<Course>) -> String {
     println!("The courses are:");
 
     for (idx, course) in courses.iter().enumerate() {
@@ -115,4 +111,31 @@ fn handle_user_input(courses: &Vec<Course>) -> String {
     let mut user_input = String::new();
     let _ = stdin().read_line(&mut user_input).expect("read user input");
     user_input.trim().to_string()
+}
+
+fn slot_input(slots: &Vec<Slot>) -> &'_ Slot {
+    println!("Available Slots:");
+    for (idx, slot) in slots.iter().enumerate() {
+        println!(
+            "{}. slot: {} - bookable at: {}",
+            idx + 1,
+            slot.start_date_time,
+            slot.earliest_booking_date_time
+        );
+    }
+    println!();
+    println!("Please select a slot (enter slot number)");
+    let mut slot_nr = String::new();
+    let _ = stdin().read_line(&mut slot_nr).expect("read user input");
+    let slot_nr = slot_nr.trim().to_string().parse::<usize>();
+    let nr = match slot_nr {
+        Ok(nr) => nr - 1,
+        Err(_) => return slot_input(slots),
+    };
+
+    if nr >= slots.len() {
+        return slot_input(slots);
+    }
+
+    &slots[nr]
 }

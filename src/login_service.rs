@@ -13,7 +13,7 @@ use crate::{
 
 pub trait LoginCreds {
     fn get_session_id(&self) -> Option<String>;
-    fn get_user_id(&self) -> Result<String, Box<dyn Error>>;
+    fn get_user_id(&self) -> Result<usize, Box<dyn Error>>;
 }
 
 #[derive(Default, Debug)]
@@ -84,7 +84,7 @@ where
         self.session.clone()
     }
 
-    fn get_user_id(&self) -> Result<String, Box<dyn Error>> {
+    fn get_user_id(&self) -> Result<usize, Box<dyn Error>> {
         let payload = match &self.token {
             Some(token) => token.split('.').nth(1).ok_or("Payload missing")?,
             None => return Err("Token missing".into()),
@@ -93,7 +93,8 @@ where
         let Jwt {
             claims: Claims { user_ids },
         } = serde_json::from_slice(&decoded)?;
-        Ok(user_ids[0].to_string())
+        let user_id = user_ids[0].parse::<usize>()?;
+        Ok(user_id)
     }
 }
 
@@ -210,6 +211,6 @@ mod test {
         assert!(login_service.token.is_some());
         assert_eq!(EGYM_JWT_DUMMY, login_service.token.as_ref().unwrap());
         let user_id = login_service.get_user_id();
-        assert_eq!(user_id.unwrap(), "1234567890");
+        assert_eq!(user_id.unwrap(), 1234567890);
     }
 }
