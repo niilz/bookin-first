@@ -64,7 +64,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     };
 
     let course = courses
-        .iter()
+        .into_iter()
         .find(|c| {
             c.title
                 .to_lowercase()
@@ -91,14 +91,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         None => slot_input(&slots),
     };
 
-    let booking = BookingRequest {
-        user_id,
-        slot_id: slot_choice.id,
-        course_id: course.id,
-        club_id: todo!(),
-        club_name: todo!(),
-        course_name: todo!(),
-    };
+    let booking = BookingRequest::new(user_id, slot_choice.id, course.id, course.title);
 
     Ok(())
 }
