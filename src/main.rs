@@ -7,11 +7,12 @@ use fitness_api::{
         slots::Slot,
     },
     fitness_service::FitnessService,
-    http_client::ReqwestHttpClient,
+    http_client::{FetchApiClient, ReqwestHttpClient},
     login_service::{LoginCreds, LoginService},
 };
 
 use clap::Parser;
+use wasm_bindgen::prelude::*;
 use reqwest::{
     cookie::{CookieStore, Jar},
     Url,
@@ -34,7 +35,9 @@ pub struct Args {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+#[wasm_bindgen(start)]
+async fn main() ->  Result<(), JsValue> {
+//async fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
 
     let cookie_jar = Arc::new(Jar::default());
@@ -43,13 +46,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .cookie_provider(Arc::clone(&cookie_jar))
         .build()
         .expect("Could not create client");
-    let http_client = Arc::new(ReqwestHttpClient { client });
+
+    let client = web_sys::window().unwrap();
+    //let http_client = Arc::new(ReqwestHttpClient { client });
+    let http_client = Arc::new(FetchApiClient {client});
     let mut login_service = LoginService::new(Arc::clone(&http_client), Arc::clone(&cookie_jar));
 
     let login_request = EgymLoginRequest::new(&args.username, &args.password);
     let _response = login_service.do_login(login_request).await;
 
-    let user_id = login_service.get_user_id()?;
+    let user_id = login_service.get_user_id().expect("propagate ?");//?;
 
     let session = cookie_jar.cookies(&Url::parse("https://mein.fitnessfirst.de").unwrap());
     println!("Session: {session:?}");
@@ -93,7 +99,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let booking = BookingRequest::new(user_id, slot_choice.id, course.id, course.title);
 
-    let booking_res = fitness_service.book_course(booking).await?;
+    let booking_res = fitness_service.book_course(booking).await.expect("?");//?;
 
     println!("Booking: {booking_res:?}");
 

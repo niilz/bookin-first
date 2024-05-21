@@ -332,11 +332,15 @@ dependencies = [
  "chrono",
  "clap",
  "fakeit",
+ "js-sys",
  "reqwest",
  "serde",
  "serde_json",
  "tokio",
  "trait-variant",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]
