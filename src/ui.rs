@@ -1,13 +1,10 @@
-use std::{borrow::Borrow, io::stdin, sync::Arc};
-
-use reqwest::{
-    cookie::{CookieStore, Jar},
-    Url,
-};
+use reqwest::Url;
+use std::{io::stdin, sync::Arc};
 use wasm_bindgen::JsValue;
 
 use crate::{
     args::Args,
+    cookies::Cookie,
     dto::{
         course::Course,
         request::{BookingRequest, EgymLoginRequest},
@@ -18,13 +15,14 @@ use crate::{
     login_service::{LoginCreds, LoginService},
 };
 
-pub async fn run_ui<Client>(
-    http_client: Client,
-    cookie_jar: Arc<Jar>,
+pub async fn run_ui<ClientT, CookieT>(
+    http_client: ClientT,
+    cookie_jar: Arc<CookieT>,
     args: Args,
 ) -> Result<(), JsValue>
 where
-    Client: HttpClient,
+    ClientT: HttpClient,
+    CookieT: Cookie,
 {
     let http_client = Arc::new(http_client);
 
@@ -35,7 +33,7 @@ where
 
     let user_id = login_service.get_user_id().expect("propagate ?"); //?;
 
-    let session = cookie_jar.cookies(&Url::parse("https://mein.fitnessfirst.de").unwrap());
+    let session = cookie_jar.read_cookie("https://mein.fitnessfirst.de");
     println!("Session: {session:?}");
 
     let fitness_service = FitnessService::new(login_service, Arc::clone(&http_client));
