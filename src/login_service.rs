@@ -3,6 +3,7 @@ use std::{error::Error, sync::Arc};
 use base64::{engine::general_purpose::STANDARD_NO_PAD, Engine};
 
 use crate::{
+    cookies::Cookie,
     dto::{
         request::{EgymLoginRequest, FitnessFirstLoginRequest},
         response::Response,
@@ -17,14 +18,14 @@ pub trait LoginCreds {
 }
 
 #[derive(Default, Debug)]
-pub struct LoginService<Client, Cookie> {
-    pub http_client: Client,
+pub struct LoginService<ClientT, CookieT> {
+    pub http_client: ClientT,
     token: Option<String>,
     session: Option<String>,
-    cookie_jar: Arc<Cookie>,
+    cookie_jar: Arc<CookieT>,
 }
-impl<Client, Cookie> LoginService<Client, Cookie> {
-    pub fn new(http_client: Client, cookie_jar: Arc<Cookie>) -> Self {
+impl<ClientT, CookieT> LoginService<ClientT, CookieT> {
+    pub fn new(http_client: ClientT, cookie_jar: Arc<CookieT>) -> Self {
         Self {
             http_client,
             token: None,
@@ -34,10 +35,10 @@ impl<Client, Cookie> LoginService<Client, Cookie> {
     }
 }
 
-impl<Client, Cookie> LoginService<Client, Cookie>
+impl<ClientT, CookieT> LoginService<ClientT, CookieT>
 where
-    Client: HttpClient,
-    Cookie: crate::cookies::Cookie,
+    ClientT: HttpClient,
+    CookieT: Cookie,
 {
     pub async fn do_login(&mut self, request: EgymLoginRequest) -> Result<(), Box<dyn Error>> {
         if self.token.is_none() {
@@ -75,10 +76,10 @@ where
     }
 }
 
-impl<Client, Cookie> LoginCreds for LoginService<Client, Cookie>
+impl<ClientT, CookieT> LoginCreds for LoginService<ClientT, CookieT>
 where
-    Client: HttpClient,
-    Cookie: crate::cookies::Cookie,
+    ClientT: HttpClient,
+    CookieT: Cookie,
 {
     fn get_session_id(&self) -> Option<String> {
         self.session.clone()
