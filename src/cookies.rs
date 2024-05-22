@@ -1,14 +1,13 @@
+#[cfg(not(target_family = "wasm"))]
+use reqwest::cookie::{CookieStore, Jar};
+use reqwest::Url;
 use std::error::Error;
-
-use reqwest::{
-    cookie::{CookieStore, Jar},
-    Url,
-};
 
 pub trait Cookie {
     fn read_cookie(&self, domain: &str) -> Result<String, Box<dyn Error>>;
 }
 
+#[cfg(not(target_family = "wasm"))]
 impl Cookie for Jar {
     fn read_cookie(&self, domain: &str) -> Result<String, Box<dyn Error>> {
         let cookie_domain = Url::parse(domain)?;

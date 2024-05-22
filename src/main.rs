@@ -9,7 +9,8 @@ use fitness_api::http_client::FetchApiClient;
 use reqwest::cookie::Jar;
 use wasm_bindgen::prelude::*;
 
-#[tokio::main]
+#[cfg(not(target_family = "wasm"))]
+#[tokio::main(flavor = "current_thread")]
 #[wasm_bindgen(start)]
 async fn main() -> Result<(), JsValue> {
     //async fn main() -> Result<(), Box<dyn Error>> {
@@ -17,14 +18,18 @@ async fn main() -> Result<(), JsValue> {
 
     let cookie_jar = Arc::new(Jar::default());
 
-    if cfg!(target_family = "wasm") {
+    #[cfg(not(target_family = "wasm"))]
+    {
         let client = reqwest::Client::builder()
             .cookie_provider(Arc::clone(&cookie_jar))
             .build()
             .expect("Could not create client");
         let http_client = ReqwestHttpClient { client };
         ui::run_ui(http_client, cookie_jar, args);
-    } else {
+    };
+
+    #[cfg(target_family = "wasm")]
+    {
         let client = web_sys::window().unwrap();
         let http_client = FetchApiClient { client };
         ui::run_ui(http_client, cookie_jar, args);

@@ -73,6 +73,7 @@ where
 }
 
 #[cfg(test)]
+#[cfg(not(target_family = "wasm"))]
 mod test {
     use chrono::{DateTime, Local};
     use serde_json::json;
