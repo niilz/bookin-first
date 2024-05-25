@@ -1,5 +1,6 @@
 # TODO
 
+- Do NOT store token and session in LoginService (very bad design decision)
 - Store token and session (cache)
 - Add appointment to calendar
 - implement delete
