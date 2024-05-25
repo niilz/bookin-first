@@ -36,49 +36,6 @@ pub struct ReqwestHttpClient {
     pub client: reqwest::Client,
 }
 
-pub struct FetchApiClient {
-    pub client: web_sys::Window,
-}
-
-/*
-impl HttpClient for FetchApiClient {
-    async fn egym_login(&self, request: EgymLoginRequest) -> Result<Response, Box<dyn Error>> {
-        let res = JsFuture::from(self.client.fetch_with_str("google.com"))
-            .await
-            .expect("did not fetch");
-        println!("{res:?}");
-        Ok(Response::Text("foo".to_string()))
-    }
-
-    async fn ff_login(
-        &self,
-        request: FitnessFirstLoginRequest,
-    ) -> Result<Response, Box<dyn Error>> {
-        todo!()
-    }
-
-    async fn fetch_courses(&self, session_id: &str) -> Result<Response, Box<dyn Error>> {
-        todo!()
-    }
-
-    async fn fetch_slots(
-        &self,
-        course_id: usize,
-        session_id: &str,
-    ) -> Result<Response, Box<dyn Error>> {
-        todo!()
-    }
-
-    async fn book_course(
-        &self,
-        booking: BookingRequest,
-        session_id: &str,
-    ) -> Result<Response, Box<dyn Error>> {
-        todo!()
-    }
-}
-*/
-
 impl HttpClient for ReqwestHttpClient {
     async fn egym_login(&self, request: EgymLoginRequest) -> Result<Response, Box<dyn Error>> {
         let mut params = HashMap::new();
@@ -167,6 +124,47 @@ impl HttpClient for ReqwestHttpClient {
             Ok(res) => Ok(Response::Json(res.text().await?)),
             Err(e) => Err(Box::from(format!("Failed to read slots: {e}"))),
         }
+    }
+}
+
+pub struct FetchApiClient {
+    pub client: web_sys::Window,
+}
+
+impl HttpClient for FetchApiClient {
+    async fn egym_login(&self, request: EgymLoginRequest) -> Result<Response, Box<dyn Error>> {
+        let res = JsFuture::from(self.client.fetch_with_str("google.com"))
+            .await
+            .expect("did not fetch");
+        println!("{res:?}");
+        Ok(Response::Text("foo".to_string()))
+    }
+
+    async fn ff_login(
+        &self,
+        request: FitnessFirstLoginRequest,
+    ) -> Result<Response, Box<dyn Error>> {
+        todo!()
+    }
+
+    async fn fetch_courses(&self, session_id: &str) -> Result<Response, Box<dyn Error>> {
+        todo!()
+    }
+
+    async fn fetch_slots(
+        &self,
+        course_id: usize,
+        session_id: &str,
+    ) -> Result<Response, Box<dyn Error>> {
+        todo!()
+    }
+
+    async fn book_course(
+        &self,
+        booking: BookingRequest,
+        session_id: &str,
+    ) -> Result<Response, Box<dyn Error>> {
+        todo!()
     }
 }
 

@@ -11,8 +11,8 @@ use crate::{
     login_service::LoginCreds,
 };
 
-pub struct FitnessService<Client> {
-    http_client: Client,
+pub struct FitnessService<ClientT> {
+    http_client: ClientT,
 }
 
 impl<ClientT> FitnessService<ClientT>
