@@ -1,7 +1,7 @@
 #[cfg(not(target_family = "wasm"))]
 use reqwest::cookie::{CookieStore, Jar};
 use reqwest::Url;
-use std::error::Error;
+use std::{error::Error, sync::Arc};
 
 pub trait Cookie {
     fn read_cookie(&self, domain: &str) -> Result<String, Box<dyn Error>>;
@@ -16,5 +16,14 @@ impl Cookie for Jar {
             .ok_or("no cookie present")?
             .to_str()?
             .to_string())
+    }
+}
+
+impl<T> Cookie for Arc<T>
+where
+    T: Cookie,
+{
+    fn read_cookie(&self, domain: &str) -> Result<String, Box<dyn Error>> {
+        self.as_ref().read_cookie(domain)
     }
 }

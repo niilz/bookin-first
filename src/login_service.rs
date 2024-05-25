@@ -1,4 +1,4 @@
-use std::{error::Error, sync::Arc};
+use std::error::Error;
 
 use base64::{engine::general_purpose::STANDARD_NO_PAD, Engine};
 
@@ -12,9 +12,9 @@ use crate::{
     http_client::{HttpClient, FITNESS_FIRST_BASE_URL},
 };
 
-pub trait LoginCreds {
-    fn get_session_id(&self) -> Option<String>;
-    fn get_user_id(&self) -> Result<usize, Box<dyn Error>>;
+pub struct LoginCreds {
+    pub session: String,
+    pub user_id: usize,
 }
 
 #[derive(Default, Debug)]
@@ -22,10 +22,14 @@ pub struct LoginService<ClientT, CookieT> {
     pub http_client: ClientT,
     token: Option<String>,
     session: Option<String>,
-    cookie_jar: Arc<CookieT>,
+    cookie_jar: CookieT,
 }
-impl<ClientT, CookieT> LoginService<ClientT, CookieT> {
-    pub fn new(http_client: ClientT, cookie_jar: Arc<CookieT>) -> Self {
+impl<ClientT, CookieT> LoginService<ClientT, CookieT>
+where
+    ClientT: HttpClient,
+    CookieT: Cookie,
+{
+    pub fn new(http_client: ClientT, cookie_jar: CookieT) -> Self {
         Self {
             http_client,
             token: None,
@@ -57,10 +61,27 @@ where
                 Err(e) => return Err(Box::from(format!("login egym failed: {e}"))),
             };
         }
-        self.login_to_fitnes_first().await
+        self.login_to_fitness_first().await
     }
 
-    async fn login_to_fitnes_first(&mut self) -> Result<(), Box<dyn Error>> {
+    pub fn get_login_credentials(&self) -> Result<LoginCreds, Box<dyn Error>> {
+        let payload = match &self.token {
+            Some(token) => token.split('.').nth(1).ok_or("Payload missing")?,
+            None => return Err("Token missing".into()),
+        };
+        let decoded = STANDARD_NO_PAD.decode(payload)?;
+        let Jwt {
+            claims: Claims { user_ids },
+        } = serde_json::from_slice(&decoded)?;
+        let user_id = user_ids[0].parse::<usize>()?;
+
+        Ok(LoginCreds {
+            session: self.session.clone().expect("Session should be here"),
+            user_id,
+        })
+    }
+
+    async fn login_to_fitness_first(&mut self) -> Result<(), Box<dyn Error>> {
         let ff_login_req = FitnessFirstLoginRequest::new(&self.token.as_ref().unwrap());
         match self.http_client.ff_login(ff_login_req).await {
             Ok(_res) => {
@@ -76,29 +97,6 @@ where
     }
 }
 
-impl<ClientT, CookieT> LoginCreds for LoginService<ClientT, CookieT>
-where
-    ClientT: HttpClient,
-    CookieT: Cookie,
-{
-    fn get_session_id(&self) -> Option<String> {
-        self.session.clone()
-    }
-
-    fn get_user_id(&self) -> Result<usize, Box<dyn Error>> {
-        let payload = match &self.token {
-            Some(token) => token.split('.').nth(1).ok_or("Payload missing")?,
-            None => return Err("Token missing".into()),
-        };
-        let decoded = STANDARD_NO_PAD.decode(payload)?;
-        let Jwt {
-            claims: Claims { user_ids },
-        } = serde_json::from_slice(&decoded)?;
-        let user_id = user_ids[0].parse::<usize>()?;
-        Ok(user_id)
-    }
-}
-
 #[cfg(test)]
 
 mod test {
@@ -107,7 +105,7 @@ mod test {
 
     use crate::{
         dto::request::EgymLoginRequest,
-        login_service::{LoginCreds, LoginService},
+        login_service::LoginService,
         mock_client,
         testutil::{egym_login_response_dummy, ff_login_response_dummy, CookieMock},
     };
@@ -211,7 +209,10 @@ mod test {
 
         assert!(login_service.token.is_some());
         assert_eq!(EGYM_JWT_DUMMY, login_service.token.as_ref().unwrap());
-        let user_id = login_service.get_user_id();
-        assert_eq!(user_id.unwrap(), 1234567890);
+        let user_id = login_service
+            .get_login_credentials()
+            .expect("dummy should have login creds")
+            .user_id;
+        assert_eq!(user_id, 1234567890);
     }
 }

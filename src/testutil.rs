@@ -123,14 +123,9 @@ impl Cookie for CookieMock {
     }
 }
 
-#[derive(Default, Debug)]
-pub(crate) struct CredentialsMock;
-impl LoginCreds for CredentialsMock {
-    fn get_session_id(&self) -> Option<String> {
-        Some("dummy-session-id".to_string())
-    }
-
-    fn get_user_id(&self) -> Result<usize, Box<dyn Error>> {
-        Ok(123454321)
+pub(crate) fn get_credentials_dummy() -> LoginCreds {
+    LoginCreds {
+        session: "dummy-session-id".to_string(),
+        user_id: 123454321,
     }
 }

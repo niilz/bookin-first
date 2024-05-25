@@ -40,6 +40,7 @@ pub struct FetchApiClient {
     pub client: web_sys::Window,
 }
 
+/*
 impl HttpClient for FetchApiClient {
     async fn egym_login(&self, request: EgymLoginRequest) -> Result<Response, Box<dyn Error>> {
         let res = JsFuture::from(self.client.fetch_with_str("google.com"))
@@ -76,6 +77,7 @@ impl HttpClient for FetchApiClient {
         todo!()
     }
 }
+*/
 
 impl HttpClient for ReqwestHttpClient {
     async fn egym_login(&self, request: EgymLoginRequest) -> Result<Response, Box<dyn Error>> {

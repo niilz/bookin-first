@@ -1,19 +1,15 @@
+use std::error::Error;
 use std::sync::Arc;
 
-use fitness_api::{args::Args, ui};
-
+use cli::args::Args;
 use fitness_api::http_client::ReqwestHttpClient;
 
-use fitness_api::http_client::FetchApiClient;
-
 use reqwest::cookie::Jar;
-use wasm_bindgen::prelude::*;
 
-#[cfg(not(target_family = "wasm"))]
+mod cli;
+
 #[tokio::main(flavor = "current_thread")]
-#[wasm_bindgen(start)]
-async fn main() -> Result<(), JsValue> {
-    //async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> Result<(), Box<dyn Error>> {
     let args = <Args as clap::Parser>::parse();
 
     let cookie_jar = Arc::new(Jar::default());
@@ -25,15 +21,7 @@ async fn main() -> Result<(), JsValue> {
             .build()
             .expect("Could not create client");
         let http_client = ReqwestHttpClient { client };
-        ui::run_ui(http_client, cookie_jar, args);
+        cli::run_cli(http_client, cookie_jar, args).await?;
     };
-
-    #[cfg(target_family = "wasm")]
-    {
-        let client = web_sys::window().unwrap();
-        let http_client = FetchApiClient { client };
-        ui::run_ui(http_client, cookie_jar, args);
-    };
-
     Ok(())
 }

@@ -11,27 +11,22 @@ use crate::{
     login_service::LoginCreds,
 };
 
-pub struct FitnessService<Creds, Client> {
-    credendials: Creds,
+pub struct FitnessService<Client> {
     http_client: Client,
 }
 
-impl<Creds, Client> FitnessService<Creds, Client>
+impl<ClientT> FitnessService<ClientT>
 where
-    Creds: LoginCreds,
-    Client: HttpClient,
+    ClientT: HttpClient,
 {
-    pub fn new(credendials: Creds, http_client: Client) -> Self {
-        Self {
-            credendials,
-            http_client,
-        }
+    pub fn new(http_client: ClientT) -> Self {
+        Self { http_client }
     }
-    pub async fn fetch_courses(&self) -> Result<Vec<Course>, Box<dyn Error>> {
-        let courses_res = self
-            .http_client
-            .fetch_courses(&self.credendials.get_session_id().unwrap())
-            .await?;
+    pub async fn fetch_courses(
+        &self,
+        credentials: &LoginCreds,
+    ) -> Result<Vec<Course>, Box<dyn Error>> {
+        let courses_res = self.http_client.fetch_courses(&credentials.session).await?;
         if let Response::Json(courses_json) = courses_res {
             let result = serde_json::from_str::<CoursesResult>(&courses_json)
                 .expect("Could not deserialize into courses");
@@ -41,10 +36,14 @@ where
         }
     }
 
-    pub async fn fetch_slots(&self, course_id: usize) -> Result<Vec<Slot>, Box<dyn Error>> {
+    pub async fn fetch_slots(
+        &self,
+        course_id: usize,
+        credentials: &LoginCreds,
+    ) -> Result<Vec<Slot>, Box<dyn Error>> {
         let slots_res = self
             .http_client
-            .fetch_slots(course_id, &self.credendials.get_session_id().unwrap())
+            .fetch_slots(course_id, &credentials.session)
             .await?;
         if let Response::Json(slots_json) = slots_res {
             let result = serde_json::from_str::<SlotsResult>(&slots_json)
@@ -58,10 +57,11 @@ where
     pub async fn book_course(
         &self,
         booking: BookingRequest,
+        credentials: LoginCreds,
     ) -> Result<BookingResponse, Box<dyn Error>> {
         let booking_res = self
             .http_client
-            .book_course(booking, &self.credendials.get_session_id().unwrap())
+            .book_course(booking, &credentials.session)
             .await?;
         if let Response::Json(booking_json) = booking_res {
             serde_json::from_str::<BookingResponse>(&booking_json)
@@ -87,7 +87,7 @@ mod test {
         },
         fitness_service::FitnessService,
         mock_client,
-        testutil::{serialize_response_dummy, CredentialsMock},
+        testutil::{get_credentials_dummy, serialize_response_dummy},
     };
 
     #[tokio::test]
@@ -101,10 +101,10 @@ mod test {
             MockRes::None
         );
 
-        let creds_mock = CredentialsMock;
-        let fitness_service = FitnessService::new(creds_mock, http_client_mock);
+        let creds_mock = get_credentials_dummy();
+        let fitness_service = FitnessService::new(http_client_mock);
         let courses = fitness_service
-            .fetch_courses()
+            .fetch_courses(&creds_mock)
             .await
             .expect("test: read_courses");
 
@@ -122,10 +122,10 @@ mod test {
             MockRes::None
         );
 
-        let creds_mock = CredentialsMock;
-        let fitness_service = FitnessService::new(creds_mock, http_client_mock);
+        let creds_mock = get_credentials_dummy();
+        let fitness_service = FitnessService::new(http_client_mock);
         let slots = fitness_service
-            .fetch_slots(1234)
+            .fetch_slots(1234, &creds_mock)
             .await
             .expect("test: read_courses");
 
@@ -150,11 +150,11 @@ mod test {
             Some(Ok(Response::Json(booking_dummy)))
         );
 
-        let creds_mock = CredentialsMock;
-        let fitness_service = FitnessService::new(creds_mock, http_client_mock);
+        let creds_mock = get_credentials_dummy();
+        let fitness_service = FitnessService::new(http_client_mock);
         let request_dummy = BookingRequest::new(42, 43, 43, "Some Course".to_string());
         let booking = fitness_service
-            .book_course(request_dummy)
+            .book_course(request_dummy, creds_mock)
             .await
             .expect("test: book course");
 
