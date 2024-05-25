@@ -1,5 +1,6 @@
 # TODO
 
+- Handle errors e.g. when Slot can not be read (is it a parsing problem?)
 - Do NOT store token and session in LoginService (very bad design decision)
 - Store token and session (cache)
 - Add appointment to calendar
