@@ -129,9 +129,24 @@ impl HttpClient for ReqwestHttpClient {
     }
 }
 
-#[wasm_bindgen(getter_with_clone)]
+#[wasm_bindgen]
 pub struct FetchApiClient {
-    pub client: web_sys::Window,
+    client: web_sys::Window,
+}
+
+#[wasm_bindgen]
+impl FetchApiClient {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        Self {
+            client: web_sys::window().expect("no window object?"),
+        }
+    }
+    pub async fn call(&self) -> JsValue {
+        JsFuture::from(self.client.fetch_with_str("https://google.com"))
+            .await
+            .expect("did not fetch")
+    }
 }
 
 impl HttpClient for FetchApiClient {

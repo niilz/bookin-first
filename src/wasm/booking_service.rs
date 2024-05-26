@@ -16,52 +16,6 @@ use crate::{
 };
 
 #[wasm_bindgen]
-struct CookieWasm;
-
-impl Cookie for CookieWasm {
-    fn read_cookie(&self, _domain: &str) -> Result<String, Box<dyn Error>> {
-        Ok("TODO".to_string())
-    }
-}
-
-#[wasm_bindgen]
-pub struct LoginServiceWasm(LoginService<Arc<FetchApiClient>, Arc<CookieWasm>>);
-impl LoginServiceWasm {
-    async fn do_login(&mut self, request: EgymLoginRequest) -> Result<(), Box<dyn Error>> {
-        self.0.do_login(request).await
-    }
-
-    pub fn get_login_credentials(&self) -> Result<LoginCreds, Box<dyn Error>> {
-        self.0.get_login_credentials()
-    }
-}
-
-#[wasm_bindgen]
-pub struct FitnessServiceWasm(FitnessService<Arc<FetchApiClient>>);
-
-impl FitnessServiceWasm {
-    async fn fetch_courses(&self, credentials: &LoginCreds) -> Result<Vec<Course>, Box<dyn Error>> {
-        self.0.fetch_courses(credentials).await
-    }
-
-    async fn fetch_slots(
-        &self,
-        course_id: usize,
-        credentials: &LoginCreds,
-    ) -> Result<Vec<Slot>, Box<dyn Error>> {
-        self.0.fetch_slots(course_id, credentials).await
-    }
-
-    async fn book_course(
-        &self,
-        booking: BookingRequest,
-        credentials: LoginCreds,
-    ) -> Result<BookingResponse, Box<dyn Error>> {
-        self.0.book_course(booking, credentials).await
-    }
-}
-
-#[wasm_bindgen]
 pub struct BookingServiceWasm {
     login_service: LoginServiceWasm,
     fitness_service: FitnessServiceWasm,
@@ -71,8 +25,12 @@ pub struct BookingServiceWasm {
 impl BookingServiceWasm {
     #[wasm_bindgen(constructor)]
     pub fn new(http_client: FetchApiClient, cookie_jar: CookieWasm) -> Self {
+        web_sys::console::log_1(&"> new booking service".into());
+
         let http_client = Arc::new(http_client);
         let cookie_jar = Arc::new(cookie_jar);
+
+        web_sys::console::log_1(&"arced the args".into());
 
         let login_service = LoginService::new(Arc::clone(&http_client), Arc::clone(&cookie_jar));
         let login_service = LoginServiceWasm(login_service);
@@ -125,5 +83,63 @@ impl BookingServiceWasm {
             .book_course(booking, credentials)
             .await
             .map_err(|e| JsValue::from_str(&format!("{e:?}")))
+    }
+}
+
+#[wasm_bindgen]
+pub struct CookieWasm {
+    cookies: Vec<String>,
+}
+
+#[wasm_bindgen]
+impl CookieWasm {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        Self {
+            cookies: Vec::new(),
+        }
+    }
+}
+
+impl Cookie for CookieWasm {
+    fn read_cookie(&self, _domain: &str) -> Result<String, Box<dyn Error>> {
+        Ok("TODO".to_string())
+    }
+}
+
+#[wasm_bindgen]
+pub struct LoginServiceWasm(LoginService<Arc<FetchApiClient>, Arc<CookieWasm>>);
+impl LoginServiceWasm {
+    async fn do_login(&mut self, request: EgymLoginRequest) -> Result<(), Box<dyn Error>> {
+        self.0.do_login(request).await
+    }
+
+    pub fn get_login_credentials(&self) -> Result<LoginCreds, Box<dyn Error>> {
+        self.0.get_login_credentials()
+    }
+}
+
+#[wasm_bindgen]
+pub struct FitnessServiceWasm(FitnessService<Arc<FetchApiClient>>);
+
+impl FitnessServiceWasm {
+    async fn fetch_courses(&self, credentials: &LoginCreds) -> Result<Vec<Course>, Box<dyn Error>> {
+        self.0.fetch_courses(credentials).await
+    }
+
+    async fn fetch_slots(
+        &self,
+        course_id: usize,
+        credentials: &LoginCreds,
+    ) -> Result<Vec<Slot>, Box<dyn Error>> {
+        self.0.fetch_slots(course_id, credentials).await
+    }
+
+    async fn book_course(
+        &self,
+        booking: BookingRequest,
+        credentials: LoginCreds,
+    ) -> Result<BookingResponse, Box<dyn Error>> {
+        self.0.book_course(booking, credentials).await
     }
 }
