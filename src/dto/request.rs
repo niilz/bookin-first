@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use wasm_bindgen::prelude::*;
 
 pub struct EgymLoginRequest {
     pub user_name: String,
@@ -31,6 +32,7 @@ impl FitnessFirstLoginRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[wasm_bindgen]
 pub struct BookingRequest {
     #[serde(rename = "customerId")]
     user_id: usize,

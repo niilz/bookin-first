@@ -9,7 +9,7 @@ use crate::{
         slots::Slot,
     },
     fitness_service::FitnessService,
-    http_client::HttpClient,
+    http_client::{FetchApiClient, HttpClient},
     login_service::{LoginCreds, LoginService},
 };
 

@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use wasm_bindgen::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub struct CoursesResult {
@@ -15,6 +16,7 @@ impl FromIterator<Course> for CoursesResult {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+#[wasm_bindgen(getter_with_clone)]
 pub struct Course {
     /// Internal-Id of the course
     pub id: usize,

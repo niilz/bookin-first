@@ -1,5 +1,6 @@
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
+use wasm_bindgen::JsValue;
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub struct SlotsResult {
@@ -80,6 +81,13 @@ pub struct Slot {
     pub booked_participants: u8,
     #[serde(rename = "waitingListParticipants")]
     pub waiting_list_participants: u8,
+}
+
+impl From<Slot> for JsValue {
+    fn from(slot: Slot) -> Self {
+        let slot_json = serde_json::to_string(&slot).expect("Slot to json");
+        JsValue::from_str(&slot_json)
+    }
 }
 
 mod date_format {

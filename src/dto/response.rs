@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use wasm_bindgen::prelude::*;
+
 #[derive(Debug, Clone)]
 pub enum Response {
     Text(String),
@@ -8,11 +10,13 @@ pub enum Response {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[wasm_bindgen]
 pub enum BookingState {
     BOOKED,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[wasm_bindgen(getter_with_clone)]
 pub struct BookingResponse {
     #[serde(rename = "bookingId")]
     pub booking_id: usize,

@@ -1,6 +1,6 @@
-use std::error::Error;
-
 use base64::{engine::general_purpose::STANDARD_NO_PAD, Engine};
+use std::error::Error;
+use wasm_bindgen::prelude::*;
 
 use crate::{
     cookies::Cookie,
@@ -12,6 +12,7 @@ use crate::{
     http_client::{HttpClient, FITNESS_FIRST_BASE_URL},
 };
 
+#[wasm_bindgen(getter_with_clone)]
 pub struct LoginCreds {
     pub session: String,
     pub user_id: usize,

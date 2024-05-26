@@ -1,5 +1,7 @@
 use std::{collections::HashMap, error::Error, sync::Arc};
 
+use wasm_bindgen::prelude::*;
+
 use wasm_bindgen_futures::JsFuture;
 
 use crate::dto::{
@@ -127,6 +129,7 @@ impl HttpClient for ReqwestHttpClient {
     }
 }
 
+#[wasm_bindgen(getter_with_clone)]
 pub struct FetchApiClient {
     pub client: web_sys::Window,
 }
