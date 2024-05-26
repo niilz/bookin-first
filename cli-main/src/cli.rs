@@ -2,7 +2,7 @@ pub mod args;
 
 use std::{error::Error, io::stdin, sync::Arc};
 
-use fitness_api::{
+use booking_first_lib::{
     booking_service::BookingService,
     cookies::Cookie,
     dto::{course::Course, request::BookingRequest, slots::Slot},

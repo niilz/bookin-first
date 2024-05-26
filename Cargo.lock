@@ -135,6 +135,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf4b9d6a944f767f8e5e0db018570623c85f3d925ac718db4e06d0187adb21c1"
 
 [[package]]
+name = "booking-first-lib"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.0",
+ "chrono",
+ "clap",
+ "fakeit",
+ "js-sys",
+ "reqwest",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "tokio",
+ "trait-variant",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -212,6 +232,27 @@ name = "clap_lex"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "98cc8fbded0c607b7ba9dd60cd98df59af97e84d24e49c8557331cfc26d301ce"
+
+[[package]]
+name = "cli-main"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.0",
+ "booking-first-lib",
+ "chrono",
+ "clap",
+ "fakeit",
+ "js-sys",
+ "reqwest",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "tokio",
+ "trait-variant",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
 
 [[package]]
 name = "cloudabi"
@@ -323,26 +364,6 @@ name = "fastrand"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9fc0510504f03c51ada170672ac806f1f105a88aa97a5281117e1ddc3368e51a"
-
-[[package]]
-name = "fitness-api"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.0",
- "chrono",
- "clap",
- "fakeit",
- "js-sys",
- "reqwest",
- "serde",
- "serde-wasm-bindgen",
- "serde_json",
- "tokio",
- "trait-variant",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
 
 [[package]]
 name = "fnv"
