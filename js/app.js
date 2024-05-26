@@ -2,6 +2,7 @@ import init, {
   BookingServiceWasm,
   FetchApiClient,
   CookieWasm,
+  LoginCreds,
 } from "../pkg/fitness_api.js";
 
 async function run() {
@@ -15,6 +16,10 @@ async function run() {
   console.log({ cookieJar });
   let bookingService = new BookingServiceWasm(httpClient, cookieJar);
   console.log({ bookingService });
+
+  let res = await bookingService.login("USER-NAME", "PASSWORD");
+
+  console.log({ res });
 }
 
 run();
