@@ -2,8 +2,8 @@ use std::error::Error;
 use std::sync::Arc;
 
 use cli::args::Args;
-use fitness_api::http_client::ReqwestHttpClient;
 
+use fitness_api::http_client::reqwest_client::ReqwestHttpClient;
 use reqwest::cookie::Jar;
 
 mod cli;

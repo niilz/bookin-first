@@ -11,8 +11,8 @@ use crate::{
         slots::Slot,
     },
     fitness_service::FitnessService,
-    http_client::FetchApiClient,
     login_service::{LoginCreds, LoginService},
+    wasm::http_client::FetchApiClient,
 };
 
 #[wasm_bindgen]
