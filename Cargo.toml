@@ -1,6 +1,6 @@
 [workspace]
 members = [
 	"cli-main",
-	"booking-first-lib"
-	#"lambda"
+	"booking-first-lib",
+	"login-lambda"
 ]
