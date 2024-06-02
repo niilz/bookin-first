@@ -4,3 +4,4 @@ members = [
 	"booking-first-lib",
 	"login-lambda"
 ]
+resolver = "2"

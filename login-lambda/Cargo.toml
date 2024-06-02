@@ -15,7 +15,11 @@ edition = "2021"
 # and it will keep the alphabetic ordering for you.
 
 [dependencies]
+booking-first-lib = { path = "../booking-first-lib" }
 lambda_http = "0.11.1"
+reqwest = { version = "0.11.26", default-features = false, features = ["cookies"] }
+serde_json = "1.0.114"
+
 
 tokio = { version = "1", features = ["macros"] }
 
