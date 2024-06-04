@@ -50,6 +50,7 @@ where
         let login_request = EgymLoginRequest::new(user_name, password);
 
         let _response = self.login_service.do_login(login_request).await;
+        dbg!(_response);
 
         self.login_service.get_login_credentials()
     }
