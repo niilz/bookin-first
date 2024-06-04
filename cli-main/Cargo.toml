@@ -8,5 +8,5 @@ edition = "2021"
 [dependencies]
 booking-first-lib = { path = "../booking-first-lib" }
 clap = { version = "4.5.1", features = ["derive"] }
-reqwest = { version = "0.11.26", default-features = false, features = ["cookies"] }
+reqwest = { version = "0.11.26", default-features = false, features = ["cookies", "rustls-tls"] }
 tokio = { version = "1.36.0", features = ["rt", "macros"] }
