@@ -890,6 +890,7 @@ dependencies = [
  "booking-first-lib",
  "lambda_http",
  "reqwest",
+ "serde",
  "serde_json",
  "tokio",
 ]

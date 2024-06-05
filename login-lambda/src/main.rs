@@ -4,8 +4,9 @@ use booking_first_lib::{
     booking_service::BookingService, dto::login_data::LoginData,
     http_client::reqwest_client::ReqwestHttpClient,
 };
-use lambda_http::{run, service_fn, tracing, Body, Error, Request, RequestExt, Response};
+use lambda_http::{run, service_fn, tracing, Body, Error, IntoResponse, Request, Response};
 use reqwest::cookie::Jar;
+use serde_json::Value;
 
 /// This is the main body for the function.
 /// Write your code inside it.
@@ -38,32 +39,23 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
                 .login(&user_name, &password)
                 .await
                 .expect("LoginCreds not present after login?");
-
             println!("{login_credentials:?}");
+
+            let login_creds_value =
+                serde_json::to_string(&login_credentials).expect("Convert LoginCreds to String");
+
+            let resp = Response::builder()
+                .status(200)
+                .header("content-type", "text/html")
+                .body(login_creds_value.into())
+                .map_err(Box::new)?;
+            Ok(resp)
         }
         Err(e) => {
             eprintln!("{e:?}");
             return Err(Box::from("Could not parse LoginData"));
         }
-    };
-
-    // Extract some useful information from the request
-    /*
-    let who = event
-        .query_string_parameters_ref()
-        .and_then(|params| params.first("name"))
-        .unwrap_or("world");
-    */
-    let message = format!("Hello {{who}}, this is an AWS Lambda HTTP request");
-
-    // Return something that implements IntoResponse.
-    // It will be serialized to the right response event automatically by the runtime
-    let resp = Response::builder()
-        .status(200)
-        .header("content-type", "text/html")
-        .body(message.into())
-        .map_err(Box::new)?;
-    Ok(resp)
+    }
 }
 
 #[tokio::main]

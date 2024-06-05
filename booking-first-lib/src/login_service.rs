@@ -1,4 +1,5 @@
 use base64::{engine::general_purpose::STANDARD_NO_PAD, Engine};
+use serde::Serialize;
 use std::error::Error;
 use wasm_bindgen::prelude::*;
 
@@ -12,7 +13,7 @@ use crate::{
     http_client::{HttpClient, FITNESS_FIRST_BASE_URL},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 #[wasm_bindgen(getter_with_clone)]
 pub struct LoginCreds {
     pub session: String,
