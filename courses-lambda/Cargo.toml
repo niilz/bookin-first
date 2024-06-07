@@ -1,0 +1,10 @@
+[package]
+name = "courses-lambda"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+lambda-common = { path = "../lambda-common" }
+booking-first-lib = { path = "../booking-first-lib" }
+lambda_http = "0.11.1"
+reqwest = { version = "0.11.26", default-features = false, features = ["cookies", "rustls-tls"] }
