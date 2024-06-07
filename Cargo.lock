@@ -781,6 +781,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "lambda-common"
+version = "0.1.0"
+dependencies = [
+ "reqwest",
+]
+
+[[package]]
 name = "lambda_http"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -888,6 +895,7 @@ name = "login-lambda"
 version = "0.1.0"
 dependencies = [
  "booking-first-lib",
+ "lambda-common",
  "lambda_http",
  "reqwest",
  "serde",

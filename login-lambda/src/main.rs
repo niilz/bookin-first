@@ -4,6 +4,7 @@ use booking_first_lib::{
     booking_service::BookingService, dto::login_data::LoginData,
     http_client::reqwest_client::ReqwestHttpClient,
 };
+use lambda_common::reqwest_client;
 use lambda_http::{run, service_fn, tracing, Body, Error, IntoResponse, Request, Response};
 use reqwest::cookie::Jar;
 use serde_json::Value;
@@ -24,14 +25,7 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
             user_name,
             password,
         }) => {
-            let cookie_jar = Arc::new(Jar::default());
-            let client = reqwest::Client::builder()
-                .cookie_provider(Arc::clone(&cookie_jar))
-                .build()
-                .expect("Could not create client");
-            let http_client = ReqwestHttpClient { client };
-
-            let http_client = Arc::new(http_client);
+            let http_client = reqwest_client();
 
             let mut booking_service = BookingService::new(http_client, cookie_jar);
 
