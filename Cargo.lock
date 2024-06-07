@@ -346,6 +346,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06ea2b9bc92be3c2baa9334a323ebca2d6f074ff852cd1d7b11064035cd3868f"
 
 [[package]]
+name = "courses-lambda"
+version = "0.1.0"
+dependencies = [
+ "lambda_http",
+ "tokio",
+]
+
+[[package]]
 name = "deranged"
 version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -784,6 +792,7 @@ dependencies = [
 name = "lambda-common"
 version = "0.1.0"
 dependencies = [
+ "booking-first-lib",
  "reqwest",
 ]
 

@@ -1,17 +1,21 @@
-use std::sync::Arc;
+use lambda_http::{run, service_fn, tracing, Body, Error, Request, RequestExt, Response};
 
 async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
-    let Body::Text(request_body) = event.into_body() else {
-        return Err(Box::from("Only Text Requests are supported"));
-    };
+    let session = event
+        .query_string_parameters_ref()
+        .and_then(|params| params.first("session"));
 
-    let http_client = reqwest_client();
-
-
-    match serde_json::from_str(&request_body) {
-        // Extract session-token from request
-        // Query fitness-first api for courses
-        // Return list of courses
+    match session {
+        Some(session) => {
+            // fetchcourses
+            let resp = Response::builder()
+                .status(200)
+                .header("content-type", "text/html")
+                .body(session.into())
+                .map_err(Box::new)?;
+            Ok(resp)
+        }
+        None => Err(Box::from("no session no courses")),
     }
 }
 

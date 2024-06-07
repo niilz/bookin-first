@@ -2,7 +2,8 @@
 members = [
 	"cli-main",
 	"booking-first-lib",
+	"courses-lambda",
 	"login-lambda",
-    "lambda-common"
+  "lambda-common"
 ]
 resolver = "2"
