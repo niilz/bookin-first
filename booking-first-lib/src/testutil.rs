@@ -1,7 +1,6 @@
 use serde::Serialize;
 
 use crate::{
-    cookies::Cookie,
     dto::{error::BoxDynError, response::Response},
     login::service::LoginCreds,
 };

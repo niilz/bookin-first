@@ -33,10 +33,17 @@ impl HttpClientSend for ReqwestHttpClientSend {
         let res = req.send().await;
         match res {
             Ok(res) => {
+                dbg!(&res);
                 let cookies = res
-                    .cookies()
-                    .filter(|c| c.name().to_string() == "PHPSESSID")
-                    .map(|c| c.value().to_string())
+                    .headers()
+                    .iter()
+                    .filter(|h| h.0 == "set-cookie")
+                    // TODO: propagate error up
+                    .map(|h| {
+                        h.1.to_str()
+                            .expect("could not convert header to str")
+                            .to_string()
+                    })
                     // TODO: turn option into error and bubble up
                     .last()
                     .expect("No PHPSESSID");
@@ -49,10 +56,7 @@ impl HttpClientSend for ReqwestHttpClientSend {
     async fn fetch_courses(&self, session_id: &str) -> Result<Response, BoxDynError> {
         let url = format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}");
         println!("Getting courses from: {url}");
-        let req = self
-            .client
-            .get(url)
-            .header("Cookie", format!("PHPSESSID={session_id}"));
+        let req = self.client.get(url).header("Cookie", session_id);
         dbg!(&req);
         let res = req.send().await;
         dbg!(&res);
@@ -73,7 +77,7 @@ impl HttpClientSend for ReqwestHttpClientSend {
         let res = self
             .client
             .get(slots_url)
-            .header("Cookie", format!("PHPSESSID={session_id}"))
+            .header("Cookie", session_id))
             .send()
             .await;
         match res {
@@ -94,7 +98,7 @@ impl HttpClientSend for ReqwestHttpClientSend {
             .client
             .post(booking_url)
             .body(booking)
-            .header("Cookie", format!("PHPSESSID={session_id}"))
+            .header("Cookie", session_id))
             .send()
             .await;
         match res {

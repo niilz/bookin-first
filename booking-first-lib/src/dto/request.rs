@@ -20,17 +20,6 @@ impl EgymLoginRequest {
     }
 }
 
-pub struct FitnessFirstLoginRequest {
-    pub egym_token: String,
-}
-impl FitnessFirstLoginRequest {
-    pub fn new(egym_token: &str) -> Self {
-        Self {
-            egym_token: egym_token.to_string(),
-        }
-    }
-}
-
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[wasm_bindgen]
 pub struct BookingRequest {
