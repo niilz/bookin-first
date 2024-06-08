@@ -40,7 +40,7 @@ impl HttpClientSend for ReqwestHttpClientSend {
                     // TODO: turn option into error and bubble up
                     .last()
                     .expect("No PHPSESSID");
-                Ok(Response::Cookies(cookies))
+                Ok(Response::Session(cookies))
             }
             Err(e) => Err(Box::from(format!("Failed to login: {e}"))),
         }
@@ -49,12 +49,13 @@ impl HttpClientSend for ReqwestHttpClientSend {
     async fn fetch_courses(&self, session_id: &str) -> Result<Response, BoxDynError> {
         let url = format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}");
         println!("Getting courses from: {url}");
-        let res = self
+        let req = self
             .client
             .get(url)
-            .header("Cookie", session_id)
-            .send()
-            .await;
+            .header("Cookie", format!("PHPSESSID={session_id}"));
+        dbg!(&req);
+        let res = req.send().await;
+        dbg!(&res);
         match res {
             Ok(res) => Ok(Response::Json(res.text().await?)),
             Err(e) => Err(Box::from(format!("Failed to read courses: {e}"))),
@@ -72,7 +73,7 @@ impl HttpClientSend for ReqwestHttpClientSend {
         let res = self
             .client
             .get(slots_url)
-            .header("Cookie", session_id)
+            .header("Cookie", format!("PHPSESSID={session_id}"))
             .send()
             .await;
         match res {
@@ -93,7 +94,7 @@ impl HttpClientSend for ReqwestHttpClientSend {
             .client
             .post(booking_url)
             .body(booking)
-            .header("Cookie", session_id)
+            .header("Cookie", format!("PHPSESSID={session_id}"))
             .send()
             .await;
         match res {

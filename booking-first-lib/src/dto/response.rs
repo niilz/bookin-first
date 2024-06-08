@@ -5,7 +5,7 @@ use wasm_bindgen::prelude::*;
 #[derive(Debug, Clone)]
 pub enum Response {
     Text(String),
-    Cookies(String),
+    Session(String),
     Json(String),
 }
 

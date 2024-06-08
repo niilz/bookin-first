@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use crate::dto::{
     error::BoxDynError,
-    request::{BookingRequest, EgymLoginRequest, FitnessFirstLoginRequest},
+    request::{BookingRequest, EgymLoginRequest},
     response::Response,
 };
 

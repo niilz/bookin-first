@@ -103,7 +103,7 @@ pub(crate) fn egym_login_response_dummy(egym_jwt: &str) -> Result<Response, BoxD
 }
 
 pub(crate) fn ff_login_response_dummy(session: &str) -> Result<Response, BoxDynError> {
-    Ok(Response::Cookies(session.to_string()))
+    Ok(Response::Session(session.to_string()))
 }
 
 pub(crate) fn serialize_response_dummy(

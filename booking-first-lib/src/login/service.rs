@@ -4,7 +4,6 @@ use wasm_bindgen::prelude::*;
 use crate::{
     dto::{error::BoxDynError, request::EgymLoginRequest, response::Response},
     http_client::HttpClientSend,
-    login::parse::extract_session,
 };
 
 use super::parse::extract_user_id;
@@ -57,11 +56,10 @@ where
 
     async fn login_to_fitness_first(&self, token: &str) -> Result<String, BoxDynError> {
         match self.http_client.ff_login(token).await {
-            Ok(Response::Cookies(cookies)) => {
+            Ok(Response::Session(session_id)) => {
                 println!("FF login succeeded. PHPSESSID-Cookie should be in Jar");
-                let session_cookie = extract_session(cookies /*FITNESS_FIRST_BASE_URL*/);
-                println!("PHPSESSID: {session_cookie}");
-                Ok(session_cookie)
+                println!("PHPSESSID: {session_id}");
+                Ok(session_id)
             }
             Ok(_) => Err(Box::from("unexpected response type")),
             Err(e) => Err(Box::from(format!("login fitness-first failed: {e}"))),
