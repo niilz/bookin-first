@@ -1,14 +1,13 @@
-use std::error::Error;
-
 use crate::{
     dto::{
         course::{Course, CoursesResult},
+        error::BoxDynError,
         request::BookingRequest,
         response::{BookingResponse, Response},
         slots::{Slot, SlotsResult},
     },
-    http_client::HttpClient,
-    login_service::LoginCreds,
+    http_client::HttpClientSend,
+    login::service::LoginCreds,
 };
 
 pub struct FitnessService<ClientT> {
@@ -17,7 +16,7 @@ pub struct FitnessService<ClientT> {
 
 impl<ClientT> FitnessService<ClientT>
 where
-    ClientT: HttpClient,
+    ClientT: HttpClientSend,
 {
     pub fn new(http_client: ClientT) -> Self {
         Self { http_client }
@@ -25,7 +24,7 @@ where
     pub async fn fetch_courses(
         &self,
         credentials: &LoginCreds,
-    ) -> Result<Vec<Course>, Box<dyn Error>> {
+    ) -> Result<Vec<Course>, BoxDynError> {
         let courses_res = self.http_client.fetch_courses(&credentials.session).await?;
         if let Response::Json(courses_json) = courses_res {
             let result = serde_json::from_str::<CoursesResult>(&courses_json)
@@ -40,7 +39,7 @@ where
         &self,
         course_id: usize,
         credentials: &LoginCreds,
-    ) -> Result<Vec<Slot>, Box<dyn Error>> {
+    ) -> Result<Vec<Slot>, BoxDynError> {
         let slots_res = self
             .http_client
             .fetch_slots(course_id, &credentials.session)
@@ -57,8 +56,8 @@ where
     pub async fn book_course(
         &self,
         booking: BookingRequest,
-        credentials: LoginCreds,
-    ) -> Result<BookingResponse, Box<dyn Error>> {
+        credentials: &LoginCreds,
+    ) -> Result<BookingResponse, BoxDynError> {
         let booking_res = self
             .http_client
             .book_course(booking, &credentials.session)
@@ -154,7 +153,7 @@ mod test {
         let fitness_service = FitnessService::new(http_client_mock);
         let request_dummy = BookingRequest::new(42, 43, 43, "Some Course".to_string());
         let booking = fitness_service
-            .book_course(request_dummy, creds_mock)
+            .book_course(request_dummy, &creds_mock)
             .await
             .expect("test: book course");
 

@@ -1,33 +1,28 @@
 pub mod args;
 
-use std::{error::Error, io::stdin, sync::Arc};
+use std::{io::stdin, sync::Arc};
 
 use booking_first_lib::{
     booking_service::BookingService,
-    cookies::Cookie,
-    dto::{course::Course, request::BookingRequest, slots::Slot},
-    http_client::HttpClient,
+    dto::{course::Course, error::BoxDynError, request::BookingRequest, slots::Slot},
+    http_client::HttpClientSend,
 };
 
 use self::args::Args;
 
-pub async fn run_cli<ClientT, CookieT>(
-    http_client: ClientT,
-    cookie_jar: Arc<CookieT>,
-    args: Args,
-) -> Result<(), Box<dyn Error>>
+pub async fn run_cli<ClientT>(http_client: ClientT, args: Args) -> Result<(), BoxDynError>
 where
-    ClientT: HttpClient,
-    CookieT: Cookie,
+    ClientT: HttpClientSend,
 {
     let http_client = Arc::new(http_client);
 
-    let mut booking_service = BookingService::new(http_client, cookie_jar);
+    let booking_service = BookingService::new(http_client);
 
     let login_credentials = booking_service
         .login(&args.username, &args.password)
         .await
         .expect("LoginCreds not present after login?");
+
     let course_response = booking_service.fetch_courses(&login_credentials).await;
 
     let course_choice = match &args.course_name {
@@ -70,7 +65,7 @@ where
     );
 
     let booking_res = booking_service
-        .book_course(booking, login_credentials)
+        .book_course(booking, &login_credentials)
         .await;
 
     println!("Booking: {booking_res:?}");

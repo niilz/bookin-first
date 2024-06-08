@@ -1,16 +1,16 @@
-use std::{error::Error, sync::Arc};
+use std::sync::Arc;
 
 use crate::{
-    cookies::Cookie,
     dto::{
         course::Course,
+        error::BoxDynError,
         request::{BookingRequest, EgymLoginRequest},
         response::BookingResponse,
         slots::Slot,
     },
     fitness_service::FitnessService,
-    http_client::HttpClient,
-    login_service::{LoginCreds, LoginService},
+    http_client::HttpClientSend,
+    login::service::{LoginCreds, LoginService},
 };
 
 pub struct CourseResponse {
@@ -18,21 +18,19 @@ pub struct CourseResponse {
     pub course_options: Vec<Course>,
 }
 
-pub struct BookingService<ClientT, CookieT> {
-    login_service: LoginService<Arc<ClientT>, Arc<CookieT>>,
+pub struct BookingService<ClientT> {
+    login_service: LoginService<Arc<ClientT>>,
     fitness_service: FitnessService<Arc<ClientT>>,
 }
 
-impl<ClientT, CookieT> BookingService<ClientT, CookieT>
+impl<ClientT> BookingService<ClientT>
 where
-    ClientT: HttpClient,
-    CookieT: Cookie,
+    ClientT: HttpClientSend,
 {
-    pub fn new(http_client: ClientT, cookie_jar: CookieT) -> BookingService<ClientT, CookieT> {
+    pub fn new(http_client: ClientT) -> BookingService<ClientT> {
         let http_client = Arc::new(http_client);
-        let cookie_jar = Arc::new(cookie_jar);
 
-        let login_service = LoginService::new(Arc::clone(&http_client), Arc::clone(&cookie_jar));
+        let login_service = LoginService::new(Arc::clone(&http_client));
 
         let fitness_service = FitnessService::new(Arc::clone(&http_client));
 
@@ -42,17 +40,10 @@ where
         }
     }
 
-    pub async fn login(
-        &mut self,
-        user_name: &str,
-        password: &str,
-    ) -> Result<LoginCreds, Box<dyn Error>> {
+    pub async fn login(&self, user_name: &str, password: &str) -> Result<LoginCreds, BoxDynError> {
         let login_request = EgymLoginRequest::new(user_name, password);
 
-        let _response = self.login_service.do_login(login_request).await;
-        dbg!(_response);
-
-        self.login_service.get_login_credentials()
+        self.login_service.do_login(login_request).await
     }
 
     pub async fn fetch_courses(&self, credentials: &LoginCreds) -> Vec<Course> {
@@ -72,8 +63,8 @@ where
     pub async fn book_course(
         &self,
         booking: BookingRequest,
-        credentials: LoginCreds,
-    ) -> Result<BookingResponse, Box<dyn Error>> {
+        credentials: &LoginCreds,
+    ) -> Result<BookingResponse, BoxDynError> {
         self.fitness_service.book_course(booking, credentials).await
     }
 }

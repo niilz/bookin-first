@@ -1,14 +1,12 @@
 use std::sync::Arc;
 
-use reqwest::cookie::Jar;
+use booking_first_lib::http_client::{reqwest_client::ReqwestHttpClientSend, HttpClientSend};
 
-pub fn reqwest_client() -> impl HttpClient {
-    let cookie_jar = Arc::new(Jar::default());
+pub fn reqwest_client() -> impl HttpClientSend {
     let client = reqwest::Client::builder()
-        .cookie_provider(Arc::clone(&cookie_jar))
         .build()
         .expect("Could not create client");
-    let http_client = ReqwestHttpClient { client };
+    let http_client = ReqwestHttpClientSend { client };
 
     Arc::new(http_client)
 }
@@ -19,6 +17,6 @@ mod tests {
 
     #[test]
     fn can_create_client() {
-        let client = reqwest_client();
+        let _client = reqwest_client();
     }
 }

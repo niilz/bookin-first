@@ -1,12 +1,6 @@
-use std::sync::Arc;
-
-use booking_first_lib::{
-    booking_service::BookingService, dto::login_data::LoginData,
-    http_client::reqwest_client::ReqwestHttpClient,
-};
+use booking_first_lib::{booking_service::BookingService, dto::login_data::LoginData};
 use lambda_common::reqwest_client;
-use lambda_http::{run, service_fn, tracing, Body, Error, IntoResponse, Request, Response};
-use reqwest::cookie::Jar;
+use lambda_http::{run, service_fn, tracing, Body, Error, Request, Response};
 use serde_json::Value;
 
 /// This is the main body for the function.
@@ -25,9 +19,9 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
             user_name,
             password,
         }) => {
-            let http_client = reqwest_client();
+            //let http_client = reqwest_client();
 
-            let mut booking_service = BookingService::new(http_client, cookie_jar);
+            let booking_service = BookingService::new(reqwest_client());
 
             let login_credentials = booking_service
                 .login(&user_name, &password)
