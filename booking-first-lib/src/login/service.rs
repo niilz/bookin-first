@@ -87,7 +87,7 @@ mod test {
 
     const EGYM_TOKEN_URL_DUMMY: &str = "https://www.foo.de/my-area?token=";
     const EGYM_JWT_DUMMY: &str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkdW1teS1pc3N1ZXIiLCJhdWQiOiJkdW1teS1hdWRpZW5jZSIsImV4cCI6MTcxMTc0ODkyNCwiaWF0IjoxNzExNzQ1MzI0LCJzdWIiOiJkdW1teS1zdWIiLCJ1aWQiOiJhMTc1YmNlNy0zZTViLTQ4NjMtOTJhMS1lZmMxOTkxYWU2ZmQ6ZWZnaTVlaDVwd2lqIiwiY2xhaW1zIjp7ImJyYW5kSWQiOiJkdW1teS1icmFuZC1pZCIsImVneW1BY2NvdW50SWQiOiJkdW1teS1lZ3ltLWFjY291bnQtaWQiLCJtZW1iZXJzaGlwSWQiOiJkdW1teS1tZW1iZXJzaGlwLWlkIiwibW1zTWVtYmVyc2hpcElkcyI6WyIxMjM0NTY3ODkwIl19fQ.C_NkEF_U8PNPfSSX_P-aYZdssOygvhz3Q8QEGfbEnkI";
-    const SESS_ID_DUMMY: &str = "PHPSESSID123DUMMY";
+    const COOKIES_DUMMY: &str = "Session: PHPSESSID123DUMMY, Foo: OtherCookie";
     const EGYM_LOGIN_ERR_DUMMY: &str = "Egym login test-failure";
     const FF_LOGIN_ERR_DUMMY: &str = "FF login test-failure";
 
@@ -138,7 +138,7 @@ mod test {
         let token_res_dummy = format!("{EGYM_TOKEN_URL_DUMMY}{EGYM_JWT_DUMMY}");
         let http_client_mock = mock_client!(
             Some(egym_login_response_dummy(&token_res_dummy)),
-            Some(ff_login_response_dummy(SESS_ID_DUMMY)),
+            Some(ff_login_response_dummy(COOKIES_DUMMY)),
             MockRes::None,
             MockRes::None,
             MockRes::None
@@ -149,7 +149,7 @@ mod test {
 
         assert!(login_creds.is_ok());
         let login_creds = login_creds.unwrap();
-        assert_eq!(login_creds.session, SESS_ID_DUMMY);
+        assert_eq!(login_creds.session, COOKIES_DUMMY);
         assert_eq!(login_creds.user_id, 42);
     }
 
@@ -175,7 +175,7 @@ mod test {
         let token_res_dummy = format!("{EGYM_TOKEN_URL_DUMMY}{EGYM_JWT_DUMMY}");
         let http_client_mock = mock_client!(
             Some(egym_login_response_dummy(&token_res_dummy)),
-            Some(ff_login_response_dummy(SESS_ID_DUMMY)),
+            Some(ff_login_response_dummy(COOKIES_DUMMY)),
             MockRes::None,
             MockRes::None,
             MockRes::None
@@ -187,6 +187,6 @@ mod test {
         assert!(login_creds.is_ok());
         let login_creds = login_creds.unwrap();
         assert_eq!(login_creds.user_id, 1234567890);
-        assert_eq!(login_creds.session, SESS_ID_DUMMY);
+        assert_eq!(login_creds.session, COOKIES_DUMMY);
     }
 }
