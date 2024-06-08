@@ -12,15 +12,11 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
         return Err(Box::from("Only Text Requests are supported"));
     };
 
-    //dbg!(&request_body);
-
     match serde_json::from_str(&request_body) {
         Ok(LoginData {
             user_name,
             password,
         }) => {
-            //let http_client = reqwest_client();
-
             let booking_service = BookingService::new(reqwest_client());
 
             let login_credentials = booking_service

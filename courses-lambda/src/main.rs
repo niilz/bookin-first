@@ -5,6 +5,9 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
         .query_string_parameters_ref()
         .and_then(|params| params.first("session"));
 
+    // TODO: Replace template with get_reqwest_client()
+    // Use FitnessService directly instead of booking service
+
     match session {
         Some(session) => {
             // fetchcourses

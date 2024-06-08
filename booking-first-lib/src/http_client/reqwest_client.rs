@@ -77,7 +77,7 @@ impl HttpClientSend for ReqwestHttpClientSend {
         let res = self
             .client
             .get(slots_url)
-            .header("Cookie", session_id))
+            .header("Cookie", session_id)
             .send()
             .await;
         match res {
@@ -98,7 +98,7 @@ impl HttpClientSend for ReqwestHttpClientSend {
             .client
             .post(booking_url)
             .body(booking)
-            .header("Cookie", session_id))
+            .header("Cookie", session_id)
             .send()
             .await;
         match res {
