@@ -1,9 +1,6 @@
-use std::{collections::HashMap, error::Error};
+use std::collections::HashMap;
 
-use crate::dto::{
-    request::{EgymLoginRequest, FitnessFirstLoginRequest},
-    response::Response,
-};
+use crate::dto::{request::EgymLoginRequest, response::Response};
 
 use super::*;
 
@@ -21,10 +18,6 @@ impl HttpClientSend for ReqwestHttpClientSend {
         let res = self.client.post(EGYM_LOGIN_URL).form(&params).send().await;
         match res {
             Ok(res) => {
-                println!(
-                    "Cookies from egym_login: {:?}",
-                    res.cookies().collect::<Vec<_>>()
-                );
                 let res = res.text().await.expect("could not read response text");
                 Ok(Response::Text(res))
             }
@@ -32,21 +25,21 @@ impl HttpClientSend for ReqwestHttpClientSend {
         }
     }
 
-    async fn ff_login(&self, request: FitnessFirstLoginRequest) -> Result<Response, BoxDynError> {
+    async fn ff_login(&self, egym_token: &str) -> Result<Response, BoxDynError> {
         //https://mein.fitnessfirst.de/egymid-login?token=
-        let url = format!(
-            "{FITNESS_FIRST_BASE_URL}{EGYM_TOKEN_PATH}{}",
-            request.egym_token
-        );
+        let url = format!("{FITNESS_FIRST_BASE_URL}{EGYM_TOKEN_PATH}{egym_token}");
         println!("Logging in to: {url}");
-        let res = self.client.get(url).send().await;
+        let req = self.client.get(url);
+        let res = req.send().await;
         match res {
             Ok(res) => {
                 let cookies = res
                     .cookies()
-                    .map(|c| c.name().to_string())
-                    .collect::<String>();
-                println!("Cookies from ff_login: {cookies}",);
+                    .filter(|c| c.name().to_string() == "PHPSESSID")
+                    .map(|c| c.value().to_string())
+                    // TODO: turn option into error and bubble up
+                    .last()
+                    .expect("No PHPSESSID");
                 Ok(Response::Cookies(cookies))
             }
             Err(e) => Err(Box::from(format!("Failed to login: {e}"))),

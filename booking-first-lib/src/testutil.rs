@@ -16,7 +16,7 @@ macro_rules! mock_client {
         use crate::{
             dto::{
                 error::BoxDynError,
-                request::{BookingRequest, EgymLoginRequest, FitnessFirstLoginRequest},
+                request::{BookingRequest, EgymLoginRequest},
                 response::Response,
             },
             http_client::HttpClientSend,
@@ -44,10 +44,7 @@ macro_rules! mock_client {
                 }
             }
 
-            async fn ff_login(
-                &self,
-                _request: FitnessFirstLoginRequest,
-            ) -> Result<Response, BoxDynError> {
+            async fn ff_login(&self, _request: &str) -> Result<Response, BoxDynError> {
                 match self.ff_dummy.as_ref() {
                     Some(Ok(res)) => Ok(res.clone()),
                     Some(Err(e)) => Err(Box::from(e.to_string())),
@@ -115,14 +112,6 @@ pub(crate) fn serialize_response_dummy(
     let response: String =
         serde_json::to_string(&response_data).expect("test: serialize expected response-data");
     Ok(Response::Json(response))
-}
-
-#[derive(Default, Debug)]
-pub(crate) struct CookieMock;
-impl Cookie for CookieMock {
-    fn read_cookie(&self, _domain: &str) -> Result<String, BoxDynError> {
-        Ok("PHPSESSID123DUMMY".to_string())
-    }
 }
 
 pub(crate) fn get_credentials_dummy() -> LoginCreds {

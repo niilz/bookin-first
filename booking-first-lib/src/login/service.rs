@@ -2,11 +2,7 @@ use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
 use crate::{
-    dto::{
-        error::BoxDynError,
-        request::{EgymLoginRequest, FitnessFirstLoginRequest},
-        response::Response,
-    },
+    dto::{error::BoxDynError, request::EgymLoginRequest, response::Response},
     http_client::HttpClientSend,
     login::parse::extract_session,
 };
@@ -60,8 +56,7 @@ where
     }
 
     async fn login_to_fitness_first(&self, token: &str) -> Result<String, BoxDynError> {
-        let ff_login_req = FitnessFirstLoginRequest::new(token);
-        match self.http_client.ff_login(ff_login_req).await {
+        match self.http_client.ff_login(token).await {
             Ok(Response::Cookies(cookies)) => {
                 println!("FF login succeeded. PHPSESSID-Cookie should be in Jar");
                 let session_cookie = extract_session(cookies /*FITNESS_FIRST_BASE_URL*/);
@@ -94,9 +89,10 @@ mod test {
     #[tokio::test]
     async fn egym_login_success() {
         let token_res_dummy = format!("{EGYM_TOKEN_URL_DUMMY}{EGYM_JWT_DUMMY}");
+        let ff_login_err = "Out of scope ERR, only egym-login is testet";
         let http_client_mock = mock_client!(
             Some(egym_login_response_dummy(&token_res_dummy)),
-            Some(Err(Box::from("FF-login not tested here"))),
+            Some(Err(Box::from(ff_login_err))),
             MockRes::None,
             MockRes::None,
             MockRes::None
@@ -108,9 +104,7 @@ mod test {
 
         assert!(success.is_err());
         if let Err(err) = success {
-            assert!(err
-                .to_string()
-                .starts_with("login fitness-first failed: {e}"));
+            assert!(err.to_string().ends_with(ff_login_err));
         };
     }
 
@@ -129,7 +123,7 @@ mod test {
 
         assert!(success.is_err());
         if let Err(err) = success {
-            assert!(err.to_string().starts_with("TODO"));
+            assert!(err.to_string().starts_with("login egym failed"));
         };
     }
 
@@ -150,7 +144,7 @@ mod test {
         assert!(login_creds.is_ok());
         let login_creds = login_creds.unwrap();
         assert_eq!(login_creds.session, COOKIES_DUMMY);
-        assert_eq!(login_creds.user_id, 42);
+        assert_eq!(login_creds.user_id, 1234567890);
     }
 
     #[tokio::test]

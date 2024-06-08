@@ -18,7 +18,7 @@ pub const COURSES_URL_PATH: &str = "/api/magicline/openapi/classes/hamburg3";
 #[trait_variant::make(HttpClientSend: Send + Sync)]
 pub trait HttpClient {
     async fn egym_login(&self, request: EgymLoginRequest) -> Result<Response, BoxDynError>;
-    async fn ff_login(&self, request: FitnessFirstLoginRequest) -> Result<Response, BoxDynError>;
+    async fn ff_login(&self, egym_token: &str) -> Result<Response, BoxDynError>;
     async fn fetch_courses(&self, session_id: &str) -> Result<Response, BoxDynError>;
     async fn fetch_slots(
         &self,
@@ -40,8 +40,8 @@ where
         self.as_ref().egym_login(request).await
     }
 
-    async fn ff_login(&self, request: FitnessFirstLoginRequest) -> Result<Response, BoxDynError> {
-        self.as_ref().ff_login(request).await
+    async fn ff_login(&self, egym_token: &str) -> Result<Response, BoxDynError> {
+        self.as_ref().ff_login(egym_token).await
     }
 
     async fn fetch_courses(&self, session_id: &str) -> Result<Response, BoxDynError> {

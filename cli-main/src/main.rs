@@ -2,6 +2,7 @@ use booking_first_lib::dto::error::BoxDynError;
 use cli::args::Args;
 
 use booking_first_lib::http_client::reqwest_client::ReqwestHttpClientSend;
+use reqwest::redirect::Policy;
 
 mod cli;
 
@@ -10,6 +11,7 @@ async fn main() -> Result<(), BoxDynError> {
     let args = <Args as clap::Parser>::parse();
 
     let client = reqwest::Client::builder()
+        .redirect(Policy::none())
         .build()
         .expect("Could not create client");
     let http_client = ReqwestHttpClientSend { client };
