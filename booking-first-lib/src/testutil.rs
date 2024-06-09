@@ -1,6 +1,5 @@
 use serde::Serialize;
-
-use crate::dto::{error::BoxDynError, response::Response};
+use shared::dto::{error::BoxDynError, response::Response};
 
 #[macro_export]
 macro_rules! mock_client {
@@ -9,14 +8,11 @@ macro_rules! mock_client {
      $courses_dummy:expr,
      $slots_dummy:expr,
      $book_dummy:expr) => {{
-        use crate::{
-            dto::{
-                error::BoxDynError,
-                request::{BookingRequest, EgymLoginRequest},
-                response::Response,
-            },
-            http_client::HttpClientSend,
-            testutil::MockRes,
+        use crate::{http_client::HttpClientSend, testutil::MockRes};
+        use shared::dto::{
+            error::BoxDynError,
+            request::{BookingRequest, EgymLoginRequest},
+            response::Response,
         };
 
         #[derive(Default, Debug)]

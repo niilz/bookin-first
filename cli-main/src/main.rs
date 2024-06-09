@@ -1,5 +1,5 @@
-use booking_first_lib::dto::error::BoxDynError;
 use cli::args::Args;
+use shared::dto::error::BoxDynError;
 
 use booking_first_lib::http_client::reqwest_client::ReqwestHttpClientSend;
 use reqwest::redirect::Policy;

@@ -7,5 +7,5 @@ members = [
 	"login-lambda",
 	"slots-lambda",
   "lambda-common"
-, "wasm-client"]
+, "wasm-client", "shared"]
 resolver = "2"

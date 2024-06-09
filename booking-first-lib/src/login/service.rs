@@ -1,15 +1,11 @@
 use serde::Serialize;
-use wasm_bindgen::prelude::*;
 
-use crate::{
-    dto::{error::BoxDynError, request::EgymLoginRequest, response::Response},
-    http_client::HttpClientSend,
-};
+use crate::http_client::HttpClientSend;
+use shared::dto::{error::BoxDynError, request::EgymLoginRequest, response::Response};
 
 use super::parse::extract_user_id;
 
 #[derive(Debug, Serialize)]
-#[wasm_bindgen(getter_with_clone)]
 pub struct LoginCreds {
     pub session: String,
     pub user_id: usize,
@@ -71,8 +67,9 @@ where
 
 mod test {
 
+
+        use shared::dto::request::EgymLoginRequest;
     use crate::{
-        dto::request::EgymLoginRequest,
         login::service::LoginService,
         mock_client,
         testutil::{egym_login_response_dummy, ff_login_response_dummy},

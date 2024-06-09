@@ -1,6 +1,7 @@
-use booking_first_lib::{dto::request::BookingRequest, fitness_service::FitnessService};
+use booking_first_lib::fitness_service::FitnessService;
 use lambda_common::reqwest_client;
 use lambda_http::{run, service_fn, tracing, Body, Error, Request, RequestExt, Response};
+use shared::dto::request::BookingRequest;
 
 async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
     let Body::Text(booking) = event.body() else {

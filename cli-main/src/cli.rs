@@ -3,15 +3,13 @@ pub mod args;
 use std::{io::stdin, sync::Arc};
 
 use booking_first_lib::{
-    dto::{
-        course::Course,
-        error::BoxDynError,
-        request::{BookingRequest, EgymLoginRequest},
-        slots::Slot,
-    },
-    fitness_service::FitnessService,
-    http_client::HttpClientSend,
-    login::service::LoginService,
+    fitness_service::FitnessService, http_client::HttpClientSend, login::service::LoginService,
+};
+use shared::dto::{
+    course::Course,
+    error::BoxDynError,
+    request::{BookingRequest, EgymLoginRequest},
+    slots::Slot,
 };
 
 use self::args::Args;

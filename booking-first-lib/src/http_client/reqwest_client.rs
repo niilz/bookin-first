@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::dto::{request::EgymLoginRequest, response::Response};
+use shared::dto::{request::EgymLoginRequest, response::Response};
 
 use super::*;
 

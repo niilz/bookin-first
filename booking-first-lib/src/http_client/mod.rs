@@ -2,7 +2,7 @@ pub mod reqwest_client;
 
 use std::sync::Arc;
 
-use crate::dto::{
+use shared::dto::{
     error::BoxDynError,
     request::{BookingRequest, EgymLoginRequest},
     response::Response,

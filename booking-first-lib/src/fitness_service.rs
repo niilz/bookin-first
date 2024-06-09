@@ -1,13 +1,12 @@
-use crate::{
-    dto::{
-        course::{Course, CoursesResult},
-        error::BoxDynError,
-        request::BookingRequest,
-        response::{BookingResponse, Response},
-        slots::{Slot, SlotsResult},
-    },
-    http_client::HttpClientSend,
+use shared::dto::{
+    course::{Course, CoursesResult},
+    error::BoxDynError,
+    request::BookingRequest,
+    response::{BookingResponse, Response},
+    slots::{Slot, SlotsResult},
 };
+
+use crate::http_client::HttpClientSend;
 
 pub struct FitnessService<ClientT> {
     http_client: ClientT,
@@ -66,18 +65,14 @@ where
 mod test {
     use chrono::{DateTime, Local};
     use serde_json::json;
-
-    use crate::{
-        dto::{
-            course::{Course, CoursesResult},
-            request::BookingRequest,
-            response::BookingState,
-            slots::{Slot, SlotsResult},
-        },
-        fitness_service::FitnessService,
-        mock_client,
-        testutil::serialize_response_dummy,
+    use shared::dto::{
+        course::{Course, CoursesResult},
+        request::BookingRequest,
+        response::BookingState,
+        slots::{Slot, SlotsResult},
     };
+
+    use crate::{fitness_service::FitnessService, mock_client, testutil::serialize_response_dummy};
 
     #[tokio::test]
     async fn read_all_courses_works() {

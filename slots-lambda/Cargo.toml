@@ -18,6 +18,7 @@ edition = "2021"
 booking-first-lib = { path = "../booking-first-lib" }
 lambda-common = { path = "../lambda-common" }
 lambda_http = "0.11.1"
+shared = { path = "../shared" }
 serde_json = "1.0.114"
 
 tokio = { version = "1", features = ["macros"] }

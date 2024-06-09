@@ -1,6 +1,6 @@
 use base64::{engine::general_purpose::STANDARD_NO_PAD, Engine};
 
-use crate::dto::{
+use shared::dto::{
     error::BoxDynError,
     token::{Claims, Jwt},
 };

@@ -1,9 +1,7 @@
-use booking_first_lib::{
-    dto::{login_data::LoginData, request::EgymLoginRequest},
-    login::service::LoginService,
-};
+use booking_first_lib::login::service::LoginService;
 use lambda_common::reqwest_client;
 use lambda_http::{run, service_fn, tracing, Body, Error, Request, Response};
+use shared::dto::{login_data::LoginData, request::EgymLoginRequest};
 
 /// This is the main body for the function.
 /// Write your code inside it.

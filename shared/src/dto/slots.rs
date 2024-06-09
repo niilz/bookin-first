@@ -125,8 +125,8 @@ mod test {
 
     use crate::dto::slots::SlotsResult;
 
-    #[tokio::test]
-    async fn deserialize_into_slot_works() {
+    #[test]
+    fn deserialize_into_slot_works() {
         let slots_json = json!({
             "classes": {
                 "result": [
