@@ -23,7 +23,9 @@ where
         .await
         .expect("LoginCreds not present after login?");
 
-    let course_response = booking_service.fetch_courses(&login_credentials).await;
+    let course_response = booking_service
+        .fetch_courses(&login_credentials.session)
+        .await;
 
     let course_choice = match &args.course_name {
         Some(course) => course.to_string(),

@@ -21,11 +21,8 @@ where
     pub fn new(http_client: ClientT) -> Self {
         Self { http_client }
     }
-    pub async fn fetch_courses(
-        &self,
-        credentials: &LoginCreds,
-    ) -> Result<Vec<Course>, BoxDynError> {
-        let courses_res = self.http_client.fetch_courses(&credentials.session).await?;
+    pub async fn fetch_courses(&self, session: &str) -> Result<Vec<Course>, BoxDynError> {
+        let courses_res = self.http_client.fetch_courses(&session).await?;
         if let Response::Json(courses_json) = courses_res {
             let result = serde_json::from_str::<CoursesResult>(&courses_json)
                 .expect("Could not deserialize into courses");
@@ -100,10 +97,10 @@ mod test {
             MockRes::None
         );
 
-        let creds_mock = get_credentials_dummy();
+        let session_dummy = "SESSION_DUMMY";
         let fitness_service = FitnessService::new(http_client_mock);
         let courses = fitness_service
-            .fetch_courses(&creds_mock)
+            .fetch_courses(&session_dummy)
             .await
             .expect("test: read_courses");
 

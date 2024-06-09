@@ -46,9 +46,9 @@ where
         self.login_service.do_login(login_request).await
     }
 
-    pub async fn fetch_courses(&self, credentials: &LoginCreds) -> Vec<Course> {
+    pub async fn fetch_courses(&self, session: &str) -> Vec<Course> {
         self.fitness_service
-            .fetch_courses(credentials)
+            .fetch_courses(session)
             .await
             .expect("read courses")
     }
