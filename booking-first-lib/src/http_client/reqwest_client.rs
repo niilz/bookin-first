@@ -33,7 +33,7 @@ impl HttpClientSend for ReqwestHttpClientSend {
         let res = req.send().await;
         match res {
             Ok(res) => {
-                dbg!(&res);
+                //dbg!(&res);
                 let cookies = res
                     .headers()
                     .iter()
@@ -60,9 +60,9 @@ impl HttpClientSend for ReqwestHttpClientSend {
             .client
             .get(url)
             .header("Cookie", &format!("PHPSESSID={session_id}"));
-        dbg!(&req);
+        //dbg!(&req);
         let res = req.send().await;
-        dbg!(&res);
+        //dbg!(&res);
         match res {
             Ok(res) => Ok(Response::Json(res.text().await?)),
             Err(e) => Err(Box::from(format!("Failed to read courses: {e}"))),
@@ -97,15 +97,15 @@ impl HttpClientSend for ReqwestHttpClientSend {
         //https://mein.fitnessfirst.de/api/magicline/openapi/classes/hamburg3/booking/book
         let booking_url = format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}/booking/book");
         let booking = serde_json::to_string(&booking)?;
-        dbg!(&booking);
+        //dbg!(&booking);
         let req = self
             .client
             .post(booking_url)
             .body(booking)
             .header("Cookie", &format!("PHPSESSID={session_id}"));
-        dbg!(&req);
+        //dbg!(&req);
         let res = req.send().await;
-        dbg!(&res);
+        //dbg!(&res);
         match res {
             Ok(res) => Ok(Response::Json(res.text().await?)),
             Err(e) => Err(Box::from(format!("Failed to read slots: {e}"))),
