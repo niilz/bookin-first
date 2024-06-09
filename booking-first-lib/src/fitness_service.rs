@@ -7,7 +7,6 @@ use crate::{
         slots::{Slot, SlotsResult},
     },
     http_client::HttpClientSend,
-    login::service::LoginCreds,
 };
 
 pub struct FitnessService<ClientT> {
@@ -52,7 +51,7 @@ where
         booking: BookingRequest,
         session: &str,
     ) -> Result<BookingResponse, BoxDynError> {
-        let booking_res = self.http_client.book_course(booking, &session).await?;
+        let booking_res = self.http_client.book_course(booking, session).await?;
         if let Response::Json(booking_json) = booking_res {
             serde_json::from_str::<BookingResponse>(&booking_json)
                 .map_err(serde_json::error::Error::into)

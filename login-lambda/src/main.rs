@@ -1,4 +1,7 @@
-use booking_first_lib::{booking_service::BookingService, dto::login_data::LoginData};
+use booking_first_lib::{
+    dto::{login_data::LoginData, request::EgymLoginRequest},
+    login::service::LoginService,
+};
 use lambda_common::reqwest_client;
 use lambda_http::{run, service_fn, tracing, Body, Error, Request, Response};
 
@@ -16,10 +19,10 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
             user_name,
             password,
         }) => {
-            let booking_service = BookingService::new(reqwest_client());
+            let login_service = LoginService::new(reqwest_client());
 
-            let login_credentials = booking_service
-                .login(&user_name, &password)
+            let login_credentials = login_service
+                .do_login(EgymLoginRequest::new(&user_name, &password))
                 .await
                 .expect("LoginCreds not present after login?");
             println!("{login_credentials:?}");

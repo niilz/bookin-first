@@ -3,9 +3,15 @@ pub mod args;
 use std::{io::stdin, sync::Arc};
 
 use booking_first_lib::{
-    booking_service::BookingService,
-    dto::{course::Course, error::BoxDynError, request::BookingRequest, slots::Slot},
+    dto::{
+        course::Course,
+        error::BoxDynError,
+        request::{BookingRequest, EgymLoginRequest},
+        slots::Slot,
+    },
+    fitness_service::FitnessService,
     http_client::HttpClientSend,
+    login::service::LoginService,
 };
 
 use self::args::Args;
@@ -15,17 +21,17 @@ where
     ClientT: HttpClientSend,
 {
     let http_client = Arc::new(http_client);
+    let login_service = LoginService::new(Arc::clone(&http_client));
+    let fitness_service = FitnessService::new(Arc::clone(&http_client));
 
-    let booking_service = BookingService::new(http_client);
-
-    let login_credentials = booking_service
-        .login(&args.username, &args.password)
+    let login_credentials = login_service
+        .do_login(EgymLoginRequest::new(&args.username, &args.password))
         .await
         .expect("LoginCreds not present after login?");
 
-    let course_response = booking_service
+    let course_response = fitness_service
         .fetch_courses(&login_credentials.session)
-        .await;
+        .await?;
 
     let course_choice = match &args.course_name {
         Some(course) => course.to_string(),
@@ -46,9 +52,9 @@ where
     println!();
     println!("Course: {course:#?}");
 
-    let slots = booking_service
-        .fetch_slots(&course, &login_credentials)
-        .await;
+    let slots = fitness_service
+        .fetch_slots(course.id, &login_credentials.session)
+        .await?;
 
     println!();
 
@@ -66,8 +72,8 @@ where
         course.title,
     );
 
-    let booking_res = booking_service
-        .book_course(booking, &login_credentials)
+    let booking_res = fitness_service
+        .book_course(booking, &login_credentials.session)
         .await;
 
     println!("Booking: {booking_res:?}");

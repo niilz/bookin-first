@@ -11,7 +11,7 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
         .query_string_parameters_ref()
         .and_then(|params| params.first("session"));
 
-    match (session, serde_json::from_str::<BookingRequest>(&booking)) {
+    match (session, serde_json::from_str::<BookingRequest>(booking)) {
         (Some(session), Ok(booking_request)) => {
             let http_client = reqwest_client();
 
