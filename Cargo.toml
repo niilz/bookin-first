@@ -2,6 +2,7 @@
 members = [
 	"cli-main",
 	"booking-first-lib",
+	"book-lambda",
 	"courses-lambda",
 	"login-lambda",
 	"slots-lambda",
