@@ -1,25 +1,39 @@
+use booking_first_lib::fitness_service::FitnessService;
+use lambda_common::reqwest_client;
 use lambda_http::{run, service_fn, tracing, Body, Error, Request, RequestExt, Response};
 
-/// This is the main body for the function.
-/// Write your code inside it.
-/// There are some code example in the following URLs:
-/// - https://github.com/awslabs/aws-lambda-rust-runtime/tree/main/examples
 async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
-    // Extract some useful information from the request
-    let who = event
+    let course_id = event
         .query_string_parameters_ref()
-        .and_then(|params| params.first("name"))
-        .unwrap_or("world");
-    let message = format!("Hello {who}, this is an AWS Lambda HTTP request");
+        .and_then(|params| params.first("course"))
+        .and_then(|session| session.parse::<usize>().ok());
 
-    // Return something that implements IntoResponse.
-    // It will be serialized to the right response event automatically by the runtime
-    let resp = Response::builder()
-        .status(200)
-        .header("content-type", "text/html")
-        .body(message.into())
-        .map_err(Box::new)?;
-    Ok(resp)
+    let session = event
+        .query_string_parameters_ref()
+        .and_then(|params| params.first("session"));
+
+    match (course_id, session) {
+        (Some(course_id), Some(session)) => {
+            let http_client = reqwest_client();
+
+            let fitness_service = FitnessService::new(http_client);
+
+            let slots = fitness_service
+                .fetch_slots(course_id, session)
+                .await
+                .expect("fetching slots");
+
+            let slots = serde_json::to_string(&slots).expect("convert courses into String");
+
+            let resp = Response::builder()
+                .status(200)
+                .header("content-type", "application/json")
+                .body(slots.into())
+                .map_err(Box::new)?;
+            Ok(resp)
+        }
+        (_, _) => Err(Box::from("course_id and session required")),
+    }
 }
 
 #[tokio::main]

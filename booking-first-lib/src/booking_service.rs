@@ -55,7 +55,7 @@ where
 
     pub async fn fetch_slots(&self, course: &Course, credentials: &LoginCreds) -> Vec<Slot> {
         self.fitness_service
-            .fetch_slots(course.id, credentials)
+            .fetch_slots(course.id, &credentials.session)
             .await
             .expect("read slots")
     }

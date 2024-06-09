@@ -4,6 +4,7 @@ members = [
 	"booking-first-lib",
 	"courses-lambda",
 	"login-lambda",
+	"slots-lambda",
   "lambda-common"
 ]
 resolver = "2"

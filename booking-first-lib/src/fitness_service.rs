@@ -35,12 +35,9 @@ where
     pub async fn fetch_slots(
         &self,
         course_id: usize,
-        credentials: &LoginCreds,
+        session: &str,
     ) -> Result<Vec<Slot>, BoxDynError> {
-        let slots_res = self
-            .http_client
-            .fetch_slots(course_id, &credentials.session)
-            .await?;
+        let slots_res = self.http_client.fetch_slots(course_id, session).await?;
         if let Response::Json(slots_json) = slots_res {
             let result = serde_json::from_str::<SlotsResult>(&slots_json)
                 .expect("Could not deserialize into slots");
@@ -118,10 +115,10 @@ mod test {
             MockRes::None
         );
 
-        let creds_mock = get_credentials_dummy();
+        let session_dummy = "dummy-session";
         let fitness_service = FitnessService::new(http_client_mock);
         let slots = fitness_service
-            .fetch_slots(1234, &creds_mock)
+            .fetch_slots(1234, &session_dummy)
             .await
             .expect("test: read_courses");
 
