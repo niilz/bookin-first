@@ -75,7 +75,7 @@ where
     Ok(())
 }
 
-fn course_input(courses: &Vec<Course>) -> String {
+fn course_input(courses: &[Course]) -> String {
     println!("The courses are:");
 
     for (idx, course) in courses.iter().enumerate() {

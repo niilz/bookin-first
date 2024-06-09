@@ -94,7 +94,7 @@ mod date_format {
     use chrono::{DateTime, Local, NaiveDateTime};
     use serde::{Deserialize, Deserializer, Serializer};
 
-    const FORMAT: &'static str = "%+";
+    const FORMAT: &str = "%+";
 
     pub fn serialize<S>(date: &DateTime<Local>, serializer: S) -> Result<S::Ok, S::Error>
     where

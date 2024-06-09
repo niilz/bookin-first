@@ -36,7 +36,7 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
         }
         Err(e) => {
             eprintln!("{e:?}");
-            return Err(Box::from("Could not parse LoginData"));
+            Err(Box::from("Could not parse LoginData"))
         }
     }
 }

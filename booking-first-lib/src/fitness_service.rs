@@ -22,7 +22,7 @@ where
         Self { http_client }
     }
     pub async fn fetch_courses(&self, session: &str) -> Result<Vec<Course>, BoxDynError> {
-        let courses_res = self.http_client.fetch_courses(&session).await?;
+        let courses_res = self.http_client.fetch_courses(session).await?;
         if let Response::Json(courses_json) = courses_res {
             let result = serde_json::from_str::<CoursesResult>(&courses_json)
                 .expect("Could not deserialize into courses");
