@@ -14,6 +14,7 @@ pub async fn login(user_name: String, password: String) -> Result<JsValue, JsVal
     let login_data = serde_json::to_string(&login_data).expect("login_data to Json");
     let mut init = RequestInit::new();
     init.body(Some(&JsValue::from(login_data)));
+    init.method("POST");
 
     let promise = window.fetch_with_str_and_init(&lambda_url("login-lambda", None), &init);
     let res = JsFuture::from(promise)

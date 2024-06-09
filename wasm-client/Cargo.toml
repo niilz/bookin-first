@@ -7,7 +7,6 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-booking-first-lib = { path = "../booking-first-lib" }
 shared = { path = "../shared" }
 serde = "1.0.203"
 serde_json = "1.0.117"
