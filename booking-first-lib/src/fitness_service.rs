@@ -76,7 +76,7 @@ mod test {
         },
         fitness_service::FitnessService,
         mock_client,
-        testutil::{get_credentials_dummy, serialize_response_dummy},
+        testutil::serialize_response_dummy,
     };
 
     #[tokio::test]

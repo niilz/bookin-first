@@ -1,9 +1,6 @@
 use serde::Serialize;
 
-use crate::{
-    dto::{error::BoxDynError, response::Response},
-    login::service::LoginCreds,
-};
+use crate::dto::{error::BoxDynError, response::Response};
 
 #[macro_export]
 macro_rules! mock_client {
@@ -111,11 +108,4 @@ pub(crate) fn serialize_response_dummy(
     let response: String =
         serde_json::to_string(&response_data).expect("test: serialize expected response-data");
     Ok(Response::Json(response))
-}
-
-pub(crate) fn get_credentials_dummy() -> LoginCreds {
-    LoginCreds {
-        session: "dummy-session-id".to_string(),
-        user_id: 123454321,
-    }
 }
