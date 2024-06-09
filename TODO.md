@@ -1,8 +1,6 @@
 # TODO
 
-- Implement fetch_courses for lambda (use fitness-service directly)
-- Remove trailing String parts on PHPSESS-Cookie
-- Try to use api with session token even though if it is not from fitness-first page (like grab other peoples data with your token)
+- Remove trailing String parts on PHPSESS-Cookie (not sure if that is still the case)
 - Handle errors e.g. when Slot can not be read (is it a parsing problem?) or when Course is not bookable
 - Store token and session (cache)
 - Add appointment to calendar
