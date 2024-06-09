@@ -97,13 +97,15 @@ impl HttpClientSend for ReqwestHttpClientSend {
         //https://mein.fitnessfirst.de/api/magicline/openapi/classes/hamburg3/booking/book
         let booking_url = format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}/booking/book");
         let booking = serde_json::to_string(&booking)?;
-        let res = self
+        dbg!(&booking);
+        let req = self
             .client
             .post(booking_url)
             .body(booking)
-            .header("Cookie", &format!("PHPSESSID={session_id}"))
-            .send()
-            .await;
+            .header("Cookie", &format!("PHPSESSID={session_id}"));
+        dbg!(&req);
+        let res = req.send().await;
+        dbg!(&res);
         match res {
             Ok(res) => Ok(Response::Json(res.text().await?)),
             Err(e) => Err(Box::from(format!("Failed to read slots: {e}"))),

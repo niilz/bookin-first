@@ -1,25 +1,38 @@
+use booking_first_lib::{dto::request::BookingRequest, fitness_service::FitnessService};
+use lambda_common::reqwest_client;
 use lambda_http::{run, service_fn, tracing, Body, Error, Request, RequestExt, Response};
 
-/// This is the main body for the function.
-/// Write your code inside it.
-/// There are some code example in the following URLs:
-/// - https://github.com/awslabs/aws-lambda-rust-runtime/tree/main/examples
 async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
-    // Extract some useful information from the request
-    let who = event
-        .query_string_parameters_ref()
-        .and_then(|params| params.first("name"))
-        .unwrap_or("world");
-    let message = format!("Hello {who}, this is an AWS Lambda HTTP request");
+    let Body::Text(booking) = event.body() else {
+        return Err(Box::from("Only Text Request is supported"));
+    };
 
-    // Return something that implements IntoResponse.
-    // It will be serialized to the right response event automatically by the runtime
-    let resp = Response::builder()
-        .status(200)
-        .header("content-type", "text/html")
-        .body(message.into())
-        .map_err(Box::new)?;
-    Ok(resp)
+    let session = event
+        .query_string_parameters_ref()
+        .and_then(|params| params.first("session"));
+
+    match (session, serde_json::from_str::<BookingRequest>(&booking)) {
+        (Some(session), Ok(booking_request)) => {
+            let http_client = reqwest_client();
+
+            let fitness_service = FitnessService::new(http_client);
+
+            let slots = fitness_service
+                .book_course(booking_request, session)
+                .await
+                .expect("booking course");
+
+            let booking = serde_json::to_string(&slots).expect("convert booking into String");
+
+            let resp = Response::builder()
+                .status(200)
+                .header("content-type", "application/json")
+                .body(booking.into())
+                .map_err(Box::new)?;
+            Ok(resp)
+        }
+        _ => Err(Box::from("booking-data and session required")),
+    }
 }
 
 #[tokio::main]

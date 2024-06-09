@@ -65,6 +65,8 @@ where
         booking: BookingRequest,
         credentials: &LoginCreds,
     ) -> Result<BookingResponse, BoxDynError> {
-        self.fitness_service.book_course(booking, credentials).await
+        self.fitness_service
+            .book_course(booking, &credentials.session)
+            .await
     }
 }

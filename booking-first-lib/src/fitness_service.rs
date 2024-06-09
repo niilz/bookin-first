@@ -50,12 +50,9 @@ where
     pub async fn book_course(
         &self,
         booking: BookingRequest,
-        credentials: &LoginCreds,
+        session: &str,
     ) -> Result<BookingResponse, BoxDynError> {
-        let booking_res = self
-            .http_client
-            .book_course(booking, &credentials.session)
-            .await?;
+        let booking_res = self.http_client.book_course(booking, &session).await?;
         if let Response::Json(booking_json) = booking_res {
             serde_json::from_str::<BookingResponse>(&booking_json)
                 .map_err(serde_json::error::Error::into)
@@ -143,11 +140,11 @@ mod test {
             Some(Ok(Response::Json(booking_dummy)))
         );
 
-        let creds_mock = get_credentials_dummy();
+        let session_dummy = "dummy-session";
         let fitness_service = FitnessService::new(http_client_mock);
         let request_dummy = BookingRequest::new(42, 43, 43, "Some Course".to_string());
         let booking = fitness_service
-            .book_course(request_dummy, &creds_mock)
+            .book_course(request_dummy, &session_dummy)
             .await
             .expect("test: book course");
 

@@ -23,7 +23,7 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
                 .await
                 .expect("fetching slots");
 
-            let slots = serde_json::to_string(&slots).expect("convert courses into String");
+            let slots = serde_json::to_string(&slots).expect("convert slot into String");
 
             let resp = Response::builder()
                 .status(200)
