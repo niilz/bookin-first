@@ -56,7 +56,10 @@ impl HttpClientSend for ReqwestHttpClientSend {
     async fn fetch_courses(&self, session_id: &str) -> Result<Response, BoxDynError> {
         let url = format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}");
         println!("Getting courses from: {url}");
-        let req = self.client.get(url).header("Cookie", session_id);
+        let req = self
+            .client
+            .get(url)
+            .header("Cookie", &format!("PHPSESSID={session_id}"));
         dbg!(&req);
         let res = req.send().await;
         dbg!(&res);

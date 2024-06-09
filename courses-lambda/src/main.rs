@@ -1,3 +1,5 @@
+use booking_first_lib::fitness_service::FitnessService;
+use lambda_common::reqwest_client;
 use lambda_http::{run, service_fn, tracing, Body, Error, Request, RequestExt, Response};
 
 async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
@@ -5,16 +7,22 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
         .query_string_parameters_ref()
         .and_then(|params| params.first("session"));
 
-    // TODO: Replace template with get_reqwest_client()
-    // Use FitnessService directly instead of booking service
-
     match session {
         Some(session) => {
-            // fetchcourses
+            let http_client = reqwest_client();
+
+            let fitness_service = FitnessService::new(http_client);
+
+            let courses = fitness_service
+                .fetch_courses(session)
+                .await
+                .expect("fetching courses");
+            let courses = serde_json::to_string(&courses).expect("convert courses into String");
+
             let resp = Response::builder()
                 .status(200)
-                .header("content-type", "text/html")
-                .body(session.into())
+                .header("content-type", "application/json")
+                .body(courses.into())
                 .map_err(Box::new)?;
             Ok(resp)
         }

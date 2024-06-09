@@ -1,7 +1,6 @@
 use booking_first_lib::{booking_service::BookingService, dto::login_data::LoginData};
 use lambda_common::reqwest_client;
 use lambda_http::{run, service_fn, tracing, Body, Error, Request, Response};
-use serde_json::Value;
 
 /// This is the main body for the function.
 /// Write your code inside it.
