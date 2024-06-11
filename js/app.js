@@ -1,14 +1,25 @@
 import init, { login } from "../wasm-client/pkg/wasm_client.js";
 
-async function run() {
-  console.log("> run");
+async function initWasm() {
+  console.log("> init");
   await init();
-  console.log("ran init");
-
-  let loginRes = await login("User-Name", "Password");
-  console.log({ loginRes });
-
-  console.log({ res });
+  console.log("< init");
 }
+initWasm()
+  .then(() => console.log("initialized wasm module"))
+  .catch((e) => console.error(`init failed ${e}`));
 
-run();
+let sessionId;
+
+const usernameInput = document.querySelector("#username-input");
+const passwordInput = document.querySelector("#password-input");
+
+const loginButton = document.querySelector("#login-button");
+loginButton.addEventListener("click", async (e) => {
+  e.preventDefault();
+  const username = usernameInput.value;
+  const password = passwordInput.value;
+  sessionId = await login(username, password);
+
+  console.log({ sessionId });
+});
