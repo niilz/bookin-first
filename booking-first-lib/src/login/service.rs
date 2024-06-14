@@ -32,8 +32,8 @@ where
         let jwt_token = match self.http_client.egym_login(request).await {
             Ok(Response::Text(res)) => {
                 if let Some((_, token)) = res.rsplit_once("?token=") {
-                    println!("Egym-RES: {res}");
-                    println!("Egym login succeeded");
+                    dbg!("Egym-RES: {res}");
+                    dbg!("Egym login succeeded");
                     token.to_string()
                 } else {
                     eprintln!("Egym login failed");
@@ -53,8 +53,8 @@ where
     async fn login_to_fitness_first(&self, token: &str) -> Result<String, BoxDynError> {
         match self.http_client.ff_login(token).await {
             Ok(Response::Session(session_id)) => {
-                println!("FF login succeeded. PHPSESSID-Cookie should be in Jar");
-                println!("PHPSESSID: {session_id}");
+                dbg!("FF login succeeded. PHPSESSID-Cookie should be in Jar");
+                dbg!("PHPSESSID: {session_id}");
                 Ok(session_id)
             }
             Ok(_) => Err(Box::from("unexpected response type")),
