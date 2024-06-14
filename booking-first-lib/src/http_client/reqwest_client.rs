@@ -46,8 +46,9 @@ impl HttpClientSend for ReqwestHttpClientSend {
                     })
                     // TODO: turn option into error and bubble up
                     .last()
-                    .expect("No PHPSESSID");
-                Ok(Response::Session(cookies))
+                    .expect("No cookies");
+                let session = extract_session(&cookies)?;
+                Ok(Response::Session(session))
             }
             Err(e) => Err(Box::from(format!("Failed to login: {e}"))),
         }
@@ -110,5 +111,38 @@ impl HttpClientSend for ReqwestHttpClientSend {
             Ok(res) => Ok(Response::Json(res.text().await?)),
             Err(e) => Err(Box::from(format!("Failed to read slots: {e}"))),
         }
+    }
+}
+
+fn extract_session(cookies: &str) -> Result<String, String> {
+    let session = cookies
+        .split("; ")
+        .filter(|cookie| cookie.starts_with("PHPSESSID="))
+        .filter_map(|cookie| cookie.split_once('='))
+        .map(|(_, session)| session)
+        .last()
+        .ok_or("No Session present")?;
+
+    Ok(session.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::http_client::reqwest_client::extract_session;
+
+    #[test]
+    fn extract_session_from_cookies() {
+        let expected_session = "12345";
+        let dummy_cookies =
+            format!("PHPSESSID={expected_session}; path=/; secure; httponly; samesite=lax");
+        let session = extract_session(&dummy_cookies);
+        assert_eq!(session.unwrap(), expected_session);
+    }
+
+    #[test]
+    fn no_session_is_error() {
+        let dummy_cookies_without_session = format!("path=/; secure; httponly; samesite=lax");
+        let no_session = extract_session(&dummy_cookies_without_session);
+        assert!(no_session.is_err());
     }
 }
