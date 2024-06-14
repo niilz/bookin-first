@@ -1,4 +1,4 @@
-import init, { login } from "../wasm-client/pkg/wasm_client.js";
+import init, { login, fetch_courses } from "../wasm-client/pkg/wasm_client.js";
 
 async function initWasm() {
   console.log("> init");
@@ -22,4 +22,13 @@ loginButton.addEventListener("click", async (e) => {
   userCredentials = await login(username, password);
 
   console.log({ userCredentials });
+});
+
+const coursesButton = document.querySelector("#courses-button");
+coursesButton.addEventListener("click", async (e) => {
+  e.preventDefault();
+  const { session } = userCredentials;
+  const courses = await fetch_courses(session);
+
+  console.log({ courses });
 });
