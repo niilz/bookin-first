@@ -9,7 +9,7 @@ initWasm()
   .then(() => console.log("initialized wasm module"))
   .catch((e) => console.error(`init failed ${e}`));
 
-let sessionId;
+let userCredentials;
 
 const usernameInput = document.querySelector("#username-input");
 const passwordInput = document.querySelector("#password-input");
@@ -19,7 +19,7 @@ loginButton.addEventListener("click", async (e) => {
   e.preventDefault();
   const username = usernameInput.value;
   const password = passwordInput.value;
-  sessionId = await login(username, password);
+  userCredentials = await login(username, password);
 
-  console.log({ sessionId });
+  console.log({ userCredentials });
 });
