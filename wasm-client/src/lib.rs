@@ -1,40 +1,26 @@
 use shared::dto::login_data::LoginData;
 use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen::{JsCast, JsValue};
-use wasm_bindgen_futures::JsFuture;
-use web_sys::{RequestInit, Response};
+use wasm_bindgen::JsValue;
+
+mod fetch;
 
 #[wasm_bindgen]
 pub async fn login(user_name: String, password: String) -> Result<JsValue, JsValue> {
-    let window = web_sys::window().expect("Window unavailable");
     let login_data = LoginData {
         user_name,
         password,
     };
+    let login_url = fetch::lambda_url("login-lambda", None);
     let login_data = serde_json::to_string(&login_data).expect("login_data to Json");
-    let mut init = RequestInit::new();
-    init.body(Some(&JsValue::from(login_data)));
-    init.method("POST");
 
-    let promise = window.fetch_with_str_and_init(&lambda_url("login-lambda", None), &init);
-    let res = JsFuture::from(promise)
-        .await?
-        .dyn_into::<Response>()
-        .expect("fetch response");
-
-    let login_creds = JsFuture::from(res.json()?).await?;
-
-    Ok(login_creds)
+    fetch::client("POST", &login_url, Some(&login_data)).await
 }
 
-const LAMBDA_BASE_URL: &str = "http://localhost:9000/lambda-url/";
+#[wasm_bindgen]
+pub async fn fetch_courses(session_id: &str) -> Result<JsValue, JsValue> {
+    let courses_url = fetch::lambda_url("courses-lambda", Some(session_id));
 
-fn lambda_url(func: &str, session: Option<&str>) -> String {
-    let query = match session {
-        Some(session) => format!("?session={session}"),
-        None => "".to_string(),
-    };
-    format!("{LAMBDA_BASE_URL}{func}{query}")
+    fetch::client("GET", &courses_url, None).await
 }
 
 #[cfg(test)]
