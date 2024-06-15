@@ -1,6 +1,7 @@
+use std::collections::HashMap;
+
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
-use wasm_bindgen_test::console_log;
 use web_sys::{js_sys, RequestInit, Response, Window as WebSysWindow};
 
 pub(crate) trait Window {
@@ -42,16 +43,24 @@ pub(crate) async fn client(
 // TODO: make configurable
 const LAMBDA_BASE_URL: &str = "http://localhost:9000/lambda-url/";
 
-pub(crate) fn lambda_url(func: &str, session: Option<&str>) -> String {
-    let query = match session {
-        Some(session) => format!("?session={session}"),
-        None => "".to_string(),
+pub(crate) fn lambda_url(func: &str, params: &HashMap<&str, &str>) -> String {
+    let query = if !params.is_empty() {
+        let params = params
+            .iter()
+            .map(|(k, v)| format!("{k}={v}"))
+            .collect::<Vec<_>>()
+            .join("&");
+        format!("?{params}")
+    } else {
+        "".to_string()
     };
     format!("{LAMBDA_BASE_URL}{func}{query}")
 }
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
     use wasm_bindgen::JsValue;
     use wasm_bindgen_test::wasm_bindgen_test;
     use web_sys::{
@@ -63,14 +72,33 @@ mod tests {
 
     use super::{lambda_url, Window};
 
+    const SESSION_ID_DUMMY: &str = "12345";
+    const LAMBDA_NAME_DUMMY: &str = "frobnify";
+    const COURSE_ID_DUMMY: &str = "45678";
+
     #[test]
+    #[wasm_bindgen_test]
     fn url_with_session() {
-        let session_id_dummy = "12345";
-        let lambda_fn = "frobnify";
-        let url = lambda_url(lambda_fn, Some(session_id_dummy));
+        let url = lambda_url(
+            LAMBDA_NAME_DUMMY,
+            &HashMap::from([("session", SESSION_ID_DUMMY)]),
+        );
         assert_eq!(
             url,
             "http://localhost:9000/lambda-url/frobnify?session=12345"
+        );
+    }
+
+    #[test]
+    #[wasm_bindgen_test]
+    fn url_with_session_and_course() {
+        let url = lambda_url(
+            LAMBDA_NAME_DUMMY,
+            &HashMap::from([("session", SESSION_ID_DUMMY), ("course", COURSE_ID_DUMMY)]),
+        );
+        assert_eq!(
+            url,
+            "http://localhost:9000/lambda-url/frobnify?session=12345&course=45678"
         );
     }
 
