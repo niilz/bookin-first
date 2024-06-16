@@ -2,9 +2,9 @@
 
 ## Required
 
-- finish wasm-wiring (like cli) to call lambda-functions with fetch
-  - have fetch-wrapper (and tests)
-- implement HTML/JS UI
+- Why is slots not working? (can you inspect phone with wire shark?)
+- fetch slots via JS
+- book slot via JS
 - Make lambda functions hosts configurable
 - deploy functions to aws
 - Handle errors e.g. when Slot can not be read (is it a parsing problem?) or when Course is not bookable
