@@ -18,13 +18,13 @@ initWasm()
       .then((courseResult) => {
         if (courseResult) {
           // hide login form if courses could be loaded
-          loginForm.classList.add("hidden");
+          loginFormEl.classList.add("hidden");
         }
       })
       .catch((e) => {
         console.error(`unexpected error during initial course loading: ${e}`);
         // show login form if courses could not be loaded
-        loginForm.classList.remove("hidden");
+        loginFormEl.classList.remove("hidden");
       });
   })
   .catch((e) => console.error(`init failed ${e}`));
@@ -32,25 +32,25 @@ initWasm()
 let userCredentials;
 
 // Login-Inputs
-const loginForm = document.querySelector("#login-form");
-const usernameInput = document.querySelector("#username-input");
-const passwordInput = document.querySelector("#password-input");
+const loginFormEl = document.querySelector("#login-form");
+const usernameInputEl = document.querySelector("#username-input");
+const passwordInputEl = document.querySelector("#password-input");
 // Displayed Data
-const courseList = document.querySelector("#course-list");
+const selectListEl = document.querySelector("#select-list");
 
 async function tryLoadCourses() {
   const userCredentialsString = localStorage.getItem(USER_CREDENTIALS);
   if (userCredentialsString) {
     userCredentials = JSON.parse(userCredentialsString);
     console.log({ userCredentials });
-    return await loadAndDisplayCourses(userCredentials.session);
-  } else if (loginForm.classList.contains("hidden")) {
+    return await loadAndDisplayCourses(userCredentials.session, selectListEl);
+  } else if (loginFormEl.classList.contains("hidden")) {
     // Show login-form if credentials are not present
-    loginForm.classList.remove("hidden");
+    loginFormEl.classList.remove("hidden");
   }
 }
 
-courseList.addEventListener("click", (e) => {
+selectListEl.addEventListener("click", async (e) => {
   const course = e.target;
   if (course.classList.contains("course")) {
     // TODO: map course to data or backing array
@@ -63,8 +63,8 @@ const coursesButton = document.querySelector("#courses-button");
 coursesButton.addEventListener("click", async (e) => {
   e.preventDefault();
   if (!userCredentials) {
-    const username = usernameInput.value;
-    const password = passwordInput.value;
+    const username = usernameInputEl.value;
+    const password = passwordInputEl.value;
     login(username, password);
   }
   const { session } = userCredentials;
