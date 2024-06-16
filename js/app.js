@@ -3,6 +3,7 @@ import init, {
   courses as coursesWasm,
   slots as slotsWasm,
 } from "../wasm-client/pkg/wasm_client.js";
+import { displayCourses, displaySlots } from "./display.js";
 
 const USER_CREDENTIALS = "userCredentials";
 
@@ -53,9 +54,11 @@ async function tryLoadCourses() {
 selectListEl.addEventListener("click", async (e) => {
   const course = e.target;
   if (course.classList.contains("course")) {
-    // TODO: map course to data or backing array
-    console.log(`Clicked cours: ${course}`);
-    console.log("TODO: fetch slots");
+    loadAndDisplaySlots(
+      userCredentials.session,
+      course.dataset.courseId,
+      selectListEl
+    );
   }
 });
 
@@ -80,16 +83,11 @@ async function login(username, password) {
 
 async function loadAndDisplayCourses(sessionId) {
   const courseResult = await coursesWasm(sessionId);
-  displayCourses(courseResult);
+  displayCourses(courseResult, selectListEl);
   return courseResult;
 }
 
-function displayCourses(courses) {
-  const courseListItems = courses.map((course, idx) => {
-    let { id, title } = course;
-    return `<li id="course-${idx}" class="course" data-course-id="${id}">${title}</li>`;
-  });
-  for (const course of courseListItems) {
-    courseList.innerHTML += course;
-  }
+async function loadAndDisplaySlots(sessionId, courseId, selectListEl) {
+  const slots = await slotsWasm(sessionId, courseId);
+  displaySlots(slots, selectListEl);
 }
