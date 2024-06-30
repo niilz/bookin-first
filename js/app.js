@@ -6,7 +6,7 @@ import init, {
 import { displayCourses, displaySlots } from "./display.js";
 
 const USER_CREDENTIALS = "userCredentials";
-const USER_CREDENTIALS_APP_MODE = "userCredentialsAppMode";
+const DEFAULT_MODE = "app";
 
 async function initWasm() {
   console.log("> init");
@@ -32,7 +32,6 @@ initWasm()
   .catch((e) => console.error(`init failed ${e}`));
 
 let userCredentials;
-let userCredentialsAppMode;
 
 // Login-Inputs
 const loginFormEl = document.querySelector("#login-form");
@@ -43,20 +42,13 @@ const selectListEl = document.querySelector("#select-list");
 
 async function tryLoadCourses() {
   const userCredentialsString = localStorage.getItem(USER_CREDENTIALS);
-  const userCredentialsAppModeString = localStorage.getItem(
-    USER_CREDENTIALS_APP_MODE
-  );
   if (userCredentialsString) {
     userCredentials = JSON.parse(userCredentialsString);
     console.log({ userCredentials });
-    return await loadAndDisplayCourses(userCredentials.session, selectListEl);
-  } else if (userCredentialsAppModeString) {
-    userCredentialsAppMode = JSON.parse(userCredentialsAppMode);
-    console.log({ userCredentialsAppMode });
     return await loadAndDisplayCourses(
       userCredentials.session,
       selectListEl,
-      true
+      DEFAULT_MODE
     );
   } else if (loginFormEl.classList.contains("hidden")) {
     // Show login-form if credentials are not present
@@ -82,44 +74,30 @@ coursesButton.addEventListener("click", async (e) => {
   if (!userCredentials) {
     const username = usernameInputEl.value;
     const password = passwordInputEl.value;
-    login(username, password);
+    login(username, password, "web");
   }
   const { session } = userCredentials;
-  loadAndDisplayCourses(session);
+  loadAndDisplayCourses(session, "web");
 });
 
 coursesButtonAppMode.addEventListener("click", async (e) => {
   e.preventDefault();
-  if (!userCredentialsAppMode) {
+  if (!userCredentials) {
     const username = usernameInputEl.value;
     const password = passwordInputEl.value;
-    login(username, password, true);
+    login(username, password, "app");
   }
   const { session } = userCredentials;
-  loadAndDisplayCourses(session, true);
+  loadAndDisplayCourses(session, "app");
 });
-async function login(username, password, isAppMode) {
-  if (isAppMode) {
-    userCredentialsAppMode = await loginWasmAppMode(username, password);
-    localStorage.setItem(
-      USER_CREDENTIALS_APP_MODE,
-      JSON.stringify(userCredentialsAppMode)
-    );
-    console.log({ userCredentialsAppMode });
-  } else {
-    userCredentials = await loginWasm(username, password);
-    localStorage.setItem(USER_CREDENTIALS, JSON.stringify(userCredentials));
-    console.log({ userCredentials });
-  }
+async function login(username, password, mode) {
+  userCredentials = await loginWasm(username, password, mode);
+  localStorage.setItem(USER_CREDENTIALS, JSON.stringify(userCredentials));
+  console.log({ userCredentials });
 }
 
-async function loadAndDisplayCourses(sessionId, isAppMode) {
-  let courseResult;
-  if (isAppMode) {
-    courseResult = await coursesWasmAppMode(sessionId);
-  } else {
-    courseResult = await coursesWasm(sessionId);
-  }
+async function loadAndDisplayCourses(sessionId, selectListEl, mode) {
+  const courseResult = await coursesWasm(sessionId, mode);
   displayCourses(courseResult, selectListEl);
   return courseResult;
 }

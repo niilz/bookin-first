@@ -9,12 +9,12 @@ use web_sys::Window as WebSysWindow;
 mod fetch;
 
 #[wasm_bindgen]
-pub async fn login(user_name: String, password: String) -> Result<JsValue, JsValue> {
+pub async fn login(user_name: String, password: String, mode: &str) -> Result<JsValue, JsValue> {
     let login_data = LoginData {
         user_name,
         password,
     };
-    let login_url = fetch::lambda_url("login-lambda", &HashMap::new());
+    let login_url = fetch::lambda_url("login-lambda", &HashMap::from([("mode", mode)]));
     let login_data = serde_json::to_string(&login_data).expect("login_data to Json");
 
     let window = WebSysWindow::instance().ok_or("Window unavailable")?;
@@ -23,8 +23,9 @@ pub async fn login(user_name: String, password: String) -> Result<JsValue, JsVal
 }
 
 #[wasm_bindgen]
-pub async fn courses(session_id: &str) -> Result<JsValue, JsValue> {
-    let params = default_params(session_id);
+pub async fn courses(session_id: &str, mode: &str) -> Result<JsValue, JsValue> {
+    let mut params = default_params(session_id);
+    params.insert("mode", mode);
     let courses_url = fetch::lambda_url("courses-lambda", &params);
 
     let window = WebSysWindow::instance().ok_or("Window unavailable")?;
