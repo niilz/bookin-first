@@ -28,7 +28,22 @@ impl<ClientT> LoginService<ClientT>
 where
     ClientT: HttpClientSend,
 {
-    pub async fn do_login(&self, request: EgymLoginRequest) -> Result<LoginCreds, BoxDynError> {
+    pub async fn do_login(
+        &self,
+        request: LoginRequest,
+        mode: &str,
+    ) -> Result<LoginCreds, BoxDynError> {
+        match mode {
+            "web" => self.login_web(request).await,
+            //"app" => self.login_app(request).await,
+            unsupported_mode => {
+                let e = format!("unsupported mode: '{unsupported_mode}'");
+                Err(Box::from(e))
+            }
+        }
+    }
+
+    async fn login_web(&self, request: LoginRequest) -> Result<LoginCreds, BoxDynError> {
         let jwt_token = match self.http_client.egym_login(request).await {
             Ok(Response::Text(res)) => {
                 if let Some((_, token)) = res.rsplit_once("?token=") {
