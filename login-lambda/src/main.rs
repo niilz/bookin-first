@@ -8,6 +8,12 @@ use shared::dto::{login_data::LoginData, request::LoginRequest};
 /// There are some code example in the following URLs:
 /// - https://github.com/awslabs/aws-lambda-rust-runtime/tree/main/examples
 async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
+    let mode = event
+        .query_string_parameters_ref()
+        .and_then(|params| params.first("mode"))
+        .expect("please send a mode")
+        .to_string();
+
     let Body::Text(request_body) = event.into_body() else {
         return Err(Box::from("Only Text Requests are supported"));
     };
