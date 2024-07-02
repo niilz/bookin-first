@@ -2,6 +2,7 @@
 
 ## Required
 
+- implement alternative (app) mode in LoginService (login without EgymLogin)
 - Why is slots not working? (can you inspect phone with wire shark?)
 - fetch slots via JS
 - book slot via JS
