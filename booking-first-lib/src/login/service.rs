@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 use crate::http_client::HttpClientSend;
-use shared::dto::{error::BoxDynError, request::EgymLoginRequest, response::Response};
+use shared::dto::{error::BoxDynError, request::LoginRequest, response::Response};
 
 use super::parse::extract_user_id;
 
@@ -44,6 +44,7 @@ where
             Err(e) => return Err(Box::from(format!("login egym failed: {e}"))),
         };
         let session = self.login_to_fitness_first(&jwt_token).await?;
+
         Ok(LoginCreds {
             session,
             user_id: extract_user_id(&jwt_token)?,
@@ -72,7 +73,7 @@ mod test {
         mock_client,
         testutil::{egym_login_response_dummy, ff_login_response_dummy},
     };
-    use shared::dto::request::EgymLoginRequest;
+    use shared::dto::request::LoginRequest;
 
     const EGYM_TOKEN_URL_DUMMY: &str = "https://www.foo.de/my-area?token=";
     const EGYM_JWT_DUMMY: &str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkdW1teS1pc3N1ZXIiLCJhdWQiOiJkdW1teS1hdWRpZW5jZSIsImV4cCI6MTcxMTc0ODkyNCwiaWF0IjoxNzExNzQ1MzI0LCJzdWIiOiJkdW1teS1zdWIiLCJ1aWQiOiJhMTc1YmNlNy0zZTViLTQ4NjMtOTJhMS1lZmMxOTkxYWU2ZmQ6ZWZnaTVlaDVwd2lqIiwiY2xhaW1zIjp7ImJyYW5kSWQiOiJkdW1teS1icmFuZC1pZCIsImVneW1BY2NvdW50SWQiOiJkdW1teS1lZ3ltLWFjY291bnQtaWQiLCJtZW1iZXJzaGlwSWQiOiJkdW1teS1tZW1iZXJzaGlwLWlkIiwibW1zTWVtYmVyc2hpcElkcyI6WyIxMjM0NTY3ODkwIl19fQ.C_NkEF_U8PNPfSSX_P-aYZdssOygvhz3Q8QEGfbEnkI";
@@ -93,8 +94,8 @@ mod test {
         );
 
         let login_service = LoginService::new(http_client_mock);
-        let req = EgymLoginRequest::new("user", "password");
-        let success = login_service.do_login(req).await;
+        let req = LoginRequest::new("user", "password");
+        let success = login_service.do_login(req, "web").await;
 
         assert!(success.is_err());
         if let Err(err) = success {
@@ -112,8 +113,8 @@ mod test {
             MockRes::None
         );
         let login_service = LoginService::new(http_client_mock);
-        let req = EgymLoginRequest::new("user", "password");
-        let success = login_service.do_login(req).await;
+        let req = LoginRequest::new("user", "password");
+        let success = login_service.do_login(req, "web").await;
 
         assert!(success.is_err());
         if let Err(err) = success {
@@ -132,8 +133,8 @@ mod test {
             MockRes::None
         );
         let login_service = LoginService::new(http_client_mock);
-        let req = EgymLoginRequest::new("user", "password");
-        let login_creds = login_service.do_login(req).await;
+        let req = LoginRequest::new("user", "password");
+        let login_creds = login_service.do_login(req, "web").await;
 
         assert!(login_creds.is_ok());
         let login_creds = login_creds.unwrap();
@@ -152,8 +153,8 @@ mod test {
             MockRes::None
         );
         let login_service = LoginService::new(http_client_mock);
-        let req = EgymLoginRequest::new("user", "password");
-        let login_creds = login_service.do_login(req).await;
+        let req = LoginRequest::new("user", "password");
+        let login_creds = login_service.do_login(req, "web").await;
 
         assert!(login_creds.is_err());
     }
@@ -169,8 +170,8 @@ mod test {
             MockRes::None
         );
         let login_service = LoginService::new(http_client_mock);
-        let req = EgymLoginRequest::new("user", "password");
-        let login_creds = login_service.do_login(req).await;
+        let req = LoginRequest::new("user", "password");
+        let login_creds = login_service.do_login(req, "web").await;
 
         assert!(login_creds.is_ok());
         let login_creds = login_creds.unwrap();

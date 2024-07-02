@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use shared::dto::{request::EgymLoginRequest, response::Response};
+use shared::dto::response::Response;
 
 use super::*;
 
@@ -9,7 +9,7 @@ pub struct ReqwestHttpClientSend {
 }
 
 impl HttpClientSend for ReqwestHttpClientSend {
-    async fn egym_login(&self, request: EgymLoginRequest) -> Result<Response, BoxDynError> {
+    async fn egym_login(&self, request: LoginRequest) -> Result<Response, BoxDynError> {
         let mut params = HashMap::new();
         params.insert("username", request.user_name.as_str());
         params.insert("password", request.password.as_str());

@@ -11,7 +11,7 @@ macro_rules! mock_client {
         use crate::{http_client::HttpClientSend, testutil::MockRes};
         use shared::dto::{
             error::BoxDynError,
-            request::{BookingRequest, EgymLoginRequest},
+            request::{BookingRequest, LoginRequest},
             response::Response,
         };
 
@@ -25,10 +25,7 @@ macro_rules! mock_client {
         }
 
         impl HttpClientSend for HttpClientSendMock {
-            async fn egym_login(
-                &self,
-                _request: EgymLoginRequest,
-            ) -> Result<Response, BoxDynError> {
+            async fn egym_login(&self, _request: LoginRequest) -> Result<Response, BoxDynError> {
                 match self.egym_dummy.as_ref() {
                     Some(Ok(res)) => Ok(res.clone()),
                     Some(Err(e)) => Err(Box::from(e.to_string())),

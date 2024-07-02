@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
-pub struct EgymLoginRequest {
+pub struct LoginRequest {
     pub user_name: String,
     pub password: String,
     pub client_id: &'static str,
@@ -10,7 +10,7 @@ pub struct EgymLoginRequest {
 // Aparently the client-id is not per user but per company registered with eGym
 const FF_CLIENT_ID: &str = "a175bce7-3e5b-4863-92a1-efc1991ae6fd";
 
-impl EgymLoginRequest {
+impl LoginRequest {
     pub fn new(user_name: &str, password: &str) -> Self {
         Self {
             user_name: user_name.to_string(),

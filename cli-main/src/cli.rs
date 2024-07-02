@@ -8,7 +8,7 @@ use booking_first_lib::{
 use shared::dto::{
     course::Course,
     error::BoxDynError,
-    request::{BookingRequest, EgymLoginRequest},
+    request::{BookingRequest, LoginRequest},
     slots::Slot,
 };
 
@@ -23,7 +23,7 @@ where
     let fitness_service = FitnessService::new(Arc::clone(&http_client));
 
     let login_credentials = login_service
-        .do_login(EgymLoginRequest::new(&args.username, &args.password))
+        .do_login(LoginRequest::new(&args.username, &args.password), "web")
         .await
         .expect("LoginCreds not present after login?");
 

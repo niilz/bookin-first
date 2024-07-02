@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use shared::dto::{
     error::BoxDynError,
-    request::{BookingRequest, EgymLoginRequest},
+    request::{BookingRequest, LoginRequest},
     response::Response,
 };
 
@@ -17,7 +17,7 @@ pub const COURSES_URL_PATH: &str = "/api/magicline/openapi/classes/hamburg3";
 // TODO: Remove when async fn in traits is fully stable (see: https://blog.rust-lang.org/2023/12/21/async-fn-rpit-in-traits.html#async-fn-in-public-traits)
 #[trait_variant::make(HttpClientSend: Send + Sync)]
 pub trait HttpClient {
-    async fn egym_login(&self, request: EgymLoginRequest) -> Result<Response, BoxDynError>;
+    async fn egym_login(&self, request: LoginRequest) -> Result<Response, BoxDynError>;
     async fn ff_login(&self, egym_token: &str) -> Result<Response, BoxDynError>;
     async fn fetch_courses(&self, session_id: &str) -> Result<Response, BoxDynError>;
     async fn fetch_slots(
@@ -36,7 +36,7 @@ impl<ClientT> HttpClientSend for Arc<ClientT>
 where
     ClientT: HttpClientSend + Sync,
 {
-    async fn egym_login(&self, request: EgymLoginRequest) -> Result<Response, BoxDynError> {
+    async fn egym_login(&self, request: LoginRequest) -> Result<Response, BoxDynError> {
         self.as_ref().egym_login(request).await
     }
 
