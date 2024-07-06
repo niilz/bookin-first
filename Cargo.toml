@@ -6,6 +6,7 @@ members = [
 	"courses-lambda",
 	"login-lambda",
 	"slots-lambda",
-  "lambda-common"
-, "wasm-client", "shared"]
+  "lambda-common",
+	"wasm-client",
+	"shared"]
 resolver = "2"
