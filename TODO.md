@@ -3,6 +3,8 @@
 ## Required
 
 - implement alternative (app) mode in LoginService (login without EgymLogin)
+- get netpulse_login to work (mapping of cookie and response)
+- figure out how to handle store local-storage credentials
 - Why is slots not working? (can you inspect phone with wire shark?)
 - fetch slots via JS
 - book slot via JS
