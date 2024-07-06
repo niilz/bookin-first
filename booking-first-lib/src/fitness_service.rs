@@ -139,7 +139,7 @@ mod test {
 
         let session_dummy = "dummy-session";
         let fitness_service = FitnessService::new(http_client_mock);
-        let request_dummy = BookingRequest::new(42, 43, 43, "Some Course".to_string());
+        let request_dummy = BookingRequest::new("42", 43, 43, "Some Course".to_string());
         let booking = fitness_service
             .book_course(request_dummy, &session_dummy)
             .await

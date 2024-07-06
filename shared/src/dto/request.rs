@@ -38,9 +38,9 @@ pub struct BookingRequest {
 }
 
 impl BookingRequest {
-    pub fn new(user_id: usize, slot_id: usize, course_id: usize, course_name: String) -> Self {
+    pub fn new(user_id: &str, slot_id: usize, course_id: usize, course_name: String) -> Self {
         Self {
-            user_id,
+            user_id: user_id.parse::<usize>().expect("user_id must be a usize"),
             slot_id,
             course_id,
             club_id: "hamburg3".to_string(),

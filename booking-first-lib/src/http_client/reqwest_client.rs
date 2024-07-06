@@ -8,19 +8,6 @@ pub struct ReqwestHttpClientSend {
     pub client: reqwest::Client,
 }
 
-impl ReqwestHttpClientSend {
-    async fn login(&self, url: &str, params: HashMap<&str, &str>) -> Result<Response, BoxDynError> {
-        let res = self.client.post(url).form(&params).send().await;
-        match res {
-            Ok(res) => {
-                let res = res.text().await.expect("could not read response text");
-                Ok(Response::Text(res))
-            }
-            Err(e) => Err(Box::from(format!("Failed to login: {e}"))),
-        }
-    }
-}
-
 impl HttpClientSend for ReqwestHttpClientSend {
     async fn egym_login(&self, request: LoginRequest) -> Result<Response, BoxDynError> {
         let mut params = HashMap::new();

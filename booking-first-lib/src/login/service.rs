@@ -12,13 +12,7 @@ use super::parse::extract_user_id;
 #[derive(Debug, Serialize)]
 pub struct LoginCreds {
     pub session: String,
-    pub user_id: UserId,
-}
-
-#[derive(Debug, Serialize, Eq, PartialEq)]
-pub enum UserId {
-    Num(usize),
-    Uuid(String),
+    pub user_id: String,
 }
 
 #[derive(Default, Debug)]
@@ -55,16 +49,20 @@ where
 
     async fn login_app(&self, request: LoginRequest) -> Result<LoginCreds, BoxDynError> {
         let (session, login_response) = match self.http_client.netpulse_login(request).await {
-            Ok(Response::WithSession { response, session }) => (
-                session,
-                serde_json::from_str::<NetpulseLoginResponse>(&response)?,
-            ),
+            Ok(Response::WithSession { response, session }) => {
+                dbg!(&response);
+                dbg!(&session);
+                (
+                    session,
+                    serde_json::from_str::<NetpulseLoginResponse>(&response)?,
+                )
+            }
             Ok(_) => return Err(Box::from("Unexpected Response type for netpulse-login")),
             Err(e) => return Err(Box::from(format!("login netpulse failed: {e}"))),
         };
         Ok(LoginCreds {
             session,
-            user_id: UserId::Uuid(login_response.user_id),
+            user_id: login_response.user_id,
         })
     }
 
@@ -86,10 +84,7 @@ where
         let session = self.login_to_fitness_first(&jwt_token).await?;
 
         let user_id = extract_user_id(&jwt_token)?;
-        Ok(LoginCreds {
-            session,
-            user_id: UserId::Num(user_id),
-        })
+        Ok(LoginCreds { session, user_id })
     }
 
     async fn login_to_fitness_first(&self, token: &str) -> Result<String, BoxDynError> {
@@ -110,18 +105,14 @@ where
 mod test {
 
     use crate::{
-        login::service::{LoginService, UserId},
+        login::service::LoginService,
         mock_client,
         testutil::{
             egym_login_response_dummy, ff_login_response_dummy, netpulse_login_response_dummy,
         },
     };
-    use shared::dto::{
-        request::LoginRequest,
-        response::{self, NetpulseLoginResponse},
-    };
+    use shared::dto::{request::LoginRequest, response::NetpulseLoginResponse};
 
-    const NETPULSE_LOGIN_DUMMY: &str = "Egym login test-failure";
     const EGYM_TOKEN_URL_DUMMY: &str = "https://www.foo.de/my-area?token=";
     const EGYM_JWT_DUMMY: &str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkdW1teS1pc3N1ZXIiLCJhdWQiOiJkdW1teS1hdWRpZW5jZSIsImV4cCI6MTcxMTc0ODkyNCwiaWF0IjoxNzExNzQ1MzI0LCJzdWIiOiJkdW1teS1zdWIiLCJ1aWQiOiJhMTc1YmNlNy0zZTViLTQ4NjMtOTJhMS1lZmMxOTkxYWU2ZmQ6ZWZnaTVlaDVwd2lqIiwiY2xhaW1zIjp7ImJyYW5kSWQiOiJkdW1teS1icmFuZC1pZCIsImVneW1BY2NvdW50SWQiOiJkdW1teS1lZ3ltLWFjY291bnQtaWQiLCJtZW1iZXJzaGlwSWQiOiJkdW1teS1tZW1iZXJzaGlwLWlkIiwibW1zTWVtYmVyc2hpcElkcyI6WyIxMjM0NTY3ODkwIl19fQ.C_NkEF_U8PNPfSSX_P-aYZdssOygvhz3Q8QEGfbEnkI";
     const COOKIES_DUMMY: &str = "Session: PHPSESSID123DUMMY, Foo: OtherCookie";
@@ -189,7 +180,7 @@ mod test {
         assert!(login_creds.is_ok());
         let login_creds = login_creds.unwrap();
         assert_eq!(login_creds.session, COOKIES_DUMMY);
-        assert_eq!(login_creds.user_id, UserId::Num(1234567890));
+        assert_eq!(login_creds.user_id, "1234567890");
     }
 
     #[tokio::test]
@@ -227,7 +218,7 @@ mod test {
 
         assert!(login_creds.is_ok());
         let login_creds = login_creds.unwrap();
-        assert_eq!(login_creds.user_id, UserId::Num(1234567890));
+        assert_eq!(login_creds.user_id, "1234567890");
         assert_eq!(login_creds.session, COOKIES_DUMMY);
     }
 
@@ -257,7 +248,7 @@ mod test {
 
         assert!(login_creds.is_ok());
         let login_creds = login_creds.unwrap();
-        assert_eq!(login_creds.user_id, UserId::Uuid(dummy_id));
+        assert_eq!(login_creds.user_id, dummy_id);
         assert_eq!(login_creds.session, session_dummy);
     }
 }

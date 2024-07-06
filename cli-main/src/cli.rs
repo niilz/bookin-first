@@ -3,9 +3,7 @@ pub mod args;
 use std::{io::stdin, sync::Arc};
 
 use booking_first_lib::{
-    fitness_service::FitnessService,
-    http_client::HttpClientSend,
-    login::service::{LoginService, UserId},
+    fitness_service::FitnessService, http_client::HttpClientSend, login::service::LoginService,
 };
 use shared::dto::{
     course::Course,
@@ -65,10 +63,9 @@ where
         None => slot_input(&slots),
     };
 
-    let UserId::Num(user_id) = login_credentials.user_id else {
-        panic!("only user_id nums are supported for booking");
-    };
-    let booking = BookingRequest::new(user_id, slot_choice.id, course.id, course.title);
+    let user_id = login_credentials.user_id;
+
+    let booking = BookingRequest::new(&user_id, slot_choice.id, course.id, course.title);
 
     let booking_res = fitness_service
         .book_course(booking, &login_credentials.session)

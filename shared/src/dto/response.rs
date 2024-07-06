@@ -53,7 +53,7 @@ pub struct NetpulseLoginResponse {
     pub chain_name: String,
     pub timezone: String,
     #[serde(rename = "timezoneOffset")]
-    pub timezone_offset: String,
+    pub timezone_offset: usize,
     #[serde(rename = "profileCompleted")]
     pub profile_completed: bool,
     #[serde(rename = "membershipType")]
