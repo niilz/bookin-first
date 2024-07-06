@@ -6,7 +6,6 @@ import init, {
 import { displayCourses, displaySlots } from "./display.js";
 
 const USER_CREDENTIALS = "userCredentials";
-const DEFAULT_MODE = "app";
 
 async function initWasm() {
   console.log("> init");
@@ -27,6 +26,8 @@ initWasm()
         console.error(`unexpected error during initial course loading: ${e}`);
         // show login form if courses could not be loaded
         loginFormEl.classList.remove("hidden");
+        // clear out stale-credentials
+        localStorage.clear();
       });
   })
   .catch((e) => console.error(`init failed ${e}`));
@@ -48,7 +49,7 @@ async function tryLoadCourses() {
     return await loadAndDisplayCourses(
       userCredentials.session,
       selectListEl,
-      DEFAULT_MODE
+      userCredentials.mode
     );
   } else if (loginFormEl.classList.contains("hidden")) {
     // Show login-form if credentials are not present
@@ -92,6 +93,7 @@ coursesButtonAppMode.addEventListener("click", async (e) => {
 });
 async function login(username, password, mode) {
   userCredentials = await loginWasm(username, password, mode);
+  userCredentials.mode = mode;
   localStorage.setItem(USER_CREDENTIALS, JSON.stringify(userCredentials));
   console.log({ userCredentials });
 }
