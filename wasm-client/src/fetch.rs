@@ -96,9 +96,11 @@ mod tests {
             LAMBDA_NAME_DUMMY,
             &HashMap::from([("session", SESSION_ID_DUMMY), ("course", COURSE_ID_DUMMY)]),
         );
-        assert_eq!(
-            url,
-            "http://localhost:9000/lambda-url/frobnify?session=12345&course=45678"
+        assert!(url.starts_with("http://localhost:9000/lambda-url/"));
+        // Since params is a hasmap the order could be differernt
+        assert!(
+            url.ends_with("frobnify?session=12345&course=45678")
+                || url.ends_with("frobnify?course=45678&session=12345")
         );
     }
 
