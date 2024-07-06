@@ -1,14 +1,24 @@
 use serde::Serialize;
 
 use crate::http_client::HttpClientSend;
-use shared::dto::{error::BoxDynError, request::LoginRequest, response::Response};
+use shared::dto::{
+    error::BoxDynError,
+    request::LoginRequest,
+    response::{NetpulseLoginResponse, Response},
+};
 
 use super::parse::extract_user_id;
 
 #[derive(Debug, Serialize)]
 pub struct LoginCreds {
     pub session: String,
-    pub user_id: usize,
+    pub user_id: UserId,
+}
+
+#[derive(Debug, Serialize, Eq, PartialEq)]
+pub enum UserId {
+    Num(usize),
+    Uuid(String),
 }
 
 #[derive(Default, Debug)]
@@ -35,12 +45,27 @@ where
     ) -> Result<LoginCreds, BoxDynError> {
         match mode {
             "web" => self.login_web(request).await,
-            //"app" => self.login_app(request).await,
+            "app" => self.login_app(request).await,
             unsupported_mode => {
                 let e = format!("unsupported mode: '{unsupported_mode}'");
                 Err(Box::from(e))
             }
         }
+    }
+
+    async fn login_app(&self, request: LoginRequest) -> Result<LoginCreds, BoxDynError> {
+        let (session, login_response) = match self.http_client.netpulse_login(request).await {
+            Ok(Response::WithSession { response, session }) => (
+                session,
+                serde_json::from_str::<NetpulseLoginResponse>(&response)?,
+            ),
+            Ok(_) => return Err(Box::from("Unexpected Response type for netpulse-login")),
+            Err(e) => return Err(Box::from(format!("login netpulse failed: {e}"))),
+        };
+        Ok(LoginCreds {
+            session,
+            user_id: UserId::Uuid(login_response.user_id),
+        })
     }
 
     async fn login_web(&self, request: LoginRequest) -> Result<LoginCreds, BoxDynError> {
@@ -60,9 +85,10 @@ where
         };
         let session = self.login_to_fitness_first(&jwt_token).await?;
 
+        let user_id = extract_user_id(&jwt_token)?;
         Ok(LoginCreds {
             session,
-            user_id: extract_user_id(&jwt_token)?,
+            user_id: UserId::Num(user_id),
         })
     }
 
@@ -84,12 +110,18 @@ where
 mod test {
 
     use crate::{
-        login::service::LoginService,
+        login::service::{LoginService, UserId},
         mock_client,
-        testutil::{egym_login_response_dummy, ff_login_response_dummy},
+        testutil::{
+            egym_login_response_dummy, ff_login_response_dummy, netpulse_login_response_dummy,
+        },
     };
-    use shared::dto::request::LoginRequest;
+    use shared::dto::{
+        request::LoginRequest,
+        response::{self, NetpulseLoginResponse},
+    };
 
+    const NETPULSE_LOGIN_DUMMY: &str = "Egym login test-failure";
     const EGYM_TOKEN_URL_DUMMY: &str = "https://www.foo.de/my-area?token=";
     const EGYM_JWT_DUMMY: &str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkdW1teS1pc3N1ZXIiLCJhdWQiOiJkdW1teS1hdWRpZW5jZSIsImV4cCI6MTcxMTc0ODkyNCwiaWF0IjoxNzExNzQ1MzI0LCJzdWIiOiJkdW1teS1zdWIiLCJ1aWQiOiJhMTc1YmNlNy0zZTViLTQ4NjMtOTJhMS1lZmMxOTkxYWU2ZmQ6ZWZnaTVlaDVwd2lqIiwiY2xhaW1zIjp7ImJyYW5kSWQiOiJkdW1teS1icmFuZC1pZCIsImVneW1BY2NvdW50SWQiOiJkdW1teS1lZ3ltLWFjY291bnQtaWQiLCJtZW1iZXJzaGlwSWQiOiJkdW1teS1tZW1iZXJzaGlwLWlkIiwibW1zTWVtYmVyc2hpcElkcyI6WyIxMjM0NTY3ODkwIl19fQ.C_NkEF_U8PNPfSSX_P-aYZdssOygvhz3Q8QEGfbEnkI";
     const COOKIES_DUMMY: &str = "Session: PHPSESSID123DUMMY, Foo: OtherCookie";
@@ -102,6 +134,7 @@ mod test {
         let ff_login_err = "Out of scope ERR, only egym-login is testet";
         let http_client_mock = mock_client!(
             Some(egym_login_response_dummy(&token_res_dummy)),
+            MockRes::None,
             Some(Err(Box::from(ff_login_err))),
             MockRes::None,
             MockRes::None,
@@ -125,6 +158,7 @@ mod test {
             MockRes::None,
             MockRes::None,
             MockRes::None,
+            MockRes::None,
             MockRes::None
         );
         let login_service = LoginService::new(http_client_mock);
@@ -142,6 +176,7 @@ mod test {
         let token_res_dummy = format!("{EGYM_TOKEN_URL_DUMMY}{EGYM_JWT_DUMMY}");
         let http_client_mock = mock_client!(
             Some(egym_login_response_dummy(&token_res_dummy)),
+            MockRes::None,
             Some(ff_login_response_dummy(COOKIES_DUMMY)),
             MockRes::None,
             MockRes::None,
@@ -154,7 +189,7 @@ mod test {
         assert!(login_creds.is_ok());
         let login_creds = login_creds.unwrap();
         assert_eq!(login_creds.session, COOKIES_DUMMY);
-        assert_eq!(login_creds.user_id, 1234567890);
+        assert_eq!(login_creds.user_id, UserId::Num(1234567890));
     }
 
     #[tokio::test]
@@ -162,6 +197,7 @@ mod test {
         let token_res_dummy = format!("{EGYM_TOKEN_URL_DUMMY}{EGYM_JWT_DUMMY}");
         let http_client_mock = mock_client!(
             Some(egym_login_response_dummy(&token_res_dummy)),
+            MockRes::None,
             Some(Err(Box::from(FF_LOGIN_ERR_DUMMY))),
             MockRes::None,
             MockRes::None,
@@ -179,6 +215,7 @@ mod test {
         let token_res_dummy = format!("{EGYM_TOKEN_URL_DUMMY}{EGYM_JWT_DUMMY}");
         let http_client_mock = mock_client!(
             Some(egym_login_response_dummy(&token_res_dummy)),
+            MockRes::None,
             Some(ff_login_response_dummy(COOKIES_DUMMY)),
             MockRes::None,
             MockRes::None,
@@ -190,7 +227,37 @@ mod test {
 
         assert!(login_creds.is_ok());
         let login_creds = login_creds.unwrap();
-        assert_eq!(login_creds.user_id, 1234567890);
+        assert_eq!(login_creds.user_id, UserId::Num(1234567890));
         assert_eq!(login_creds.session, COOKIES_DUMMY);
+    }
+
+    // App-mode
+    #[tokio::test]
+    async fn can_login_to_netpulse() {
+        let dummy_id = "123-456-789".to_string();
+        let mut login_res_dummy = NetpulseLoginResponse::default();
+        login_res_dummy.user_id = dummy_id.clone();
+        let login_res_dummy = serde_json::to_string(&login_res_dummy).unwrap();
+
+        let session_dummy = "JSESSIONID=FooBarBaz";
+        let http_client_mock = mock_client!(
+            MockRes::None,
+            Some(netpulse_login_response_dummy(
+                &login_res_dummy,
+                &session_dummy
+            )),
+            MockRes::None,
+            MockRes::None,
+            MockRes::None,
+            MockRes::None
+        );
+        let login_service = LoginService::new(http_client_mock);
+        let req = LoginRequest::new("user", "password");
+        let login_creds = login_service.do_login(req, "app").await;
+
+        assert!(login_creds.is_ok());
+        let login_creds = login_creds.unwrap();
+        assert_eq!(login_creds.user_id, UserId::Uuid(dummy_id));
+        assert_eq!(login_creds.session, session_dummy);
     }
 }

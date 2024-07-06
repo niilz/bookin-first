@@ -8,6 +8,19 @@ pub struct ReqwestHttpClientSend {
     pub client: reqwest::Client,
 }
 
+impl ReqwestHttpClientSend {
+    async fn login(&self, url: &str, params: HashMap<&str, &str>) -> Result<Response, BoxDynError> {
+        let res = self.client.post(url).form(&params).send().await;
+        match res {
+            Ok(res) => {
+                let res = res.text().await.expect("could not read response text");
+                Ok(Response::Text(res))
+            }
+            Err(e) => Err(Box::from(format!("Failed to login: {e}"))),
+        }
+    }
+}
+
 impl HttpClientSend for ReqwestHttpClientSend {
     async fn egym_login(&self, request: LoginRequest) -> Result<Response, BoxDynError> {
         let mut params = HashMap::new();
@@ -25,6 +38,27 @@ impl HttpClientSend for ReqwestHttpClientSend {
         }
     }
 
+    async fn netpulse_login(&self, request: LoginRequest) -> Result<Response, BoxDynError> {
+        let mut params = HashMap::new();
+        params.insert("username", request.user_name.as_str());
+        params.insert("password", request.password.as_str());
+        let response = self
+            .client
+            .post(NETPULSE_LOGIN_URL)
+            .form(&params)
+            .send()
+            .await;
+        match response {
+            Ok(res) => {
+                let cookies = read_cookies(&res);
+                let session = extract_session(&cookies, "JSESSIONID=")?;
+                let response = res.text().await.expect("could not read reponse text");
+                Ok(Response::WithSession { response, session })
+            }
+            Err(e) => Err(Box::from(format!("Failed to login: {e}"))),
+        }
+    }
+
     async fn ff_login(&self, egym_token: &str) -> Result<Response, BoxDynError> {
         //https://mein.fitnessfirst.de/egymid-login?token=
         let url = format!("{FITNESS_FIRST_BASE_URL}{EGYM_TOKEN_PATH}{egym_token}");
@@ -34,20 +68,8 @@ impl HttpClientSend for ReqwestHttpClientSend {
         match res {
             Ok(res) => {
                 //dbg!(&res);
-                let cookies = res
-                    .headers()
-                    .iter()
-                    .filter(|h| h.0 == "set-cookie")
-                    // TODO: propagate error up
-                    .map(|h| {
-                        h.1.to_str()
-                            .expect("could not convert header to str")
-                            .to_string()
-                    })
-                    // TODO: turn option into error and bubble up
-                    .last()
-                    .expect("No cookies");
-                let session = extract_session(&cookies)?;
+                let cookies = read_cookies(&res);
+                let session = extract_session(&cookies, "PHPSESSID=")?;
                 Ok(Response::Session(session))
             }
             Err(e) => Err(Box::from(format!("Failed to login: {e}"))),
@@ -114,10 +136,26 @@ impl HttpClientSend for ReqwestHttpClientSend {
     }
 }
 
-fn extract_session(cookies: &str) -> Result<String, String> {
+fn read_cookies(response: &reqwest::Response) -> String {
+    response
+        .headers()
+        .iter()
+        .filter(|h| h.0 == "set-cookie")
+        // TODO: propagate error up
+        .map(|h| {
+            h.1.to_str()
+                .expect("could not convert header to str")
+                .to_string()
+        })
+        // TODO: turn option into error and bubble up
+        .last()
+        .expect("No cookies")
+}
+
+fn extract_session(cookies: &str, session_key: &str) -> Result<String, String> {
     let session = cookies
         .split("; ")
-        .filter(|cookie| cookie.starts_with("PHPSESSID="))
+        .filter(|cookie| cookie.starts_with(session_key))
         .filter_map(|cookie| cookie.split_once('='))
         .map(|(_, session)| session)
         .last()
@@ -135,14 +173,14 @@ mod tests {
         let expected_session = "12345";
         let dummy_cookies =
             format!("PHPSESSID={expected_session}; path=/; secure; httponly; samesite=lax");
-        let session = extract_session(&dummy_cookies);
+        let session = extract_session(&dummy_cookies, "PHPSESSID=");
         assert_eq!(session.unwrap(), expected_session);
     }
 
     #[test]
     fn no_session_is_error() {
         let dummy_cookies_without_session = format!("path=/; secure; httponly; samesite=lax");
-        let no_session = extract_session(&dummy_cookies_without_session);
+        let no_session = extract_session(&dummy_cookies_without_session, "PHPSESSID=");
         assert!(no_session.is_err());
     }
 }
