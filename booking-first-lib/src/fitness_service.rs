@@ -80,6 +80,7 @@ mod test {
         let http_client_mock = mock_client!(
             MockRes::None,
             MockRes::None,
+            MockRes::None,
             Some(serialize_response_dummy(&expected_courses)),
             MockRes::None,
             MockRes::None
@@ -99,6 +100,7 @@ mod test {
     async fn read_all_slots_works() {
         let expected_slots = generate_dummy_slots(5);
         let http_client_mock = mock_client!(
+            MockRes::None,
             MockRes::None,
             MockRes::None,
             MockRes::None,
@@ -127,6 +129,7 @@ mod test {
               })
         .to_string();
         let http_client_mock = mock_client!(
+            MockRes::None,
             MockRes::None,
             MockRes::None,
             MockRes::None,
