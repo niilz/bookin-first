@@ -8,12 +8,15 @@ use shared::dto::{
     response::Response,
 };
 
+// Web API
 pub const FITNESS_FIRST_BASE_URL: &str = "https://mein.fitnessfirst.de";
 pub const FITNESS_FIRST_CALLBACK_URL: &str = "https://www.fitnessfirst.de/mein-fitnessfirst";
 pub const EGYM_LOGIN_URL: &str = "https://id.egym.com/login";
-pub const NETPULSE_LOGIN_URL: &str = "https://fitnessfirst.netpulse.com/np/exerciser/login";
 pub const EGYM_TOKEN_PATH: &str = "/egymid-login?token=";
 pub const COURSES_URL_PATH: &str = "/api/magicline/openapi/classes/hamburg3";
+// App API
+pub const NETPULSE_LOGIN_URL: &str = "https://fitnessfirst.netpulse.com/np/exerciser/login";
+pub const FF_NETPULSE_BASE_URL: &str = "https://fitnessfirst.netpulse.com/np/company/";
 
 // TODO: Remove when async fn in traits is fully stable (see: https://blog.rust-lang.org/2023/12/21/async-fn-rpit-in-traits.html#async-fn-in-public-traits)
 #[trait_variant::make(HttpClientSend: Send + Sync)]
@@ -21,7 +24,11 @@ pub trait HttpClient {
     async fn egym_login(&self, request: LoginRequest) -> Result<Response, BoxDynError>;
     async fn netpulse_login(&self, request: LoginRequest) -> Result<Response, BoxDynError>;
     async fn ff_login(&self, egym_token: &str) -> Result<Response, BoxDynError>;
-    async fn fetch_courses(&self, session_id: &str) -> Result<Response, BoxDynError>;
+    async fn fetch_courses(
+        &self,
+        session_id: &str,
+        user_id: Option<&str>,
+    ) -> Result<Response, BoxDynError>;
     async fn fetch_slots(
         &self,
         course_id: usize,
@@ -50,8 +57,12 @@ where
         self.as_ref().ff_login(egym_token).await
     }
 
-    async fn fetch_courses(&self, session_id: &str) -> Result<Response, BoxDynError> {
-        self.as_ref().fetch_courses(session_id).await
+    async fn fetch_courses(
+        &self,
+        session_id: &str,
+        user_id: Option<&str>,
+    ) -> Result<Response, BoxDynError> {
+        self.as_ref().fetch_courses(session_id, user_id).await
     }
 
     async fn fetch_slots(

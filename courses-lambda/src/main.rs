@@ -7,6 +7,10 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
         .query_string_parameters_ref()
         .and_then(|params| params.first("session"));
 
+    let user_id = event
+        .query_string_parameters_ref()
+        .and_then(|params| params.first("user_id"));
+
     match session {
         Some(session) => {
             let http_client = reqwest_client();
@@ -14,7 +18,7 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
             let fitness_service = FitnessService::new(http_client);
 
             let courses = fitness_service
-                .fetch_courses(session)
+                .fetch_courses(session, user_id)
                 .await
                 .expect("fetching courses");
             let courses = serde_json::to_string(&courses).expect("convert courses into String");

@@ -28,7 +28,7 @@ where
         .expect("LoginCreds not present after login?");
 
     let course_response = fitness_service
-        .fetch_courses(&login_credentials.session)
+        .fetch_courses(&login_credentials.session, None)
         .await?;
 
     let course_choice = match &args.course_name {

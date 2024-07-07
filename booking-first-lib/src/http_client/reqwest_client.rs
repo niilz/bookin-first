@@ -1,8 +1,13 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 
 use shared::dto::response::Response;
 
 use super::*;
+
+const DAY_SEC: u64 = 60 * 60 * 24;
 
 pub struct ReqwestHttpClientSend {
     pub client: reqwest::Client,
@@ -63,8 +68,28 @@ impl HttpClientSend for ReqwestHttpClientSend {
         }
     }
 
-    async fn fetch_courses(&self, session_id: &str) -> Result<Response, BoxDynError> {
-        let url = format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}");
+    async fn fetch_courses(
+        &self,
+        session_id: &str,
+        user_id: Option<&str>,
+    ) -> Result<Response, BoxDynError> {
+        let url = match user_id {
+            None => format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}"),
+            Some(uuid) => {
+                let start_time = SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .expect("System Time before UNIX-Epoch");
+                let two_weeks = Duration::from_secs(DAY_SEC * 14);
+                let end_time = start_time
+                    .checked_add(two_weeks)
+                    .expect("reached end of time")
+                    .as_millis();
+                let start_time = start_time.as_millis();
+                // TODO: make gymlocation variable
+                let gym_location = "37d7c5d3-6594-4853-a1e6-c116ac084690";
+                format!("{FF_NETPULSE_BASE_URL}/{gym_location}/classes?startDateTime={start_time}&exerciserUuid={uuid}&endDateTime={end_time}")
+            }
+        };
         println!("Getting courses from: {url}");
         let req = self
             .client

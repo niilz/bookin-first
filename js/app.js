@@ -19,6 +19,7 @@ initWasm()
       .then((courseResult) => {
         if (courseResult) {
           // hide login form if courses could be loaded
+          console.log("Got courses. Hide login");
           loginFormEl.classList.add("hidden");
         }
       })
@@ -45,15 +46,15 @@ async function tryLoadCourses() {
   const userCredentialsString = localStorage.getItem(USER_CREDENTIALS);
   if (userCredentialsString) {
     userCredentials = JSON.parse(userCredentialsString);
+    console.log(`found credentials for mode: ${userCredentials.mode}`);
     console.log({ userCredentials });
-    return await loadAndDisplayCourses(
-      userCredentials.session,
-      selectListEl,
-      userCredentials.mode
-    );
+    return await loadAndDisplayCourses(userCredentials, selectListEl);
   } else if (loginFormEl.classList.contains("hidden")) {
     // Show login-form if credentials are not present
+    console.log("No credentials. Show login.");
     loginFormEl.classList.remove("hidden");
+  } else {
+    console.log("No credentials present and login is already shown.");
   }
 }
 
@@ -75,7 +76,7 @@ coursesButton.addEventListener("click", async (e) => {
   if (!userCredentials) {
     const username = usernameInputEl.value;
     const password = passwordInputEl.value;
-    login(username, password, "web");
+    await login(username, password, "web");
   }
   const { session } = userCredentials;
   loadAndDisplayCourses(session, "web");
@@ -86,25 +87,37 @@ coursesButtonAppMode.addEventListener("click", async (e) => {
   if (!userCredentials) {
     const username = usernameInputEl.value;
     const password = passwordInputEl.value;
-    login(username, password, "app");
+    await login(username, password, "app");
   }
-  const { session } = userCredentials;
-  loadAndDisplayCourses(session, "app");
+  loadAndDisplayCourses(userCredentials, "app");
 });
+
 async function login(username, password, mode) {
+  console.log("loging in");
   userCredentials = await loginWasm(username, password, mode);
   userCredentials.mode = mode;
   localStorage.setItem(USER_CREDENTIALS, JSON.stringify(userCredentials));
   console.log({ userCredentials });
 }
 
-async function loadAndDisplayCourses(sessionId, selectListEl, mode) {
-  const courseResult = await coursesWasm(sessionId, mode);
+async function loadAndDisplayCourses(userCredentials, selectListEl) {
+  console.log("Loading courses");
+  let courseResult;
+  if (userCredentials.mode === "app") {
+    courseResult = await coursesWasm(
+      userCredentials["session"],
+      userCredentials["user_id"]
+    );
+  } else if (userCredentials.mode === "web") {
+    courseResult = await coursesWasm(userCredentials.session, "");
+  } else {
+    throw Exception(`Unsupported mode ${userCredentials.mode}`);
+  }
   displayCourses(courseResult, selectListEl);
   return courseResult;
 }
 
-// Only relevant for non web mode (not app mode)
+// Only relevant for web mode (not app mode)
 async function loadAndDisplaySlots(sessionId, courseId, selectListEl) {
   const slots = await slotsWasm(sessionId, courseId);
   displaySlots(slots, selectListEl);

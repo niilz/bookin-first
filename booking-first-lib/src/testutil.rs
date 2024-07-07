@@ -54,7 +54,11 @@ macro_rules! mock_client {
                 }
             }
 
-            async fn fetch_courses(&self, _session_id: &str) -> Result<Response, BoxDynError> {
+            async fn fetch_courses(
+                &self,
+                _session_id: &str,
+                _user_id: Option<&str>,
+            ) -> Result<Response, BoxDynError> {
                 match self.courses_dummy.as_ref() {
                     Some(Ok(res)) => Ok(res.clone()),
                     Some(Err(e)) => Err(Box::from(e.to_string())),

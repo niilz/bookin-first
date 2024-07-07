@@ -23,9 +23,11 @@ pub async fn login(user_name: String, password: String, mode: &str) -> Result<Js
 }
 
 #[wasm_bindgen]
-pub async fn courses(session_id: &str, mode: &str) -> Result<JsValue, JsValue> {
+pub async fn courses(session_id: &str, user_id: &str) -> Result<JsValue, JsValue> {
     let mut params = default_params(session_id);
-    params.insert("mode", mode);
+    if !user_id.is_empty() {
+        params.insert("user_id", user_id);
+    }
     let courses_url = fetch::lambda_url("courses-lambda", &params);
 
     let window = WebSysWindow::instance().ok_or("Window unavailable")?;
