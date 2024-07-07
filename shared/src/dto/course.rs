@@ -2,12 +2,12 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
-pub struct CoursesResult {
+pub struct WebCoursesResult {
     #[serde(rename = "result")]
     pub courses: Vec<Course>,
 }
 
-impl FromIterator<Course> for CoursesResult {
+impl FromIterator<Course> for WebCoursesResult {
     fn from_iter<T: IntoIterator<Item = Course>>(iter: T) -> Self {
         Self {
             courses: iter.into_iter().collect(),
