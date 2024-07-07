@@ -70,7 +70,7 @@ mod test {
     use chrono::{DateTime, Local};
     use serde_json::json;
     use shared::dto::{
-        course::{Course, CoursesResult},
+        course::{Course, CoursesResult, SimpleCourse},
         request::BookingRequest,
         response::BookingState,
         slots::{Slot, SlotsResult},
@@ -158,7 +158,7 @@ mod test {
 
     fn generate_dummy_courses(count: u32) -> CoursesResult {
         (0..count)
-            .map(|id| Course {
+            .map(|id| SimpleCourse {
                 id: id as usize,
                 title: fakeit::words::sentence(5),
                 typ: fakeit::words::word(),
@@ -168,6 +168,7 @@ mod test {
                 image_url: fakeit::image::url(42, 42),
                 bookable: fakeit::bool_rand::bool(),
             })
+            .map(|sc| Course::Web(sc))
             .collect()
     }
 

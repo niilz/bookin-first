@@ -39,7 +39,7 @@ where
     let course = course_response
         .into_iter()
         .find(|c| {
-            c.title
+            c.name()
                 .to_lowercase()
                 .contains(&course_choice.to_lowercase())
         })
@@ -49,6 +49,10 @@ where
     println!("You're chosen course is:");
     println!();
     println!("Course: {course:#?}");
+
+    let Course::Web(course) = course else {
+        panic!("CLI only supports WEB-mode");
+    };
 
     let slots = fitness_service
         .fetch_slots(course.id, &login_credentials.session)
@@ -80,7 +84,7 @@ fn course_input(courses: &[Course]) -> String {
     println!("The courses are:");
 
     for (idx, course) in courses.iter().enumerate() {
-        println!("{}: {}", idx + 1, course.title);
+        println!("{}: {}", idx + 1, course.name());
     }
     println!();
     println!("Insert Course Name");
