@@ -1,5 +1,5 @@
 use shared::dto::{
-    course::{Course, CoursesResult},
+    course::{Course, CourseWithSlot, WebCoursesResult},
     error::BoxDynError,
     request::BookingRequest,
     response::{BookingResponse, Response},
@@ -26,9 +26,21 @@ where
     ) -> Result<Vec<Course>, BoxDynError> {
         let courses_res = self.http_client.fetch_courses(session, user_id).await?;
         if let Response::Json(courses_json) = courses_res {
-            let result = serde_json::from_str::<CoursesResult>(&courses_json)
-                .expect("Could not deserialize into courses");
-            Ok(result.courses)
+            match user_id {
+                None => {
+                    let result = serde_json::from_str::<WebCoursesResult>(&courses_json)
+                        .expect("Could not deserialize into courses");
+                    Ok(result.courses)
+                }
+                Some(_) => {
+                    let courses = serde_json::from_str::<Vec<CourseWithSlot>>(&courses_json)
+                        .expect("Could not deserialize into courses")
+                        .into_iter()
+                        .map(|c| Course::App(c))
+                        .collect();
+                    Ok(courses)
+                }
+            }
         } else {
             Err(Box::from("Unexpected Response-Type"))
         }
@@ -70,7 +82,7 @@ mod test {
     use chrono::{DateTime, Local};
     use serde_json::json;
     use shared::dto::{
-        course::{Course, CoursesResult, SimpleCourse},
+        course::{Course, SimpleCourse, WebCoursesResult},
         request::BookingRequest,
         response::BookingState,
         slots::{Slot, SlotsResult},
@@ -156,7 +168,7 @@ mod test {
         assert_eq!(55667788, booking.customer_id);
     }
 
-    fn generate_dummy_courses(count: u32) -> CoursesResult {
+    fn generate_dummy_courses(count: u32) -> WebCoursesResult {
         (0..count)
             .map(|id| SimpleCourse {
                 id: id as usize,
