@@ -1,7 +1,13 @@
-export function displayCourses(courses, courseListEl) {
+export function displayCourses(courses, courseListEl, mode) {
+  console.log("Displaying courses");
   const courseListItems = courses.map((course, idx) => {
-    let { id, title } = course;
-    return `<li id="course-${idx}" class="course" data-course-id="${id}">${title}</li>`;
+    if (mode === "web") {
+      let { id, title } = course;
+      return `<li id="course-${idx}" class="course" data-course-id="${id}">${title}</li>`;
+    } else if (mode === "app") {
+      let { id, name } = course.App.brief;
+      return `<li id="course-${idx}" class="course" data-course-id="${id}">${name}</li>`;
+    }
   });
   for (const course of courseListItems) {
     courseListEl.innerHTML += course;

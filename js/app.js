@@ -78,8 +78,7 @@ coursesButton.addEventListener("click", async (e) => {
     const password = passwordInputEl.value;
     await login(username, password, "web");
   }
-  const { session } = userCredentials;
-  loadAndDisplayCourses(session, "web");
+  loadAndDisplayCourses(userCredentials, selectListEl);
 });
 
 coursesButtonAppMode.addEventListener("click", async (e) => {
@@ -89,11 +88,11 @@ coursesButtonAppMode.addEventListener("click", async (e) => {
     const password = passwordInputEl.value;
     await login(username, password, "app");
   }
-  loadAndDisplayCourses(userCredentials, "app");
+  loadAndDisplayCourses(userCredentials, selectListEl);
 });
 
 async function login(username, password, mode) {
-  console.log("loging in");
+  console.log("logging in");
   userCredentials = await loginWasm(username, password, mode);
   userCredentials.mode = mode;
   localStorage.setItem(USER_CREDENTIALS, JSON.stringify(userCredentials));
@@ -113,7 +112,7 @@ async function loadAndDisplayCourses(userCredentials, selectListEl) {
   } else {
     throw Exception(`Unsupported mode ${userCredentials.mode}`);
   }
-  displayCourses(courseResult, selectListEl);
+  displayCourses(courseResult, selectListEl, userCredentials.mode);
   return courseResult;
 }
 
