@@ -91,10 +91,14 @@ impl HttpClientSend for ReqwestHttpClientSend {
             }
         };
         println!("Getting courses from: {url}");
+        let session_id_key = match user_id {
+            None => "PHPSESSID",
+            Some(_) => "JSESSIONID",
+        };
         let req = self
             .client
             .get(url)
-            .header("Cookie", &format!("PHPSESSID={session_id}"));
+            .header("Cookie", &format!("{session_id_key}={session_id}"));
         //dbg!(&req);
         let res = req.send().await;
         //dbg!(&res);
