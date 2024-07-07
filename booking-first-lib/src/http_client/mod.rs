@@ -16,7 +16,7 @@ pub const EGYM_TOKEN_PATH: &str = "/egymid-login?token=";
 pub const COURSES_URL_PATH: &str = "/api/magicline/openapi/classes/hamburg3";
 // App API
 pub const NETPULSE_LOGIN_URL: &str = "https://fitnessfirst.netpulse.com/np/exerciser/login";
-pub const FF_NETPULSE_BASE_URL: &str = "https://fitnessfirst.netpulse.com/np/company/";
+pub const FF_NETPULSE_BASE_URL: &str = "https://fitnessfirst.netpulse.com/np/company";
 
 // TODO: Remove when async fn in traits is fully stable (see: https://blog.rust-lang.org/2023/12/21/async-fn-rpit-in-traits.html#async-fn-in-public-traits)
 #[trait_variant::make(HttpClientSend: Send + Sync)]
