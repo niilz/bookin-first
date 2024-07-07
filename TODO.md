@@ -2,8 +2,7 @@
 
 ## Required
 
-- implement alternative (app) mode in LoginService (login without EgymLogin)
-- get netpulse_login to work (mapping of cookie and response)
+- Make gym-location (returned in login response) variable in fetch courses
 - figure out how to handle store local-storage credentials
 - Why is slots not working? (can you inspect phone with wire shark?)
 - fetch slots via JS
