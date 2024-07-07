@@ -2,7 +2,10 @@
 
 ## Required
 
-- Handle different course-layouts in app and web mode
+- Handle different course-layouts in app and web mode (in JS)
+- Ensure that course loading still works with Web mode (serialization might fail in fitness_service#fetch_courses)
+- Show slots from app-mode resonse
+- implement book course with app-mode
 - Make gym-location (returned in login response) variable in fetch courses
 - figure out how to handle store local-storage credentials
 - Why is slots not working? (can you inspect phone with wire shark?)
