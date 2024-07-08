@@ -3,6 +3,7 @@ import init, {
   courses as coursesWasm,
   slots as slotsWasm,
 } from "../wasm-client/pkg/wasm_client.js";
+import { mapCourseSlots } from "./course-mapper.js";
 import { displayCourses, displaySlots } from "./display.js";
 
 const USER_CREDENTIALS = "userCredentials";
@@ -112,7 +113,8 @@ async function loadAndDisplayCourses(userCredentials, selectListEl) {
   } else {
     throw Exception(`Unsupported mode ${userCredentials.mode}`);
   }
-  displayCourses(courseResult, selectListEl, userCredentials.mode);
+  const courseSlots = mapCourseSlots(courseResult, userCredentials.mode);
+  displayCourses(courseSlots, selectListEl, userCredentials.mode);
   return courseResult;
 }
 
