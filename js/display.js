@@ -1,19 +1,20 @@
 export function displayCourses(courseSlots, courseListEl, mode) {
   console.log("Displaying courses");
-  const courseListItems = courseSlots.entries().map(([course, slots], idx) => {
-    if (mode === "web") {
-      let { id, title } = course;
-      return `<li id="course-${idx}" class="course" data-course-id="${id}">${title}</li>`;
-    } else if (mode === "app") {
-      let { id, name } = course;
-      return `<li id="course-${idx}" class="course" data-course-id="${id}">
+  const courseListItems = courseSlots
+    .entries()
+    .map(([courseKey, slots], idx) => {
+      const [id, name] = courseKey.split(":");
+      if (mode === "web") {
+        return `<li id="course-${idx}" class="course" data-course-id="${id}">${name}</li>`;
+      } else if (mode === "app") {
+        return `<li id="course-${idx}" class="course" data-course-id="${id}">
          <div>
             <p>${name}</p>
             ${slotsHtml(slots)}
          </div>
        </li>`;
-    }
-  });
+      }
+    });
   for (const course of courseListItems) {
     courseListEl.innerHTML += course;
   }

@@ -1,24 +1,28 @@
 export function mapCourseSlots(courses, mode) {
   const courseSlotsMap = courses.reduce((map, c) => {
     const course = mode === "app" ? c.App.brief : c;
-    if (!map.has(course)) {
-      map.set(course, []);
+    // FIXME: If web mode ever works again, a web-course id can not be split
+    const [courseId, slotId] = course.id.split(":");
+    const courseKey = `${courseId}:${course.name}`;
+    if (!map.has(courseKey)) {
+      map.set(courseKey, []);
     }
     if (mode === "app") {
-      const slot = mapSlot(course);
-      map.get(course).push(slot);
+      const slot = mapSlot(course, slotId);
+      map.get(courseKey).push(slot);
     }
     return map;
   }, new Map());
   return courseSlotsMap;
 }
 
-function mapSlot(course) {
+function mapSlot(course, slotId) {
   const { startDateTime, endDateTime, maxCapacity, totalBooked } = course;
   const start = new Date(startDateTime);
   const end = new Date(endDateTime);
 
   const slot = {
+    slotId,
     start,
     end,
     maxCapacity,
