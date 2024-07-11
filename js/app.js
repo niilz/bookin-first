@@ -59,6 +59,12 @@ async function tryLoadCourses() {
   }
 }
 
+document.querySelector("body").addEventListener("click", (e) => {
+  if (e.target.dataset.slotId) {
+    console.log(`Here is a Slot: ${e.target.dataset.slotId}`);
+  }
+});
+
 selectListEl.addEventListener("click", async (e) => {
   const course = e.target;
   if (course.classList.contains("course")) {

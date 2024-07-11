@@ -20,9 +20,13 @@ export function displayCourses(courseSlots, courseListEl, mode) {
   }
 }
 
+// APP-Mode
 function slotsHtml(slots) {
   const html = slots
-    .map(({ start, end }) => `<p>Start: ${start}, End: ${end}</p>`)
+    .map(
+      ({ slotId, start, end }) =>
+        `<p data-slot-id="${slotId}">Start: ${start}, End: ${end}</p>`
+    )
     .join("\n");
   return `<details>
         <summary>Slots</summary>
@@ -30,6 +34,7 @@ function slotsHtml(slots) {
     </details>`;
 }
 
+// WEB-Mode
 export function displaySlots(slots, slotListEl) {
   slotListEl.innerHTML = "";
   const slotListItems = slots.map((slot, idx) => {
