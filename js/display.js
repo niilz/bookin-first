@@ -24,9 +24,10 @@ function slotsHtml(slots) {
   const html = slots
     .map(({ start, end }) => `<p>Start: ${start}, End: ${end}</p>`)
     .join("\n");
-  return `<div>
+  return `<details>
+        <summary>Slots</summary>
         ${html}
-    </div>`;
+    </details>`;
 }
 
 export function displaySlots(slots, slotListEl) {
