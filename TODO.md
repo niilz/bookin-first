@@ -2,7 +2,6 @@
 
 ## Required
 
-- make slots clickable
 - implement book course with app-mode
 - add some better design
 - Ensure that course loading still works with Web mode (serialization might fail in fitness_service#fetch_courses)

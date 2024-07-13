@@ -5,7 +5,7 @@ import init, {
 } from "../wasm-client/pkg/wasm_client.js";
 import { mapCourseSlots } from "./course-mapper.js";
 import { displayCourses, displaySlotsWeb } from "./display.js";
-import {} from "./course-action.js";
+import { loadCourses } from "./course-action.js";
 
 const USER_CREDENTIALS = "userCredentials";
 
@@ -103,17 +103,7 @@ async function login(username, password, mode) {
 
 async function loadAndDisplayCourses(userCredentials, selectListEl) {
   console.log("Loading courses");
-  let courseResult;
-  if (userCredentials.mode === "app") {
-    courseResult = await coursesWasm(
-      userCredentials["session"],
-      userCredentials["user_id"]
-    );
-  } else if (userCredentials.mode === "web") {
-    courseResult = await coursesWasm(userCredentials.session, "");
-  } else {
-    throw Exception(`Unsupported mode ${userCredentials.mode}`);
-  }
+  let courseResult = await loadCourses(userCredentials);
   const courseSlots = mapCourseSlots(courseResult, userCredentials.mode);
   displayCourses(courseSlots, selectListEl, userCredentials.mode);
   return courseResult;
