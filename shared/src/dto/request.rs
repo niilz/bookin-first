@@ -24,11 +24,11 @@ impl LoginRequest {
 #[wasm_bindgen]
 pub struct BookingRequest {
     #[serde(rename = "customerId")]
-    user_id: usize,
+    pub user_id: usize,
     #[serde(rename = "classSlotId")]
-    slot_id: usize,
+    pub slot_id: usize,
     #[serde(rename = "classId")]
-    course_id: usize,
+    pub course_id: usize,
     #[serde(rename = "clubId")]
     club_id: String,
     #[serde(rename = "clubName")]
