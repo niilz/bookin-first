@@ -24,8 +24,8 @@ export function displayCourses(courseSlots, courseListEl, mode) {
 function slotsHtml(slots) {
   const html = slots
     .map(
-      ({ slotId, start, end }) =>
-        `<p data-slot-id="${slotId}">Start: ${start}, End: ${end}</p>`
+      ({ slotId, start, end }, idx) =>
+        `<p id="slot-${idx}" class="slot" data-slot-id="${slotId}">Start: ${start}, End: ${end}</p>`
     )
     .join("\n");
   return `<details>
@@ -35,7 +35,7 @@ function slotsHtml(slots) {
 }
 
 // WEB-Mode
-export function displaySlots(slots, slotListEl) {
+export function displaySlotsWeb(slots, slotListEl) {
   slotListEl.innerHTML = "";
   const slotListItems = slots.map((slot, idx) => {
     let { id, start_date_time, booked_participants, max_participants } = slot;

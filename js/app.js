@@ -4,7 +4,8 @@ import init, {
   slots as slotsWasm,
 } from "../wasm-client/pkg/wasm_client.js";
 import { mapCourseSlots } from "./course-mapper.js";
-import { displayCourses, displaySlots } from "./display.js";
+import { displayCourses, displaySlotsWeb } from "./display.js";
+import {} from "./course-action.js";
 
 const USER_CREDENTIALS = "userCredentials";
 
@@ -58,12 +59,6 @@ async function tryLoadCourses() {
     console.log("No credentials present and login is already shown.");
   }
 }
-
-document.querySelector("body").addEventListener("click", (e) => {
-  if (e.target.dataset.slotId) {
-    console.log(`Here is a Slot: ${e.target.dataset.slotId}`);
-  }
-});
 
 selectListEl.addEventListener("click", async (e) => {
   const course = e.target;
@@ -127,5 +122,5 @@ async function loadAndDisplayCourses(userCredentials, selectListEl) {
 // Only relevant for web mode (not app mode)
 async function loadAndDisplaySlots(sessionId, courseId, selectListEl) {
   const slots = await slotsWasm(sessionId, courseId);
-  displaySlots(slots, selectListEl);
+  displaySlotsWeb(slots, selectListEl);
 }
