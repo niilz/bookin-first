@@ -12,18 +12,22 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
         .query_string_parameters_ref()
         .and_then(|params| params.first("session"));
 
+    let user_id = event
+        .query_string_parameters_ref()
+        .and_then(|params| params.first("userId"));
+
     match (session, serde_json::from_str::<BookingRequest>(booking)) {
         (Some(session), Ok(booking_request)) => {
             let http_client = reqwest_client();
 
             let fitness_service = FitnessService::new(http_client);
 
-            let slots = fitness_service
-                .book_course(booking_request, session)
+            let slot = fitness_service
+                .book_course(booking_request, session, user_id)
                 .await
                 .expect("booking course");
 
-            let booking = serde_json::to_string(&slots).expect("convert booking into String");
+            let booking = serde_json::to_string(&slot).expect("convert booking into String");
 
             let resp = Response::builder()
                 .status(200)

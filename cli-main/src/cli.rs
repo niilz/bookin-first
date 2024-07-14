@@ -8,7 +8,7 @@ use booking_first_lib::{
 use shared::dto::{
     course::Course,
     error::BoxDynError,
-    request::{BookingRequest, LoginRequest},
+    request::{create_booking_request, LoginRequest},
     slots::Slot,
 };
 
@@ -69,10 +69,10 @@ where
 
     let user_id = login_credentials.user_id;
 
-    let booking = BookingRequest::new(&user_id, slot_choice.id, course.id, course.title);
+    let booking = create_booking_request(&user_id, slot_choice.id, course.id, course.title);
 
     let booking_res = fitness_service
-        .book_course(booking, &login_credentials.session)
+        .book_course(booking, &login_credentials.session, None)
         .await;
 
     println!("Booking: {booking_res:?}");

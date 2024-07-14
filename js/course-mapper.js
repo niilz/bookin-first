@@ -17,11 +17,13 @@ export function mapCourseSlots(courses, mode) {
 }
 
 function mapSlot(course, slotId) {
-  const { startDateTime, endDateTime, maxCapacity, totalBooked } = course;
+  const { id, startDateTime, endDateTime, maxCapacity, totalBooked } = course;
+  const [courseId] = id.split(":");
   const start = new Date(startDateTime);
   const end = new Date(endDateTime);
 
   const slot = {
+    courseId,
     slotId,
     start,
     end,

@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use fetch::Window;
 use shared::dto::login_data::LoginData;
+use shared::dto::request::BookingRequest;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 use web_sys::Window as WebSysWindow;
@@ -44,6 +45,24 @@ pub async fn slots(session_id: &str, course_id: &str) -> Result<JsValue, JsValue
     let window = WebSysWindow::instance().ok_or("Window unavailable")?;
 
     fetch::client("GET", &slots_url, None, &window).await
+}
+
+#[wasm_bindgen]
+pub async fn book_course(
+    booking_request: BookingRequest,
+    session_id: &str,
+    user_id: &str,
+) -> Result<JsValue, JsValue> {
+    let mut params = default_params(session_id);
+    params.insert("userId", user_id);
+
+    let booking_url = fetch::lambda_url("book-lambda", &params);
+
+    let window = WebSysWindow::instance().ok_or("Window unavailable")?;
+
+    let booking_request = serde_json::to_string(&booking_request).expect("booking_req to Json");
+
+    fetch::client("POST", &booking_url, Some(&booking_request), &window).await
 }
 
 fn default_params(session_id: &str) -> HashMap<&str, &str> {

@@ -1,4 +1,9 @@
-import { courses as coursesWasm } from "../wasm-client/pkg/wasm_client.js";
+import {
+  courses as coursesWasm,
+  book_course as bookCourseSlotWasm,
+  create_booking_request,
+} from "../wasm-client/pkg/wasm_client.js";
+import { fetchUserCredentials } from "./login.js";
 
 const slotListEl = document.querySelector("#select-list");
 
@@ -10,14 +15,24 @@ export async function loadCourses(userCredentials) {
   } else if (userCredentials.mode === "web") {
     return coursesWasm(userCredentials.session, "");
   } else {
-    throw Exception(`Unsupported mode ${userCredentials.mode}`);
+    throw Error(`Unsupported mode ${userCredentials.mode}`);
   }
 }
 
-export function bookCourseSlot(event) {
-  const element = event.target;
-  const classes = element.classList;
-  if (classes.contains("slot")) {
-    const slotId = element.dataset.slotId;
+export async function bookCourseSlot(event) {
+  const slot = event.target;
+  const cssClasses = slot.classList;
+  if (cssClasses.contains("slot")) {
+    const slotId = Number.parseInt(slot.dataset.slotId);
+    const courseId = Number.parseInt(slot.dataset.courseId);
+    const bookingRequest = create_booking_request(
+      "42",
+      slotId,
+      courseId,
+      "course-name-does-not-matter-in-app-mode"
+    );
+    let { session, user_id: userId } = fetchUserCredentials();
+    const booking = await bookCourseSlotWasm(bookingRequest, session, userId);
+    console.log({ booking });
   }
 }

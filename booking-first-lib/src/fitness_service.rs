@@ -2,7 +2,7 @@ use shared::dto::{
     course::{Course, CourseWithSlot, WebCoursesResult},
     error::BoxDynError,
     request::BookingRequest,
-    response::{BookingResponse, Response},
+    response::{Booking, BookingResponse, NetpulseBookingResponse, Response},
     slots::{Slot, SlotsResult},
 };
 
@@ -25,6 +25,7 @@ where
         user_id: Option<&str>,
     ) -> Result<Vec<Course>, BoxDynError> {
         let courses_res = self.http_client.fetch_courses(session, user_id).await?;
+        //dbg!(&courses_res);
         if let Response::Json(courses_json) = courses_res {
             match user_id {
                 None => {
@@ -32,14 +33,16 @@ where
                         .expect("Could not deserialize into courses");
                     Ok(result.courses)
                 }
-                Some(_) => {
-                    let courses = serde_json::from_str::<Vec<CourseWithSlot>>(&courses_json)
-                        .expect("Could not deserialize into courses")
-                        .into_iter()
-                        .map(|c| Course::App(c))
-                        .collect();
-                    Ok(courses)
-                }
+                Some(_) => match serde_json::from_str::<Vec<CourseWithSlot>>(&courses_json) {
+                    Ok(courses) => {
+                        let courses = courses.into_iter().map(|c| Course::App(c)).collect();
+                        Ok(courses)
+                    }
+                    Err(e) => {
+                        eprintln!("Error: {e}");
+                        Err(Box::from("Could not deserialize into courses"))
+                    }
+                },
             }
         } else {
             Err(Box::from("Unexpected Response-Type"))
@@ -65,11 +68,23 @@ where
         &self,
         booking: BookingRequest,
         session: &str,
-    ) -> Result<BookingResponse, BoxDynError> {
-        let booking_res = self.http_client.book_course(booking, session).await?;
+        user_id: Option<&str>,
+    ) -> Result<Booking, BoxDynError> {
+        let booking_res = self
+            .http_client
+            .book_course(booking, session, user_id)
+            .await?;
         if let Response::Json(booking_json) = booking_res {
-            serde_json::from_str::<BookingResponse>(&booking_json)
-                .map_err(serde_json::error::Error::into)
+            let booking = if user_id.is_some() {
+                let booking = serde_json::from_str::<NetpulseBookingResponse>(&booking_json)
+                    .map_err(|e| format!("{e}"))?;
+                Booking::App(booking)
+            } else {
+                let booking = serde_json::from_str::<BookingResponse>(&booking_json)
+                    .map_err(|e| format!("{e}"))?;
+                Booking::Web(booking)
+            };
+            Ok(booking)
         } else {
             Err(Box::from("Unexpected Response-Type"))
         }
@@ -157,7 +172,7 @@ mod test {
         let fitness_service = FitnessService::new(http_client_mock);
         let request_dummy = BookingRequest::new("42", 43, 43, "Some Course".to_string());
         let booking = fitness_service
-            .book_course(request_dummy, &session_dummy)
+            .book_course(request_dummy, &session_dummy, None)
             .await
             .expect("test: book course");
 

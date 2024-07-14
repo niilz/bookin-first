@@ -21,7 +21,7 @@ impl LoginRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
-#[wasm_bindgen]
+#[wasm_bindgen(getter_with_clone)]
 pub struct BookingRequest {
     #[serde(rename = "customerId")]
     pub user_id: usize,
@@ -37,15 +37,19 @@ pub struct BookingRequest {
     course_name: String,
 }
 
-impl BookingRequest {
-    pub fn new(user_id: &str, slot_id: usize, course_id: usize, course_name: String) -> Self {
-        Self {
-            user_id: user_id.parse::<usize>().expect("user_id must be a usize"),
-            slot_id,
-            course_id,
-            club_id: "hamburg3".to_string(),
-            club_name: "Hamburg - Eppendorf".to_string(),
-            course_name,
-        }
+#[wasm_bindgen]
+pub fn create_booking_request(
+    user_id: &str,
+    slot_id: usize,
+    course_id: usize,
+    course_name: String,
+) -> BookingRequest {
+    BookingRequest {
+        user_id: user_id.parse::<usize>().expect("user_id must be a usize"),
+        slot_id,
+        course_id,
+        club_id: "hamburg3".to_string(),
+        club_name: "Hamburg - Eppendorf".to_string(),
+        course_name,
     }
 }

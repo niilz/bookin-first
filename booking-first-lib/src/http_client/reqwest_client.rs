@@ -108,6 +108,7 @@ impl HttpClientSend for ReqwestHttpClientSend {
         }
     }
 
+    // Only for WEB-mode
     async fn fetch_slots(
         &self,
         course_id: usize,
@@ -132,19 +133,41 @@ impl HttpClientSend for ReqwestHttpClientSend {
         &self,
         booking: BookingRequest,
         session_id: &str,
+        user_id: Option<&str>,
     ) -> Result<Response, BoxDynError> {
-        //https://mein.fitnessfirst.de/api/magicline/openapi/classes/hamburg3/booking/book
-        let booking_url = format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}/booking/book");
-        let booking = serde_json::to_string(&booking)?;
-        //dbg!(&booking);
-        let req = self
-            .client
-            .post(booking_url)
-            .body(booking)
-            .header("Cookie", &format!("PHPSESSID={session_id}"));
-        //dbg!(&req);
-        let res = req.send().await;
-        //dbg!(&res);
+        let booking_url = match user_id {
+            // https://mein.fitnessfirst.de/api/magicline/openapi/classes/hamburg3/booking/book
+            None => format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}/booking/book"),
+            // https://fitnessfirst.netpulse.com/np/company/<user_id>/class/<class_id>:<slot_id>/addExerciser
+            Some(user_id) => format!(
+                "{FF_NETPULSE_BASE_URL}/{user_id}/class/{}:{}/addExerciser",
+                booking.course_id, booking.slot_id
+            ),
+        };
+
+        let res = match user_id {
+            None => {
+                let booking = serde_json::to_string(&booking)?;
+                //dbg!(&booking);
+                let req = self
+                    .client
+                    .post(booking_url)
+                    .body(booking)
+                    .header("Cookie", &format!("PHPSESSID={session_id}"));
+                req.send().await
+            }
+            Some(user_id) => {
+                let exerciser_param = HashMap::from([("exerciserUuid", user_id)]);
+                let req = self
+                    .client
+                    .post(booking_url)
+                    .form(&exerciser_param)
+                    .header("Cookie", &format!("JSESSIONID={session_id}"));
+                dbg!(&req);
+                req.send().await
+            }
+        };
+        dbg!(&res);
         match res {
             Ok(res) => Ok(Response::Json(res.text().await?)),
             Err(e) => Err(Box::from(format!("Failed to read slots: {e}"))),

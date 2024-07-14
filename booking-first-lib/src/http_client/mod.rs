@@ -38,6 +38,7 @@ pub trait HttpClient {
         &self,
         booking: BookingRequest,
         session_id: &str,
+        user_id: Option<&str>,
     ) -> Result<Response, BoxDynError>;
 }
 
@@ -77,7 +78,10 @@ where
         &self,
         booking: BookingRequest,
         session_id: &str,
+        user_id: Option<&str>,
     ) -> Result<Response, BoxDynError> {
-        self.as_ref().book_course(booking, session_id).await
+        self.as_ref()
+            .book_course(booking, session_id, user_id)
+            .await
     }
 }

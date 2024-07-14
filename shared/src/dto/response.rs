@@ -11,13 +11,17 @@ pub enum Response {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-#[wasm_bindgen]
 pub enum BookingState {
     BOOKED,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[wasm_bindgen(getter_with_clone)]
+pub enum Booking {
+    App(NetpulseBookingResponse),
+    Web(BookingResponse),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BookingResponse {
     #[serde(rename = "bookingId")]
     pub booking_id: usize,
@@ -29,6 +33,14 @@ pub struct BookingResponse {
     pub course_id: usize,
     #[serde(rename = "customerId")]
     pub customer_id: usize,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct NetpulseBookingResponse {
+    #[serde(rename = "id")]
+    pub booking_id: usize,
+    #[serde(rename = "booked")]
+    pub booking_status: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
