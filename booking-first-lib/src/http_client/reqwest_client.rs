@@ -34,12 +34,9 @@ impl HttpClientSend for ReqwestHttpClientSend {
         let mut params = HashMap::new();
         params.insert("username", request.user_name.as_str());
         params.insert("password", request.password.as_str());
-        let response = self
-            .client
-            .post(NETPULSE_LOGIN_URL)
-            .form(&params)
-            .send()
-            .await;
+        let req = self.client.post(NETPULSE_LOGIN_URL).form(&params);
+        dbg!(&req);
+        let response = req.send().await;
         match response {
             Ok(res) => {
                 let cookies = read_cookies(&res);
@@ -86,8 +83,7 @@ impl HttpClientSend for ReqwestHttpClientSend {
                     .as_millis();
                 let start_time = start_time.as_millis();
                 // TODO: make gymlocation variable
-                let gym_location = "37d7c5d3-6594-4853-a1e6-c116ac084690";
-                format!("{FF_NETPULSE_BASE_URL}/{gym_location}/classes?startDateTime={start_time}&exerciserUuid={uuid}&endDateTime={end_time}")
+                format!("{FF_NETPULSE_BASE_URL}/{GYM_EPPENDORF_LOCATION_ID}/classes?startDateTime={start_time}&exerciserUuid={uuid}&endDateTime={end_time}")
             }
         };
         println!("Getting courses from: {url}");
@@ -138,9 +134,9 @@ impl HttpClientSend for ReqwestHttpClientSend {
         let booking_url = match user_id {
             // https://mein.fitnessfirst.de/api/magicline/openapi/classes/hamburg3/booking/book
             None => format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}/booking/book"),
-            // https://fitnessfirst.netpulse.com/np/company/<user_id>/class/<class_id>:<slot_id>/addExerciser
+            // https://fitnessfirst.netpulse.com/np/company/<location_id>/class/<class_id>:<slot_id>/addExerciser
             Some(user_id) => format!(
-                "{FF_NETPULSE_BASE_URL}/{user_id}/class/{}:{}/addExerciser",
+                "{FF_NETPULSE_BASE_URL}/{GYM_EPPENDORF_LOCATION_ID}/class/{}:{}/addExerciser",
                 booking.course_id, booking.slot_id
             ),
         };
@@ -162,6 +158,10 @@ impl HttpClientSend for ReqwestHttpClientSend {
                     .client
                     .post(booking_url)
                     .form(&exerciser_param)
+                    .header(
+                        "X-NP-User-Agent",
+                        "clientType=MOBILE_DEVICE; devicePlatform=ANDROID",
+                    )
                     .header("Cookie", &format!("JSESSIONID={session_id}"));
                 dbg!(&req);
                 req.send().await

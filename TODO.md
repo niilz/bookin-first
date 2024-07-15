@@ -3,8 +3,7 @@
 ## Required
 
 - continue implementing book-couse in reqwest_client (maybe add test?)
-  - maybe has to touch login-lambda again?
-  - construct propper request obj with user id and class, slot ids in JS
+  - it's working, so why can it not be deserialized
 - add some better design
 - Ensure that course loading still works with Web mode (serialization might fail in fitness_service#fetch_courses)
 - Make gym-location (returned in login response) variable in fetch courses

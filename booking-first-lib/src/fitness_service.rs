@@ -75,6 +75,7 @@ where
             .book_course(booking, session, user_id)
             .await?;
         if let Response::Json(booking_json) = booking_res {
+            //dbg!(&booking_json);
             let booking = if user_id.is_some() {
                 let booking = serde_json::from_str::<NetpulseBookingResponse>(&booking_json)
                     .map_err(|e| format!("{e}"))?;
