@@ -1,5 +1,5 @@
 use shared::dto::{
-    course::{Course, CourseWithSlot, CourseWrapper, WebCoursesResult},
+    course::{Course, CourseWrapper, WebCoursesResult},
     error::BoxDynError,
     request::BookingRequest,
     response::{Booking, BookingResponse, NetpulseBookingResponse, Response},
@@ -99,8 +99,8 @@ mod test {
     use serde_json::json;
     use shared::dto::{
         course::{Course, SimpleCourse, WebCoursesResult},
-        request::BookingRequest,
-        response::BookingState,
+        request::create_booking_request,
+        response::{Booking, BookingState, NetpulseBookingResponse},
         slots::{Slot, SlotsResult},
     };
 
@@ -171,17 +171,59 @@ mod test {
 
         let session_dummy = "dummy-session";
         let fitness_service = FitnessService::new(http_client_mock);
-        let request_dummy = BookingRequest::new("42", 43, 43, "Some Course".to_string());
-        let booking = fitness_service
+        let request_dummy = create_booking_request("42", 43, 43, "Some Course".to_string());
+        let Booking::Web(booking) = fitness_service
             .book_course(request_dummy, &session_dummy, None)
             .await
-            .expect("test: book course");
+            .expect("test: book course")
+        else {
+            panic!("test fails, epected WEB-Booking");
+        };
 
         assert_eq!(1234567, booking.booking_id);
         assert_eq!(BookingState::BOOKED, booking.booking_status);
         assert_eq!(89012345, booking.slot_id);
         assert_eq!(11223344, booking.course_id);
         assert_eq!(55667788, booking.customer_id);
+    }
+
+    #[tokio::test]
+    async fn can_book_course_app_mode() {
+        let booking_dummy = json!({
+            "brief": {
+                "id": "1234567",
+                "name": "test-booking",
+                "maxCapacity": 20,
+                "totalBooked": 1,
+                "startDateTime": 11223344,
+                "endDateTime": 55667788
+            }
+        })
+        .to_string();
+        let http_client_mock = mock_client!(
+            MockRes::None,
+            MockRes::None,
+            MockRes::None,
+            MockRes::None,
+            MockRes::None,
+            Some(Ok(Response::Json(booking_dummy)))
+        );
+
+        let session_dummy = "dummy-session";
+        let fitness_service = FitnessService::new(http_client_mock);
+        let request_dummy = create_booking_request("42", 43, 43, "Some Course".to_string());
+        let Booking::App(NetpulseBookingResponse { course: booking }) = fitness_service
+            .book_course(request_dummy, &session_dummy, Some("user-uuid-in-app-mode"))
+            .await
+            .expect("test: book course")
+        else {
+            panic!("test fails, epected WEB-Booking");
+        };
+
+        assert_eq!("1234567", booking.id);
+        assert_eq!(1, booking.total_booked);
+        assert_eq!(11223344, booking.start_date_time);
+        assert_eq!(55667788, booking.end_date_time);
     }
 
     fn generate_dummy_courses(count: u32) -> WebCoursesResult {

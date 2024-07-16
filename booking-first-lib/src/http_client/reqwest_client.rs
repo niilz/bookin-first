@@ -97,7 +97,7 @@ impl HttpClientSend for ReqwestHttpClientSend {
             .header("Cookie", &format!("{session_id_key}={session_id}"));
         //dbg!(&req);
         let res = req.send().await;
-        //dbg!(&res);
+        dbg!(&res);
         match res {
             Ok(res) => Ok(Response::Json(res.text().await?)),
             Err(e) => Err(Box::from(format!("Failed to read courses: {e}"))),

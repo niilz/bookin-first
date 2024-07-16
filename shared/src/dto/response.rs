@@ -40,7 +40,7 @@ pub struct BookingResponse {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NetpulseBookingResponse {
     #[serde(rename = "brief")]
-    course: CourseWithSlot,
+    pub course: CourseWithSlot,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
