@@ -1,5 +1,5 @@
 use shared::dto::{
-    course::{Course, CourseWithSlot, WebCoursesResult},
+    course::{Course, CourseWithSlot, CourseWrapper, WebCoursesResult},
     error::BoxDynError,
     request::BookingRequest,
     response::{Booking, BookingResponse, NetpulseBookingResponse, Response},
@@ -33,7 +33,7 @@ where
                         .expect("Could not deserialize into courses");
                     Ok(result.courses)
                 }
-                Some(_) => match serde_json::from_str::<Vec<CourseWithSlot>>(&courses_json) {
+                Some(_) => match serde_json::from_str::<Vec<CourseWrapper>>(&courses_json) {
                     Ok(courses) => {
                         let courses = courses.into_iter().map(|c| Course::App(c)).collect();
                         Ok(courses)

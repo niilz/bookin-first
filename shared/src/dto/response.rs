@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use wasm_bindgen::prelude::*;
 
+use super::course::CourseWithSlot;
+
 #[derive(Debug, Clone)]
 pub enum Response {
     Text(String),
@@ -37,10 +39,8 @@ pub struct BookingResponse {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NetpulseBookingResponse {
-    #[serde(rename = "id")]
-    pub booking_id: usize,
-    #[serde(rename = "booked")]
-    pub booking_status: bool,
+    #[serde(rename = "brief")]
+    course: CourseWithSlot,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]

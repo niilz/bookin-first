@@ -18,14 +18,14 @@ impl FromIterator<Course> for WebCoursesResult {
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub enum Course {
     Web(SimpleCourse),
-    App(CourseWithSlot),
+    App(CourseWrapper),
 }
 
 impl Course {
     pub fn name(&self) -> String {
         match self {
             Self::Web(course) => course.title.clone(),
-            Self::App(course) => course.brief.name.clone(),
+            Self::App(course_wrap) => course_wrap.course.name.clone(),
         }
     }
 }
@@ -54,14 +54,15 @@ pub struct SimpleCourse {
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[wasm_bindgen(getter_with_clone)]
-pub struct CourseWithSlot {
-    pub brief: Brief,
+pub struct CourseWrapper {
+    #[serde(rename = "brief")]
+    pub course: CourseWithSlot,
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Clone)]
 #[wasm_bindgen(getter_with_clone)]
-pub struct Brief {
-    /// User-Id in the form "12345678:12345678"
+pub struct CourseWithSlot {
+    /// Course:Slot-Id in the form "12345678:12345678"
     pub id: String,
     /// Name of the course
     pub name: String,
