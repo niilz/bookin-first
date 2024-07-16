@@ -35,7 +35,7 @@ where
                 }
                 Some(_) => match serde_json::from_str::<Vec<CourseWrapper>>(&courses_json) {
                     Ok(courses) => {
-                        let courses = courses.into_iter().map(|c| Course::App(c)).collect();
+                        let courses = courses.into_iter().map(Course::App).collect();
                         Ok(courses)
                     }
                     Err(e) => {

@@ -135,7 +135,7 @@ impl HttpClientSend for ReqwestHttpClientSend {
             // https://mein.fitnessfirst.de/api/magicline/openapi/classes/hamburg3/booking/book
             None => format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}/booking/book"),
             // https://fitnessfirst.netpulse.com/np/company/<location_id>/class/<class_id>:<slot_id>/addExerciser
-            Some(user_id) => format!(
+            Some(_user_id) => format!(
                 "{FF_NETPULSE_BASE_URL}/{GYM_EPPENDORF_LOCATION_ID}/class/{}:{}/addExerciser",
                 booking.course_id, booking.slot_id
             ),
