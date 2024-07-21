@@ -5,13 +5,17 @@ export const loginFormEl = document.querySelector("#login-form");
 export async function login(username, password, mode) {
   if (username && password && mode) {
     console.log("logging in");
-    const userCredentials = await loginWasm(username, password, mode);
-    console.log("logged in");
-    hideLoginForm();
-    userCredentials.mode = mode;
-    localStorage.setItem(USER_CREDENTIALS, JSON.stringify(userCredentials));
-    //console.log({ userCredentials });
-    return userCredentials;
+    try {
+      const userCredentials = await loginWasm(username, password, mode);
+      console.log("logged in");
+      hideLoginForm();
+      userCredentials.mode = mode;
+      localStorage.setItem(USER_CREDENTIALS, JSON.stringify(userCredentials));
+      //console.log({ userCredentials });
+      return userCredentials;
+    } catch (e) {
+      console.warn(`Login failed. Error: ${e}`);
+    }
   } else {
     console.warn("Login requires 'username', 'password' and 'mode'");
   }

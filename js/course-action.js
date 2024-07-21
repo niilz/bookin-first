@@ -27,13 +27,17 @@ export async function loadCourses(userCredentials) {
         return courses;
       }
     }
-    console.log("No cached courses present: loading courses");
-    const freshCourses = await coursesWasm(
-      userCredentials["session"],
-      userCredentials["user_id"]
-    );
-    storeCourses(freshCourses);
-    return freshCourses;
+    try {
+      console.log("No cached courses present: loading courses");
+      const freshCourses = await coursesWasm(
+        userCredentials["session"],
+        userCredentials["user_id"]
+      );
+      storeCourses(freshCourses);
+      return freshCourses;
+    } catch (e) {
+      console.warn(`Loading courses failed. Error: ${e}`);
+    }
   } else if (userCredentials.mode === "web") {
     return coursesWasm(userCredentials.session, "");
   } else {
