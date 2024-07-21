@@ -86,6 +86,10 @@ coursesButtonAppMode.addEventListener("click", async (e) => {
 });
 
 async function loadAndDisplayCourses(userCredentials, selectListEl) {
+  if (!userCredentials) {
+    console.warn("Cannot load coursed without user-credentials");
+    return;
+  }
   let courseResult = await loadCourses(userCredentials).catch((e) => {
     console.log(`Could not load courses. Error: ${e}`);
     clearUserCredentials();
