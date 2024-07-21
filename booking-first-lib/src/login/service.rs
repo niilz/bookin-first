@@ -50,8 +50,8 @@ where
     async fn login_app(&self, request: LoginRequest) -> Result<LoginCreds, BoxDynError> {
         let (session, login_response) = match self.http_client.netpulse_login(request).await {
             Ok(Response::WithSession { response, session }) => {
-                dbg!(&response);
-                dbg!(&session);
+                //dbg!(&response);
+                //dbg!(&session);
                 (
                     session,
                     serde_json::from_str::<NetpulseLoginResponse>(&response)?,
@@ -90,8 +90,8 @@ where
     async fn login_to_fitness_first(&self, token: &str) -> Result<String, BoxDynError> {
         match self.http_client.ff_login(token).await {
             Ok(Response::Session(session_id)) => {
-                dbg!("FF login succeeded. PHPSESSID-Cookie should be in Jar");
-                dbg!("PHPSESSID: {session_id}");
+                //dbg!("FF login succeeded. PHPSESSID-Cookie should be in Jar");
+                //dbg!("PHPSESSID: {session_id}");
                 Ok(session_id)
             }
             Ok(_) => Err(Box::from("unexpected response type")),

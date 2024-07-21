@@ -83,6 +83,7 @@ macro_rules! mock_client {
                 _booking: BookingRequest,
                 _session_id: &str,
                 _user_id: Option<&str>,
+                _cancel: bool,
             ) -> Result<Response, BoxDynError> {
                 match self.book_dummy.as_ref() {
                     Some(Ok(res)) => Ok(res.clone()),

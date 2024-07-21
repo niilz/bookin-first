@@ -69,10 +69,11 @@ where
         booking: BookingRequest,
         session: &str,
         user_id: Option<&str>,
+        cancel: bool,
     ) -> Result<Booking, BoxDynError> {
         let booking_res = self
             .http_client
-            .book_course(booking, session, user_id)
+            .book_course(booking, session, user_id, cancel)
             .await?;
         if let Response::Json(booking_json) = booking_res {
             //dbg!(&booking_json);
@@ -173,7 +174,7 @@ mod test {
         let fitness_service = FitnessService::new(http_client_mock);
         let request_dummy = create_booking_request("42", 43, 43, "Some Course".to_string());
         let Booking::Web(booking) = fitness_service
-            .book_course(request_dummy, &session_dummy, None)
+            .book_course(request_dummy, &session_dummy, None, false)
             .await
             .expect("test: book course")
         else {
@@ -213,7 +214,12 @@ mod test {
         let fitness_service = FitnessService::new(http_client_mock);
         let request_dummy = create_booking_request("42", 43, 43, "Some Course".to_string());
         let Booking::App(NetpulseBookingResponse { course: booking }) = fitness_service
-            .book_course(request_dummy, &session_dummy, Some("user-uuid-in-app-mode"))
+            .book_course(
+                request_dummy,
+                &session_dummy,
+                Some("user-uuid-in-app-mode"),
+                false,
+            )
             .await
             .expect("test: book course")
         else {

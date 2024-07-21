@@ -24,8 +24,20 @@ export function displayCourses(courseSlots, courseListEl, mode) {
 function slotsHtml(slots) {
   const html = slots
     .map(
-      ({ courseId, slotId, start, end }, idx) =>
-        `<p id="slot-${idx}" class="slot" data-course-id="${courseId}" data-slot-id="${slotId}">Start: ${start}, End: ${end}</p>`
+      ({ courseId, slotId, start, end, maxCapacity, totalBooked }, idx) =>
+        `<p id="slot-${idx}"
+            class="slot"
+            data-course-id="${courseId}"
+            data-slot-id="${slotId}"
+            data-booked="false">
+                Start: ${start}
+                <br>
+                End: ${end}
+                <br>
+                capacity: ${maxCapacity}
+                <br>
+                total booked: ${totalBooked}
+      </p>`
     )
     .join("\n");
   return `<details>

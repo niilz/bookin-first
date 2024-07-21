@@ -35,7 +35,7 @@ impl HttpClientSend for ReqwestHttpClientSend {
         params.insert("username", request.user_name.as_str());
         params.insert("password", request.password.as_str());
         let req = self.client.post(NETPULSE_LOGIN_URL).form(&params);
-        dbg!(&req);
+        //dbg!(&req);
         let response = req.send().await;
         match response {
             Ok(res) => {
@@ -97,7 +97,7 @@ impl HttpClientSend for ReqwestHttpClientSend {
             .header("Cookie", &format!("{session_id_key}={session_id}"));
         //dbg!(&req);
         let res = req.send().await;
-        dbg!(&res);
+        // dbg!(&res);
         match res {
             Ok(res) => Ok(Response::Json(res.text().await?)),
             Err(e) => Err(Box::from(format!("Failed to read courses: {e}"))),
@@ -130,15 +130,24 @@ impl HttpClientSend for ReqwestHttpClientSend {
         booking: BookingRequest,
         session_id: &str,
         user_id: Option<&str>,
+        cancel: bool,
     ) -> Result<Response, BoxDynError> {
+        //dbg!(&booking);
         let booking_url = match user_id {
             // https://mein.fitnessfirst.de/api/magicline/openapi/classes/hamburg3/booking/book
             None => format!("{FITNESS_FIRST_BASE_URL}{COURSES_URL_PATH}/booking/book"),
             // https://fitnessfirst.netpulse.com/np/company/<location_id>/class/<class_id>:<slot_id>/addExerciser
-            Some(_user_id) => format!(
-                "{FF_NETPULSE_BASE_URL}/{GYM_EPPENDORF_LOCATION_ID}/class/{}:{}/addExerciser",
-                booking.course_id, booking.slot_id
-            ),
+            Some(_user_id) => {
+                let action = if cancel {
+                    "addExerciser"
+                } else {
+                    "removeExerciser"
+                };
+                format!(
+                    "{FF_NETPULSE_BASE_URL}/{GYM_EPPENDORF_LOCATION_ID}/class/{}:{}/{action}",
+                    booking.course_id, booking.slot_id
+                )
+            }
         };
 
         let res = match user_id {
@@ -163,11 +172,11 @@ impl HttpClientSend for ReqwestHttpClientSend {
                         "clientType=MOBILE_DEVICE; devicePlatform=ANDROID",
                     )
                     .header("Cookie", &format!("JSESSIONID={session_id}"));
-                dbg!(&req);
+                //dbg!(&req);
                 req.send().await
             }
         };
-        dbg!(&res);
+        //dbg!(&res);
         match res {
             Ok(res) => Ok(Response::Json(res.text().await?)),
             Err(e) => Err(Box::from(format!("Failed to read slots: {e}"))),

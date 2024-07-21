@@ -72,6 +72,7 @@ pub struct CourseWithSlot {
     pub end_date_time: u64,
     #[serde(rename = "maxCapacity")]
     pub max_capacity: u32,
+    pub booked: bool,
     #[serde(rename = "totalBooked")]
     pub total_booked: u32,
     /*

@@ -52,9 +52,13 @@ pub async fn book_course(
     booking_request: BookingRequest,
     session_id: &str,
     user_id: &str,
+    cancel: bool,
 ) -> Result<JsValue, JsValue> {
     let mut params = default_params(session_id);
+    //dbg!(cancel);
+    let cancel = cancel.to_string();
     params.insert("userId", user_id);
+    params.insert("cancel", &cancel);
 
     let booking_url = fetch::lambda_url("book-lambda", &params);
 

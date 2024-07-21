@@ -36,7 +36,7 @@ export async function loadCourses(userCredentials) {
   }
 }
 
-export async function bookCourseSlot(event) {
+export async function bookOrCancelCourseSlot(event) {
   const slot = event.target;
   const cssClasses = slot.classList;
   if (cssClasses.contains("slot")) {
@@ -48,8 +48,21 @@ export async function bookCourseSlot(event) {
       courseId,
       "course-name-does-not-matter-in-app-mode"
     );
+    const cancel = JSON.parse(slot.dataset.booked);
+    if (cancel) {
+      cssClasses.remove("booked");
+      slot.dataset.booked = false;
+    } else {
+      slot.dataset.booked = true;
+      cssClasses.add("booked");
+    }
     let { session, user_id: userId } = fetchUserCredentials();
-    const booking = await bookCourseSlotWasm(bookingRequest, session, userId);
+    const booking = await bookCourseSlotWasm(
+      bookingRequest,
+      session,
+      userId,
+      cancel
+    );
     console.log({ booking });
   }
 }

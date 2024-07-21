@@ -9,3 +9,7 @@ body {
 .course {
   cursor: pointer;
 }
+
+.booked {
+  border: 3px dotted green;
+}

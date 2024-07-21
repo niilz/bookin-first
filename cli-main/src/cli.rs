@@ -72,7 +72,7 @@ where
     let booking = create_booking_request(&user_id, slot_choice.id, course.id, course.title);
 
     let booking_res = fitness_service
-        .book_course(booking, &login_credentials.session, None)
+        .book_course(booking, &login_credentials.session, None, false)
         .await;
 
     println!("Booking: {booking_res:?}");

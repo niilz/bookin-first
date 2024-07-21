@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use booking_first_lib::fitness_service::FitnessService;
 use lambda_common::reqwest_client;
 use lambda_http::{run, service_fn, tracing, Body, Error, Request, RequestExt, Response};
@@ -8,6 +10,8 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
         return Err(Box::from("Only Text Request is supported"));
     };
 
+    //dbg!(&booking);
+
     let session = event
         .query_string_parameters_ref()
         .and_then(|params| params.first("session"));
@@ -16,6 +20,12 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
         .query_string_parameters_ref()
         .and_then(|params| params.first("userId"));
 
+    let cancel = event
+        .query_string_parameters_ref()
+        .and_then(|params| params.first("cancel"))
+        .unwrap_or("false");
+    let cancel = bool::from_str(cancel).expect("cancesl should be true or false");
+
     match (session, serde_json::from_str::<BookingRequest>(booking)) {
         (Some(session), Ok(booking_request)) => {
             let http_client = reqwest_client();
@@ -23,7 +33,7 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
             let fitness_service = FitnessService::new(http_client);
 
             let slot = fitness_service
-                .book_course(booking_request, session, user_id)
+                .book_course(booking_request, session, user_id, cancel)
                 .await
                 .expect("booking course");
 
