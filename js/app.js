@@ -2,7 +2,13 @@ import init, { slots as slotsWasm } from "../wasm-client/pkg/wasm_client.js";
 import { mapCourseSlots } from "./course-mapper.js";
 import { displayCourses, displaySlotsWeb } from "./display.js";
 import { loadCourses } from "./course-action.js";
-import { fetchUserCredentials, login, loginFormEl } from "./login.js";
+import {
+  clearUserCredentials,
+  fetchUserCredentials,
+  hideLoginForm,
+  login,
+  loginFormEl,
+} from "./login.js";
 
 async function initWasm() {
   console.log("> init");
@@ -15,17 +21,17 @@ initWasm()
     tryLoadCourses()
       .then((courseResult) => {
         if (courseResult) {
-          // hide login form if courses could be loaded
-          console.log("Got courses. Hide login");
-          loginFormEl.classList.add("hidden");
+          console.log("Trying to load courses on page load succeeded");
+          hideLoginForm();
+        } else {
+          console.warn("Trying to load courses failed, please login first");
         }
       })
       .catch((e) => {
         console.error(`unexpected error during initial course loading: ${e}`);
         // show login form if courses could not be loaded
         loginFormEl.classList.remove("hidden");
-        // clear out stale-credentials
-        localStorage.clear();
+        clearUserCredentials();
       });
   })
   .catch((e) => console.error(`init failed ${e}`));
@@ -40,8 +46,6 @@ async function tryLoadCourses() {
   const userCredentials = fetchUserCredentials();
   if (userCredentials) {
     return loadAndDisplayCourses(userCredentials, selectListEl);
-  } else {
-    throw Error("Please login befor loading courses");
   }
 }
 
@@ -58,7 +62,6 @@ selectListEl.addEventListener("click", async (e) => {
 });
 
 const coursesButton = document.querySelector("#courses-button");
-const coursesButtonAppMode = document.querySelector("#courses-button-app-mode");
 coursesButton.addEventListener("click", async (e) => {
   e.preventDefault();
   let userCredentials = fetchUserCredentials();
@@ -70,6 +73,7 @@ coursesButton.addEventListener("click", async (e) => {
   loadAndDisplayCourses(userCredentials, selectListEl);
 });
 
+const coursesButtonAppMode = document.querySelector("#courses-button-app-mode");
 coursesButtonAppMode.addEventListener("click", async (e) => {
   e.preventDefault();
   let userCredentials = fetchUserCredentials();
@@ -82,11 +86,10 @@ coursesButtonAppMode.addEventListener("click", async (e) => {
 });
 
 async function loadAndDisplayCourses(userCredentials, selectListEl) {
-  console.log("Loading courses");
   let courseResult = await loadCourses(userCredentials).catch((e) => {
     console.log(`Could not load courses. Error: ${e}`);
-    localStorage.clear();
-    console.log("Cleared credentials");
+    clearUserCredentials();
+    return;
   });
   const courseSlots = mapCourseSlots(courseResult, userCredentials.mode);
   displayCourses(courseSlots, selectListEl, userCredentials.mode);

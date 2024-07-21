@@ -10,7 +10,11 @@ const ONE_DAY = 1000 * 60 * 60 * 24;
 
 const slotListEl = document.querySelector("#select-list");
 
+let courseData;
+
 slotListEl.addEventListener("click", bookOrCancelCourseSlot);
+
+//export async
 
 export async function loadCourses(userCredentials) {
   if (userCredentials.mode === "app") {
@@ -23,6 +27,7 @@ export async function loadCourses(userCredentials) {
         return courses;
       }
     }
+    console.log("No cached courses present: loading courses");
     const freshCourses = await coursesWasm(
       userCredentials["session"],
       userCredentials["user_id"]
@@ -76,6 +81,11 @@ function storeCourses(courses) {
 
 function getCourses() {
   const coursesData = window.localStorage.getItem(COURSES_KEY);
-  console.log("Loading courses");
+  console.log("Retrieving courses from local storage");
   return JSON.parse(coursesData);
 }
+
+const clearCoursesButton = document.querySelector("#clear-courses-button");
+clearCoursesButton.addEventListener("click", () =>
+  window.localStorage.removeItem(COURSES_KEY)
+);
