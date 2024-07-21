@@ -13,7 +13,7 @@ const slotListEl = document.querySelector("#select-list");
 
 slotListEl.addEventListener("click", bookOrCancelCourseSlot);
 
-//export async
+let courseData;
 
 export async function loadCourses(userCredentials) {
   if (userCredentials.mode === "app") {
@@ -36,7 +36,7 @@ export async function loadCourses(userCredentials) {
       storeCourses(freshCourses);
     } else {
       console.warn("Did not receive any fresh courses to store");
-      return
+      return;
     }
     const courseSlots = mapCourseSlots(fetchCourses, userCredentials.mode);
     return courseSlots;
@@ -91,6 +91,14 @@ async function fetchCourses(session, userId) {
   } catch (e) {
     console.warn(`Loading courses failed. Error: ${e}`);
   }
+}
+
+export function setCourseData(newCourseData) {
+  courseData = newCourseData;
+}
+
+export function getCourseData() {
+  return courseData;
 }
 
 function storeCourses(courses) {

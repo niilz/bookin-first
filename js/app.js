@@ -1,6 +1,6 @@
 import init, { slots as slotsWasm } from "../wasm-client/pkg/wasm_client.js";
 import { displayCourses, displaySlotsWeb } from "./display.js";
-import { loadCourses } from "./course-action.js";
+import { getCourseData, loadCourses, setCourseData } from "./course-action.js";
 import {
   clearUserCredentials,
   fetchUserCredentials,
@@ -8,8 +8,6 @@ import {
   login,
   loginFormEl,
 } from "./login.js";
-
-let courseData;
 
 async function initWasm() {
   console.log("> init");
@@ -93,7 +91,8 @@ async function loadAndDisplayCourses(userCredentials, selectListEl) {
   }
   try {
     let courseSlots = await loadCourses(userCredentials);
-    displayCourses(courseSlots, selectListEl, userCredentials.mode);
+    setCourseData(courseSlots);
+    displayCourses(getCourseData(), selectListEl, userCredentials.mode);
     return courseSlots;
   } catch (e) {
     console.log(`Could not load courses. Error: ${e}`);
