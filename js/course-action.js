@@ -32,7 +32,12 @@ export async function loadCourses(userCredentials) {
       userCredentials["session"],
       userCredentials["user_id"]
     );
-    storeCourses(freshCourses);
+    if (freshCourses) {
+      storeCourses(freshCourses);
+    } else {
+      console.warn("Did not receive any fresh courses to store");
+      return
+    }
     const courseSlots = mapCourseSlots(fetchCourses, userCredentials.mode);
     return courseSlots;
   } else if (userCredentials.mode === "web") {
@@ -75,7 +80,14 @@ export async function bookOrCancelCourseSlot(event) {
 
 async function fetchCourses(session, userId) {
   try {
-    return coursesWasm(session, userId);
+    const coursesResult = coursesWasm(session, userId);
+    const error = coursesResult.errorMessage;
+    if (error) {
+      console.warn(`Loading courses failed. Error: ${error}`);
+      return;
+    } else {
+      return coursesResult;
+    }
   } catch (e) {
     console.warn(`Loading courses failed. Error: ${e}`);
   }
