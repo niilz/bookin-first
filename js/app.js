@@ -90,14 +90,15 @@ async function loadAndDisplayCourses(userCredentials, selectListEl) {
     console.warn("Cannot load coursed without user-credentials");
     return;
   }
-  let courseResult = await loadCourses(userCredentials).catch((e) => {
+  try {
+    let courseResult = await loadCourses(userCredentials);
+    const courseSlots = mapCourseSlots(courseResult, userCredentials.mode);
+    displayCourses(courseSlots, selectListEl, userCredentials.mode);
+    return courseResult;
+  } catch (e) {
     console.log(`Could not load courses. Error: ${e}`);
     clearUserCredentials();
-    return;
-  });
-  const courseSlots = mapCourseSlots(courseResult, userCredentials.mode);
-  displayCourses(courseSlots, selectListEl, userCredentials.mode);
-  return courseResult;
+  }
 }
 
 // Only relevant for web mode (not app mode)

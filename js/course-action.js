@@ -27,19 +27,15 @@ export async function loadCourses(userCredentials) {
         return courses;
       }
     }
-    try {
-      console.log("No cached courses present: loading courses");
-      const freshCourses = await coursesWasm(
-        userCredentials["session"],
-        userCredentials["user_id"]
-      );
-      storeCourses(freshCourses);
-      return freshCourses;
-    } catch (e) {
-      console.warn(`Loading courses failed. Error: ${e}`);
-    }
+    console.log("No cached courses present: loading courses");
+    const freshCourses = await fetchCourses(
+      userCredentials["session"],
+      userCredentials["user_id"]
+    );
+    storeCourses(freshCourses);
+    return freshCourses;
   } else if (userCredentials.mode === "web") {
-    return coursesWasm(userCredentials.session, "");
+    return fetchCourses(userCredentials.session, "");
   } else {
     throw Error(`Unsupported mode ${userCredentials.mode}`);
   }
@@ -76,6 +72,14 @@ export async function bookOrCancelCourseSlot(event) {
   }
 }
 
+async function fetchCourses(session, userId) {
+  try {
+    return coursesWasm(session, userId);
+  } catch (e) {
+    console.warn(`Loading courses failed. Error: ${e}`);
+  }
+}
+
 function storeCourses(courses) {
   const lastStored = Date.now();
   console.log("Storing courses");
@@ -90,6 +94,7 @@ function getCourses() {
 }
 
 const clearCoursesButton = document.querySelector("#clear-courses-button");
-clearCoursesButton.addEventListener("click", () =>
-  window.localStorage.removeItem(COURSES_KEY)
-);
+clearCoursesButton.addEventListener("click", () => {
+  window.localStorage.removeItem(COURSES_KEY);
+  console.log("Cleared course cache");
+});
