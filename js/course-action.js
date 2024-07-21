@@ -3,14 +3,13 @@ import {
   book_course as bookCourseSlotWasm,
   create_booking_request,
 } from "../wasm-client/pkg/wasm_client.js";
+import { mapCourseSlots } from "./course-mapper.js";
 import { fetchUserCredentials } from "./login.js";
 
 const COURSES_KEY = "courses";
 const ONE_DAY = 1000 * 60 * 60 * 24;
 
 const slotListEl = document.querySelector("#select-list");
-
-let courseData;
 
 slotListEl.addEventListener("click", bookOrCancelCourseSlot);
 
@@ -24,7 +23,8 @@ export async function loadCourses(userCredentials) {
       const sinceLastStored = Date.now() - lastStored;
       if (courses && sinceLastStored < ONE_DAY) {
         console.log("returning cached courses");
-        return courses;
+        const courseSlots = mapCourseSlots(courses, userCredentials.mode);
+        return courseSlots;
       }
     }
     console.log("No cached courses present: loading courses");
@@ -33,7 +33,8 @@ export async function loadCourses(userCredentials) {
       userCredentials["user_id"]
     );
     storeCourses(freshCourses);
-    return freshCourses;
+    const courseSlots = mapCourseSlots(fetchCourses, userCredentials.mode);
+    return courseSlots;
   } else if (userCredentials.mode === "web") {
     return fetchCourses(userCredentials.session, "");
   } else {
