@@ -2,7 +2,10 @@
 
 ## Required
 
-- implement delete (at least for app-mode almost like book, just instead addExerciser use removeExerciser)
+- store courses in memory and update state based on booking-changes
+- handle error when booking/canceling fails
+- update "booked" state only when response was success
+- fix login fields not disapearing if login is triggered manually
 - figure out how to "better" handle store local-storage credentials (like clearing)
 - add some better design
 - Ensure that course loading still works with Web mode (serialization might fail in fitness_service#fetch_courses)
