@@ -15,17 +15,21 @@ slotListEl.addEventListener("click", bookOrCancelCourseSlot);
 
 let courseData;
 
-export async function loadCourses(userCredentials) {
-  if (userCredentials.mode === "app") {
+export async function loadCourses(userCredentials, mode) {
+  if (mode === "app") {
     const cachedCourses = getCourses();
     if (cachedCourses) {
       const { lastStored, courses } = cachedCourses;
       const sinceLastStored = Date.now() - lastStored;
       if (courses && sinceLastStored < ONE_DAY) {
         console.log("returning cached courses");
-        const courseSlots = mapCourseSlots(courses, userCredentials.mode);
+        const courseSlots = mapCourseSlots(courses, mode);
         return courseSlots;
       }
+    }
+    if (!userCredentials) {
+      console.log("No cached courses requires Credentials");
+      return;
     }
     console.log("No cached courses present: loading courses");
     const freshCourses = await fetchCourses(
@@ -38,9 +42,9 @@ export async function loadCourses(userCredentials) {
       console.warn("Did not receive any fresh courses to store");
       return;
     }
-    const courseSlots = mapCourseSlots(fetchCourses, userCredentials.mode);
+    const courseSlots = mapCourseSlots(freshCourses, mode);
     return courseSlots;
-  } else if (userCredentials.mode === "web") {
+  } else if (mode === "web") {
     return fetchCourses(userCredentials.session, "");
   } else {
     throw Error(`Unsupported mode ${userCredentials.mode}`);
@@ -51,8 +55,9 @@ export async function bookOrCancelCourseSlot(event) {
   const slot = event.target;
   const cssClasses = slot.classList;
   if (cssClasses.contains("slot")) {
-    const slotId = Number.parseInt(slot.dataset.slotId);
+    const slotData = getCourseData()[slot.id];
     const courseId = Number.parseInt(slot.dataset.courseId);
+    const slotId = Number.parseInt(slot.dataset.slotId);
     const bookingRequest = create_booking_request(
       "42",
       slotId,
@@ -60,13 +65,6 @@ export async function bookOrCancelCourseSlot(event) {
       "course-name-does-not-matter-in-app-mode"
     );
     const cancel = JSON.parse(slot.dataset.booked);
-    if (cancel) {
-      cssClasses.remove("booked");
-      slot.dataset.booked = false;
-    } else {
-      slot.dataset.booked = true;
-      cssClasses.add("booked");
-    }
     let { session, user_id: userId } = fetchUserCredentials();
     const booking = await bookCourseSlotWasm(
       bookingRequest,
@@ -74,13 +72,20 @@ export async function bookOrCancelCourseSlot(event) {
       userId,
       cancel
     );
+    if (booking) {
+      console.log({ slotData });
+      // TODO: if success
+      //  apply CSS and update SlotData (in memory)
+      //  cssClasses.remove("booked");
+      //  cssClasses.add("booked");
+    }
     console.log({ booking });
   }
 }
 
 async function fetchCourses(session, userId) {
   try {
-    const coursesResult = coursesWasm(session, userId);
+    const coursesResult = await coursesWasm(session, userId);
     const error = coursesResult.errorMessage;
     if (error) {
       console.warn(`Loading courses failed. Error: ${error}`);
