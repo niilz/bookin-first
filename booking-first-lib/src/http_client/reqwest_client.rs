@@ -139,9 +139,9 @@ impl HttpClientSend for ReqwestHttpClientSend {
             // https://fitnessfirst.netpulse.com/np/company/<location_id>/class/<class_id>:<slot_id>/addExerciser
             Some(_user_id) => {
                 let action = if cancel {
-                    "addExerciser"
-                } else {
                     "removeExerciser"
+                } else {
+                    "addExerciser"
                 };
                 format!(
                     "{FF_NETPULSE_BASE_URL}/{GYM_EPPENDORF_LOCATION_ID}/class/{}:{}/{action}",
@@ -149,6 +149,8 @@ impl HttpClientSend for ReqwestHttpClientSend {
                 )
             }
         };
+
+        println!("Booking-URL: {booking_url}");
 
         let res = match user_id {
             None => {
@@ -176,10 +178,9 @@ impl HttpClientSend for ReqwestHttpClientSend {
                 req.send().await
             }
         };
-        //dbg!(&res);
         match res {
             Ok(res) => Ok(Response::Json(res.text().await?)),
-            Err(e) => Err(Box::from(format!("Failed to read slots: {e}"))),
+            Err(e) => Err(Box::from(format!("Failed to read slots, error: {e}"))),
         }
     }
 }
