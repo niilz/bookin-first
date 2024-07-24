@@ -4,6 +4,7 @@ import {
   create_booking_request,
 } from "../wasm-client/pkg/wasm_client.js";
 import { mapCourseSlots } from "./course-mapper.js";
+import { displayCourses } from "./display.js";
 import { fetchUserCredentials } from "./login.js";
 
 const COURSES_KEY = "courses";
@@ -55,25 +56,29 @@ export async function bookOrCancelCourseSlot(event) {
   const slot = event.target;
   const cssClasses = slot.classList;
   if (cssClasses.contains("slot")) {
-    const slotData = getCourseData()[slot.id];
-    const courseId = Number.parseInt(slot.dataset.courseId);
-    const slotId = Number.parseInt(slot.dataset.slotId);
+    const courseKey = slot.dataset.courseId;
+    const courseData = getCourseData().get(courseKey);
+    const [_, slotIdx] = slot.id.split("slot-");
+    const slotData = courseData[Number.parseInt(slotIdx)];
     const bookingRequest = create_booking_request(
       "42",
-      slotId,
-      courseId,
+      slotData.slotId,
+      slotData.courseId,
       "course-name-does-not-matter-in-app-mode"
     );
-    const cancel = JSON.parse(slot.dataset.booked);
-    let { session, user_id: userId } = fetchUserCredentials();
+    const { session, user_id: userId } = fetchUserCredentials();
+    const cancel = slotData.booked;
     const booking = await bookCourseSlotWasm(
       bookingRequest,
       session,
       userId,
       cancel
     );
+    console.log(booking);
     if (booking) {
+      slotData.booked = !slotData.booked;
       console.log({ slotData });
+      displayCourses(getCourseData(), "app");
       // TODO: if success
       //  apply CSS and update SlotData (in memory)
       //  cssClasses.remove("booked");
