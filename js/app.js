@@ -43,9 +43,7 @@ const selectListEl = document.querySelector("#select-list");
 
 async function tryLoadCourses() {
   const userCredentials = fetchUserCredentials();
-  if (userCredentials) {
-    return loadAndDisplayCourses(userCredentials, selectListEl);
-  }
+  return loadAndDisplayCourses(userCredentials, selectListEl);
 }
 
 selectListEl.addEventListener("click", async (e) => {
@@ -85,14 +83,15 @@ coursesButtonAppMode.addEventListener("click", async (e) => {
 });
 
 async function loadAndDisplayCourses(userCredentials, selectListEl) {
-  if (!userCredentials) {
-    console.warn("Cannot load coursed without user-credentials");
-    return;
-  }
+  const mode = userCredentials ? userCredentials.mode : "app";
   try {
-    let courseSlots = await loadCourses(userCredentials);
+    let courseSlots = await loadCourses(userCredentials, mode);
+    if (!courseSlots) {
+      console.log("Could not load courses");
+      return;
+    }
     setCourseData(courseSlots);
-    displayCourses(getCourseData(), selectListEl, userCredentials.mode);
+    displayCourses(getCourseData(), selectListEl, mode);
     return courseSlots;
   } catch (e) {
     console.log(`Could not load courses. Error: ${e}`);
