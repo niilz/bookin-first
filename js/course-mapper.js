@@ -29,6 +29,7 @@ function mapSlot(course, slotId) {
     end,
     maxCapacity,
     totalBooked,
+    booked: false,
   };
   return slot;
 }
