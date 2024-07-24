@@ -38,25 +38,11 @@ initWasm()
 // Login-Inputs
 const usernameInputEl = document.querySelector("#username-input");
 const passwordInputEl = document.querySelector("#password-input");
-// Displayed Data
-const selectListEl = document.querySelector("#select-list");
 
 async function tryLoadCourses() {
   const userCredentials = fetchUserCredentials();
-  return loadAndDisplayCourses(userCredentials, selectListEl);
+  return loadAndDisplayCourses(userCredentials);
 }
-
-selectListEl.addEventListener("click", async (e) => {
-  const course = e.target;
-  if (course.classList.contains("course")) {
-    const userCredentials = fetchUserCredentials();
-    loadAndDisplaySlots(
-      userCredentials.session,
-      course.dataset.courseId,
-      selectListEl
-    );
-  }
-});
 
 const coursesButton = document.querySelector("#courses-button");
 coursesButton.addEventListener("click", async (e) => {
@@ -67,7 +53,7 @@ coursesButton.addEventListener("click", async (e) => {
     const password = passwordInputEl.value;
     userCredentials = await login(username, password, "web");
   }
-  loadAndDisplayCourses(userCredentials, selectListEl);
+  loadAndDisplayCourses(userCredentials);
 });
 
 const coursesButtonAppMode = document.querySelector("#courses-button-app-mode");
@@ -79,10 +65,10 @@ coursesButtonAppMode.addEventListener("click", async (e) => {
     const password = passwordInputEl.value;
     userCredentials = await login(username, password, "app");
   }
-  loadAndDisplayCourses(userCredentials, selectListEl);
+  loadAndDisplayCourses(userCredentials);
 });
 
-async function loadAndDisplayCourses(userCredentials, selectListEl) {
+async function loadAndDisplayCourses(userCredentials) {
   const mode = userCredentials ? userCredentials.mode : "app";
   try {
     let courseSlots = await loadCourses(userCredentials, mode);
@@ -91,7 +77,7 @@ async function loadAndDisplayCourses(userCredentials, selectListEl) {
       return;
     }
     setCourseData(courseSlots);
-    displayCourses(getCourseData(), selectListEl, mode);
+    displayCourses(getCourseData(), mode);
     return courseSlots;
   } catch (e) {
     console.log(`Could not load courses. Error: ${e}`);
@@ -100,7 +86,7 @@ async function loadAndDisplayCourses(userCredentials, selectListEl) {
 }
 
 // Only relevant for web mode (not app mode)
-async function loadAndDisplaySlots(sessionId, courseId, selectListEl) {
+async function loadAndDisplaySlots(sessionId, courseId) {
   const slots = await slotsWasm(sessionId, courseId);
-  displaySlotsWeb(slots, selectListEl);
+  displaySlotsWeb(slots);
 }
