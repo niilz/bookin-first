@@ -46,3 +46,6 @@ curl -v -X POST \
   -H 'content-type: application/json' \
   -d '{ "user_name": "name", "password": "secret" }'
 ```
+
+To deploy a lambda function to aws (enable function shows the URL):
+`cargo lambda deploy --iam-role <arn-role-configured-in-aws-for-this> <lambda-function-package-name> --enable-function-url`
