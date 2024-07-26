@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{js_sys, RequestInit, Response, Window as WebSysWindow};
+use web_sys::{js_sys, RequestInit, RequestMode, Response, Window as WebSysWindow};
 
 pub(crate) trait Window {
     fn instance() -> Option<impl Window>;
@@ -27,6 +27,7 @@ pub(crate) async fn client(
     let mut init = RequestInit::new();
     init.body(Some(&JsValue::from(body)));
     init.method(method);
+    init.mode(RequestMode::Cors);
 
     let promise = window.fetch(url, &init);
     let future = JsFuture::from(promise).await?;
@@ -41,7 +42,7 @@ pub(crate) async fn client(
 }
 
 // TODO: make configurable
-const LAMBDA_BASE_URL: &str = "http://localhost:9000/lambda-url/";
+const LAMBDA_BASE_URL: &str = "lambda-url.eu-central-1.on.aws/";
 
 pub(crate) fn lambda_url(func: &str, params: &HashMap<&str, &str>) -> String {
     let query = if !params.is_empty() {
@@ -54,7 +55,7 @@ pub(crate) fn lambda_url(func: &str, params: &HashMap<&str, &str>) -> String {
     } else {
         "".to_string()
     };
-    format!("{LAMBDA_BASE_URL}{func}{query}")
+    format!("https://{func}.{LAMBDA_BASE_URL}{query}")
 }
 
 #[cfg(test)]

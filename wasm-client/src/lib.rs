@@ -9,13 +9,17 @@ use web_sys::Window as WebSysWindow;
 
 mod fetch;
 
+const LOGIN_LAMBDA_ID: &str = "yzddb3f6n2pru5kcv3655c3db40ypqtb";
+const COURSES_LAMBDA_ID: &str = "7dtw2vqnjlzw6wci5qwrcjqus40dhhxz";
+const BOOK_LAMBDA_ID: &str = "u4tsxrmv27brwboqw5dtgqapne0ngooo";
+
 #[wasm_bindgen]
 pub async fn login(user_name: String, password: String, mode: &str) -> Result<JsValue, JsValue> {
     let login_data = LoginData {
         user_name,
         password,
     };
-    let login_url = fetch::lambda_url("login-lambda", &HashMap::from([("mode", mode)]));
+    let login_url = fetch::lambda_url(LOGIN_LAMBDA_ID, &HashMap::from([("mode", mode)]));
     let login_data = serde_json::to_string(&login_data).expect("login_data to Json");
 
     let window = WebSysWindow::instance().ok_or("Window unavailable")?;
@@ -29,7 +33,7 @@ pub async fn courses(session_id: &str, user_id: &str) -> Result<JsValue, JsValue
     if !user_id.is_empty() {
         params.insert("user_id", user_id);
     }
-    let courses_url = fetch::lambda_url("courses-lambda", &params);
+    let courses_url = fetch::lambda_url(COURSES_LAMBDA_ID, &params);
 
     let window = WebSysWindow::instance().ok_or("Window unavailable")?;
 
@@ -60,7 +64,7 @@ pub async fn book_course(
     params.insert("userId", user_id);
     params.insert("cancel", &cancel);
 
-    let booking_url = fetch::lambda_url("book-lambda", &params);
+    let booking_url = fetch::lambda_url(BOOK_LAMBDA_ID, &params);
 
     let window = WebSysWindow::instance().ok_or("Window unavailable")?;
 
