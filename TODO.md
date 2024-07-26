@@ -2,17 +2,13 @@
 
 ## Required
 
-- store courses in memory and update state based on booking-changes
-- handle error when booking/canceling fails
-- update "booked" state only when response was success
-- fix login fields not disapearing if login is triggered manually
-- figure out how to "better" handle store local-storage credentials (like clearing)
+- Report actual errors on wasm, lambda and rust side
+  - Handle errors e.g. when Slot can not be read (is it a parsing problem?) or when Course is not bookable
+  - handle error when booking/canceling fails
+- Make lambda functions hosts configurable
+- Make gym-location (returned in login response) variable in fetch courses
 - add some better design
 - Ensure that course loading still works with Web mode (serialization might fail in fitness_service#fetch_courses)
-- Make gym-location (returned in login response) variable in fetch courses
-- Make lambda functions hosts configurable
-- deploy functions to aws
-- Handle errors e.g. when Slot can not be read (is it a parsing problem?) or when Course is not bookable
 
 ## Super Cool
 
@@ -20,4 +16,5 @@
 
 ## Nice to have
 
+- port more js parts to rust
 - implement unsupervised run (for course and slot)
