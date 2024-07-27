@@ -15,7 +15,7 @@ Create new function
 
 ```
 // on in WSL (docker image seems to need --http as option)
-podman run --rm -v /mnt/c/Users/NHABERST/DEV/projects/booking-first:/booking-first cargo-lambda:latest sh -c "cd /booking-first && cargo lambda new courses-lambda --http"
+podman run --rm -v /mnt/c/Users/<PATH_TO_PROJECT>/booking-first:/booking-first cargo-lambda:latest sh -c "cd /booking-first && cargo lambda new courses-lambda --http"
 ```
 
 Build function
@@ -24,7 +24,7 @@ Build function
 
 ```
 // on in WSL
-podman run --rm -v /mnt/c/Users/NHABERST/DEV/projects/booking-first:/booking-first cargo-lambda:latest cargo lambda build --bin <function-dir> --release --manifest-path booking-first/Cargo.toml
+podman run --rm -v /mnt/c/Users/<PATH_TO_PROJECT>/booking-first:/booking-first cargo-lambda:latest cargo lambda build --bin <function-dir> --release --manifest-path booking-first/Cargo.toml
 ```
 
 Serve the function locally:
@@ -33,7 +33,7 @@ Serve the function locally:
 
 ```
 // on in WSL
-podman run --rm -p 127.0.0.1:9000:9000 -v /mnt/c/Users/NHABERST/DEV/projects/booking-first:/booking-first cargo-lambda:latest cargo lambda watch --ignore-changes --manifest-path booking-first/Cargo.toml
+podman run --rm -p 127.0.0.1:9000:9000 -v /mnt/c/Users/<PATH_TO_PROJECT>/booking-first:/booking-first cargo-lambda:latest cargo lambda watch --ignore-changes --manifest-path booking-first/Cargo.toml
 ```
 
 Ignore changes might be neccessary, because some crates are just recompiling over and over again when function is invoked.
